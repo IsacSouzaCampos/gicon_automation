@@ -11,3 +11,4 @@ links para pesquisas relacionadas:
 7. http://sped.rfb.gov.br/pasta/show/1846?fbclid=IwAR0x9nbOUrYKa4i_6WSFadZU8iDBoBeZZaHqWb5QVPkC8Y7thEbV1wzX3ow
 8. https://raccoon.ninja/pt/dev-pt/manipulando-xml-com-python/?fbclid=IwAR12gLMWZGGwdlA6O_ZZ8NzFfuAdQ5RRTkC058OEIOkdyIdSzAs9rHHF3tk
 9. http://www.pmf.sc.gov.br/sistemas/suporte/nfpssuporte/codigos.php
+10. https://docs.questor.com.br/docs/fiscal/importar-nfse
