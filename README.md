@@ -12,3 +12,4 @@ links para pesquisas relacionadas:
 8. https://raccoon.ninja/pt/dev-pt/manipulando-xml-com-python/?fbclid=IwAR12gLMWZGGwdlA6O_ZZ8NzFfuAdQ5RRTkC058OEIOkdyIdSzAs9rHHF3tk
 9. http://www.pmf.sc.gov.br/sistemas/suporte/nfpssuporte/codigos.php
 10. https://docs.questor.com.br/docs/fiscal/importar-nfse
+11. https://pt.stackoverflow.com/questions/478761/attributeerror-nonetype-object-has-no-attribute-text
