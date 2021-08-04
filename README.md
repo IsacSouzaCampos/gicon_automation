@@ -13,3 +13,9 @@ links para pesquisas relacionadas:
 9. http://www.pmf.sc.gov.br/sistemas/suporte/nfpssuporte/codigos.php
 10. https://docs.questor.com.br/docs/fiscal/importar-nfse
 11. https://pt.stackoverflow.com/questions/478761/attributeerror-nonetype-object-has-no-attribute-text
+12. https://www.letscode.com.br/blog/aprenda-a-integrar-python-e-excel
+
+
+Para baixar módulos:
+
+https://pt.stackoverflow.com/questions/239047/como-instalar-o-pip-no-windows-10

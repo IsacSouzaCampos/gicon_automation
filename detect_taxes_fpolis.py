@@ -1,32 +1,36 @@
 import xml.etree.ElementTree as ET
-import constants as const
+from constants import XML_DIR
 
 
-file = f'{const.ROOT_DIR}\\notas_xml\\nota_0164219-31.xml'
+class DetectTaxes():
 
-tree = ET.parse(file)
-root = tree.getroot()
-
-d = dict()
-for child in root.iter():
-    d[child.tag] = child.text
-
-iss_retido = False
-try:
-    if d['nomeMunicipioPrestador'] == 'FLORIANOPOLIS':
-        if d['cst'] in ['4', '6', '10']:
-            iss_retido = True
-
-    elif d['cfps'] in ['9205', '9206'] and d['cst'] in ['0', '1']:
-            iss_retido = True
-
-    print(d['dadosAdicionais'])
-
-except Exception as e:
-    print(f'Erro: {e} - Arquivo: {file}')
+    def __init__(self, file: str):
+        self.file_path = f'{XML_DIR}\\{file}'
 
 
-if iss_retido:
-    print('ISS retido')
-else:
-    print('Sem retenção de ISS')
+    def iss_withheld(self) -> bool:
+        """Verifica se ha retencao de ISS com base no CFPS e CST"""
+
+        tree = ET.parse(self.file_path)
+        root = tree.getroot()
+
+        d = dict()
+        for child in root.iter():
+            d[child.tag] = child.text
+
+        iss_withheld = False
+        try:
+            if d['nomeMunicipioPrestador'] == 'FLORIANOPOLIS':
+                if d['cst'] in ['4', '6', '10']:
+                    iss_withheld = True
+
+            elif d['cfps'] in ['9205', '9206'] and d['cst'] in ['0', '1']:
+                    iss_withheld = True
+
+            # print(d['dadosAdicionais'])
+
+        except Exception as e:
+            print(f'Erro: {e} - Arquivo: {self.file_path}')
+
+
+        return iss_withheld
