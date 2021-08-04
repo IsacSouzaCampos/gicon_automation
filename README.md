@@ -19,3 +19,8 @@ links para pesquisas relacionadas:
 Para baixar módulos:
 
 https://pt.stackoverflow.com/questions/239047/como-instalar-o-pip-no-windows-10
+
+
+ML para padrões de texto (em último caso):
+
+https://serokell.io/blog/machine-learning-text-analysis
