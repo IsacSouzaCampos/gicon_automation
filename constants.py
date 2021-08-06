@@ -1,31 +1,31 @@
-import os
+import sys
 
 
-ROOT_DIR = os.path.dirname(os.path.realpath(__file__))
-XML_DIR = f'{ROOT_DIR}\\notas_xml'
+ROOT_DIR = sys.path[0]
+XML_DIR = f'{ROOT_DIR}\\notas_para_analise'
 
-COLUMN_TITLES = ['Nota', 'Razão Social Tomador', 'Razão Social Prestador', 'Renteção de ISS',
+COLUMN_TITLES = ['Nº Nota', 'Data', 'Valor Bruto', 'Renteção de ISS',
                  'Retenção IR', 'Retenção CSRF']
 
-POSSIBLE_IR_NOTES = ['IR1,50%', 'IRRF1,50%', 'IR1,5%', 'IRRF1,5%','IR1.50%',
-                     'IRRF1.50%', 'IR1.5%', 'IRRF1.5%','IRR$', 'IRRFR$',
+POSSIBLE_IR_NOTES = ['ir1,50%', 'irrf1,50%', 'ir1,5%', 'irrf1,5%','ir1.50%',
+                     'irrf1.50%', 'ir1.5%', 'irrf1.5%','irr$', 'irrfr$',
                      
-                     'IRR1,50%', 'IRR1,5%', 'IRR1.50%','IRR1.5%','IRRR$',
+                     'irr1,50%', 'irr1,5%', 'irr1.50%','irr1.5%','irrr$',
                      
-                     'RETENCAODEIR']
+                     'retencaodeir']
 
-POSSIBLE_CSRF_NOTES = ['PIS0,65%', 'PIS0.65%', 'PISR$',
+POSSIBLE_CSRF_NOTES = ['pis0,65%', 'pis0.65%', 'pisr$',
 
-                       'COFINS3%', 'COFINS3.0%', 'COFINS3.00%',
-                       'COFINS3,0%', 'COFINS3,00%', 'COFINSR$',
+                       'cofins3%', 'cofins3.0%', 'cofins3.00%',
+                       'cofins3,0%', 'cofins3,00%', 'cofinsr$',
                        
-                       'CSLL1%', 'CSLL1.0%', 'CSLL1.00%',
-                       'CSLL1,0%', 'CSLL1,00%', 'CSLLR$',
+                       'csll1%', 'csll1.0%', 'csll1.00%',
+                       'csll1,0%', 'csll1,00%', 'csllr$',
                        
-                       'CSRF4,65%', 'CSRF4.65%', 'CSRFR$',
-                       'CRF4,65%', 'CRF4.65%', 'CRFR$',
+                       'csrf4,65%', 'csrf4.65%', 'csrfr$',
+                       'crf4,65%', 'crf4.65%', 'crfr$',
                        
-                       'PISCOFINSCSLL', 'PISCOFINS', 'COFINSCSLL',
+                       'piscofinscsll', 'piscofins', 'cofinscsll',
                        
-                       'RETENCAODECSRF', 'RETENCAODEPIS', 'RETENCAODECOFINS',
-                       'RETENCAODECRF']
+                       'retencaodecsrf', 'retencaodepis', 'retencaodecofins',
+                       'retencaodecrf']

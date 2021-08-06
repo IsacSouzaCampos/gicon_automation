@@ -17,13 +17,17 @@ class Invoice():
         invoice_file."""
 
         row = [self.number]
-        row.append(self.get_taker_business_name())
-        row.append(self.get_provider_business_name())
+        # row.append(self.get_taker_business_name())
+        # row.append(self.get_provider_business_name())
+        row.append(self.get_issuance_date())
+        row.append(self.get_gross_value())
         row.append('X' if self.iss_withheld() else '-')
 
         # 0 = IR / 1 = CSRF
         row.append('X' if self.is_fed_tax_withheld(0) else '-')
         row.append('X' if self.is_fed_tax_withheld(1) else '-')
+        if self.is_canceled():
+            row.append('CANCELADA')
 
         return row
 
@@ -48,41 +52,34 @@ class Invoice():
     
 
     def is_fed_tax_withheld(self, tax_type: int) -> bool:
-        """Verifica se ha retencao de imposto federal com base em palavras chave"""
+        """Verifica se há retenção de imposto federal com base em palavras chave"""
 
         if tax_type not in [0, 1]:  # 0 = IR / 1 = CSRF
             raise Exception('Imposto não reconhecido')
 
         KEYWORDS = POSSIBLE_IR_NOTES if tax_type == 0 else POSSIBLE_CSRF_NOTES
 
-        if 'descricaoServico' in self.d and self.d['descricaoServico'] is not None:
-            descricao_servico = self.d['descricaoServico']
+        for tag in ['descricaoServico', 'dadosAdicionais']:
+            if tag in self.d and self.d[tag] is not None:
+                value = self.d[tag]
 
-            # procurar indicios de retencao do tax_type na descricao de servico
-            clean_descricao_servico = self.clear_string(descricao_servico)
-            # if tax_type == 1 and self.number in [44319, 9014, 419]:
-            #     print(str(self.number) + '\n' + clean_descricao_servico + '\n\n')
-            for ir_note in KEYWORDS:
-                if ir_note.lower() in clean_descricao_servico or ('retencao' + ir_note) in clean_descricao_servico:
-                    return True
-        
-        if 'dadosAdicionais' in self.d and self.d['dadosAdicionais'] is not None:
-            dados_adicionais = self.d['dadosAdicionais']
-
-            # procurar indicios de retencao do tax_type nos dados adicionais
-            clean_dados_adicionais = self.clear_string(dados_adicionais)
-            # if tax_type == 1 and self.number in [44319, 9014, 419]:
-            #     print(str(self.number) + '\n' + clean_dados_adicionais + '\n\n')
-            for ir_note in KEYWORDS:
-                if ir_note.lower() in clean_dados_adicionais or ('retencao' + ir_note) in clean_dados_adicionais:
-                    return True
+                # procurar indicios de retencao do tax_type na tag
+                clean_value = self.clear_string(value)
+                for ir_note in KEYWORDS:
+                    if ir_note in clean_value or ('retencao' + ir_note) in clean_value:
+                        return True
         
         return False
     
 
+    def is_canceled(self) -> bool:
+        """Retorna verdadeiro se a nota foi cancelada e falso caso contrário"""
+        return 'dataCancelamento' in self.d and self.d['dataCancelamento'] is not None
+    
+
     def clear_string(self, s: str) -> str:
-        """Altera a string a ser analisada de maneira conveniente para a deteccao de 
-        possiveis retencoes"""
+        """Altera a string a ser analisada de maneira conveniente para a detecção de 
+        possíveis retenções"""
         s = s.lower()
 
         s = s.replace(' ', '')
@@ -109,7 +106,7 @@ class Invoice():
         s = s.replace('ó', 'o')
 
         if s.count('leidatransparencia') > 1:
-            before = s[0 : s.find('leidatransparencia')]
+            before = s[: s.find('leidatransparencia') + 1]
             after = s[s.find('leidatransparencia') + len('leidatransparencia') : len(s)]
             after = after[after.find('leidatransparencia') + len('leidatransparencia') : len(after)]
             s = before + after
@@ -118,7 +115,7 @@ class Invoice():
     
 
     def get_xml_tags_dict(self) -> dict:
-        """Retorna o dicionario referente as tags do xml e seus valores associados"""
+        """Retorna o dicionário referente as tags do xml e seus valores associados"""
         tree = ET.parse(self.file_path)
         root = tree.getroot()
 
@@ -130,10 +127,21 @@ class Invoice():
     
 
     def get_taker_business_name(self) -> str:
-        """Retorna a razao social do tomador do servico"""
+        """Retorna a razão social do tomador do serviço"""
         return self.d['razaoSocialTomador']
     
 
     def get_provider_business_name(self) -> str:
-        """Retorna a razao social do prestador do servico"""
+        """Retorna a razão social do prestador do serviço"""
         return self.d['razaoSocialPrestador']
+    
+
+    def get_issuance_date(self) -> str:
+        """Retorna a data de emissão no formato nacional de datas"""
+        issuance_date = self.d['dataEmissao'][:10].split('-')
+        return f'{issuance_date[2]}/{issuance_date[1]}/{issuance_date[0]}'
+    
+
+    def get_gross_value(self) -> float:
+        """Retorna o valor bruto do serviço"""
+        return float(self.d['valorTotalServicos'])
