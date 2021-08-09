@@ -4,13 +4,13 @@ import sys
 ROOT_DIR = sys.path[0]
 XML_DIR = f'{ROOT_DIR}\\notas_para_analise'
 
-COLUMN_TITLES = ['Nº Nota', 'Data', 'Valor Bruto', 'Renteção de ISS',
+COLUMN_TITLES = ['Nº Nota', 'Data', 'Valor Bruto', 'Retenção de ISS',
                  'Retenção IR', 'Retenção CSRF']
 
-POSSIBLE_IR_NOTES = ['ir1,50%', 'irrf1,50%', 'ir1,5%', 'irrf1,5%','ir1.50%',
-                     'irrf1.50%', 'ir1.5%', 'irrf1.5%','irr$', 'irrfr$',
+POSSIBLE_IR_NOTES = ['ir1,50%', 'irrf1,50%', 'ir1,5%', 'irrf1,5%', 'ir1.50%',
+                     'irrf1.50%', 'ir1.5%', 'irrf1.5%', 'irr$', 'irrfr$',
                      
-                     'irr1,50%', 'irr1,5%', 'irr1.50%','irr1.5%','irrr$',
+                     'irr1,50%', 'irr1,5%', 'irr1.50%', 'irr1.5%', 'irrr$',
                      
                      'retencaodeir']
 

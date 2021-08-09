@@ -6,7 +6,7 @@ import os
 
 def make_excel_file() -> None:
     """Cria um arquivo Excel contendo uma planilha com os dados: 'Nº Nota', 'Data',
-       'Valor Bruto', 'Renteção de ISS', 'Retenção IR', 'Retenção CSRF', 'Valor Líquido'"""
+       'Valor Bruto', 'Retenção de ISS', 'Retenção IR', 'Retenção CSRF', 'Valor Líquido'"""
 
     # cria o arquivo Excel a ser editado
     excel_file = Workbook()
@@ -14,8 +14,8 @@ def make_excel_file() -> None:
     # gera uma planilha (sheet1)
     sheet1 = excel_file.active
 
-    # insere o cabecalho da planilha
-    # 'Nº Nota', 'Data', 'Valor Bruto', 'Renteção de ISS',
+    # insere o cabeçalho da planilha
+    # 'Nº Nota', 'Data', 'Valor Bruto', 'Retenção de ISS',
     # 'Retenção IR', 'Retenção CSRF'
     sheet1.append([COLUMN_TITLES[0], COLUMN_TITLES[1], COLUMN_TITLES[2], COLUMN_TITLES[3],
                    COLUMN_TITLES[4], COLUMN_TITLES[5]])
@@ -34,22 +34,22 @@ def make_excel_file() -> None:
     excel_file.save('output_data.xlsx')
 
     # abre o arquivo Excel gerado
-    # os.system(f'start excel.exe output_data.xlsx')
+    # os.system('start excel.exe output_data.xlsx')
 
 
 def edit_sheet_content(sheet1) -> None:
     """Edita conteúdo da planilha passada como parâmetro com a finalidade de manter a
        organização estrutural da mesma."""
 
-     # centraliza o conteudo das celulas
-    from openpyxl.styles import Alignment, Color, PatternFill
-    for cell_row in range(len( os.listdir(XML_DIR) ) + 1):  # +1 por conta do cabeçalho
+    # centraliza o conteudo das celulas
+    from openpyxl.styles import Alignment, PatternFill
+    for cell_row in range(len(os.listdir(XML_DIR)) + 1):  # +1 por conta do cabeçalho
         for cell_column in range(len(COLUMN_TITLES)):  # a primeira coluna não é centralizada
-            cell = sheet1.cell(row=(cell_row + 1), column=((cell_column + 1)))
+            cell = sheet1.cell(row=(cell_row + 1), column=(cell_column + 1))
             cell.alignment = Alignment(horizontal='center')
 
     # torna vermelha a linha de notas canceladas
-    for cell_row in range(len( os.listdir(XML_DIR) ) + 1):  # +1 por conta do cabeçalho
+    for cell_row in range(len(os.listdir(XML_DIR)) + 1):  # +1 por conta do cabeçalho
         cell = sheet1.cell(row=(cell_row + 1), column=(len(COLUMN_TITLES) + 1))
         # print(cell.value, cell_row + 1, len(COLUMN_TITLES) + 1)
         if cell.value == 'CANCELADA':
