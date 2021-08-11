@@ -23,16 +23,20 @@ class Invoice:
         try:
             ir_value = self.get_ir_value() if self.is_fed_tax_withheld(0) else ''
         except Exception as e:
-            print(e)
+            print(self.d['numeroserie'], e)
             ir_value = '***ERRO***'
 
         try:
             csrf_withheld = self.get_csrf_value() if self.is_fed_tax_withheld(1) else ''
         except Exception as e:
-            print(e)
+            print(self.d['numeroserie'], e)
             csrf_withheld = '***ERRO***'
 
-        row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_withheld])
+        net_value = gross_value
+        for tax in [iss_value, ir_value, csrf_withheld]:
+            if tax:
+                net_value -= tax
+        row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_withheld, net_value])
 
         if self.is_canceled():
             row.append('CANCELADA')
@@ -159,6 +163,7 @@ class Invoice:
         return self.extract_tax_value(0)
 
     def get_csrf_value(self) -> float:
+        """Retorna o valor do CSRF"""
         pis_value = self.extract_tax_value(1)
         cofins_value = self.extract_tax_value(2)
         csll_value = self.extract_tax_value(3)
@@ -188,27 +193,37 @@ class Invoice:
                             tax_value = str()
 
                             i = 0
+
                             while i < len(s):
                                 c = s[i]
-                                next_c = s[i + 1]
+                                try:
+                                    next_c = s[i + 1]
+                                except Exception as e:
+                                    print(self.d['numeroserie'], e)
+                                    if c.isnumeric():
+                                        tax_value += c
+                                    return self.convert_s_tax_value_to_float(tax_value)
 
                                 if c.isnumeric() or c in [',', '.']:
                                     tax_value += c
                                     if not next_c.isnumeric() and next_c not in [',', '.'] and aux:
-                                        if not tax_value[-1].isnumeric():
-                                            tax_value = tax_value[:-1]
+                                        return self.convert_s_tax_value_to_float(tax_value)
 
-                                        dot = tax_value.find('.')
-                                        comma = tax_value.find(',')
-                                        print(self.d['numeroserie'])
-                                        print(tax_value)
-                                        print(s)
-                                        if dot > 0 and comma > 0:
-                                            if dot < comma:
-                                                return float(tax_value.replace('.', '').replace(',', '.'))
-                                        else:
-                                            return float(tax_value.replace(',', '.'))
                                 if next_c.isnumeric() and not aux:
                                     aux = True
                                 i += 1
         return -1
+
+    @staticmethod
+    def convert_s_tax_value_to_float(tax_value: str) -> float:
+        """Converte a string tax_value extraída da nota para o formato float"""
+        if not tax_value[-1].isnumeric():
+            tax_value = tax_value[:-1]
+
+        dot = tax_value.find('.')
+        comma = tax_value.find(',')
+        if dot > 0 and comma > 0:
+            if dot < comma:
+                return float(tax_value.replace('.', '').replace(',', '.'))
+        else:
+            return float(tax_value.replace(',', '.'))

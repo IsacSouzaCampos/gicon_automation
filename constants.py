@@ -4,8 +4,8 @@ import sys
 ROOT_DIR = sys.path[0]
 XML_DIR = f'{ROOT_DIR}\\notas_para_analise'
 
-COLUMN_TITLES = ['Nº Nota', 'Data', 'Valor Bruto', 'Retenção de ISS',
-                 'Retenção IR', 'Retenção CSRF']
+COLUMN_TITLES = ['Nº Nota', 'Data', 'Valor Bruto', 'Retenção ISS',
+                 'Retenção IR', 'Retenção CSRF', 'Valor Líquido']
 
 IR_KEYWORDS = ['ir1,50%', 'irrf1,50%', 'ir1,5%', 'irrf1,5%', 'ir1.50%',
                'irrf1.50%', 'ir1.5%', 'irrf1.5%', 'irr$', 'irrfr$',
@@ -14,7 +14,7 @@ IR_KEYWORDS = ['ir1,50%', 'irrf1,50%', 'ir1,5%', 'irrf1,5%', 'ir1.50%',
                      
                'retencaodeir']
 
-PIS_KEYWORDS = ['pis0,65%', 'pis0.65%', 'pisr$', 'retencaodepis']
+PIS_KEYWORDS = ['pis0,65%', 'pis0.65%', 'pis,65%', 'pis.65%', 'pisr$', 'retencaodepis']
 
 COFINS_KEYWORDS = ['cofins3%', 'cofins3.0%', 'cofins3.00%',
                    'cofins3,0%', 'cofins3,00%', 'cofinsr$',
