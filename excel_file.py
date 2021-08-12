@@ -5,8 +5,7 @@ import os
 
 
 def make_excel_file() -> None:
-    """Cria um arquivo Excel contendo uma planilha com os dados: 'Nº Nota', 'Data',
-       'Valor Bruto', 'Retenção de ISS', 'Retenção IR', 'Retenção CSRF', 'Valor Líquido'"""
+    """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
     # cria o arquivo Excel a ser editado
     excel_file = Workbook()
@@ -16,9 +15,9 @@ def make_excel_file() -> None:
 
     # insere o cabeçalho da planilha
     # 'Nº Nota', 'Data', 'Valor Bruto', 'Retenção ISS',
-    # 'Retenção IR', 'Retenção CSRF', 'Valor Líquido'
+    # 'Retenção IR', 'Retenção CSRF', 'Valor Líquido', 'Natureza'
     sheet1.append([COLUMN_TITLES[0], COLUMN_TITLES[1], COLUMN_TITLES[2], COLUMN_TITLES[3],
-                   COLUMN_TITLES[4], COLUMN_TITLES[5], COLUMN_TITLES[6]])
+                   COLUMN_TITLES[4], COLUMN_TITLES[5], COLUMN_TITLES[6], COLUMN_TITLES[7]])
 
     xml_files = os.listdir(XML_DIR)
 

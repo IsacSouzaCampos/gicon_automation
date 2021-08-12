@@ -5,7 +5,7 @@ ROOT_DIR = sys.path[0]
 XML_DIR = f'{ROOT_DIR}\\notas_para_analise'
 
 COLUMN_TITLES = ['Nº Nota', 'Data', 'Valor Bruto', 'Retenção ISS',
-                 'Retenção IR', 'Retenção CSRF', 'Valor Líquido']
+                 'Retenção IR', 'Retenção CSRF', 'Valor Líquido', 'Natureza']
 
 IR_KEYWORDS = ['ir1,50%', 'irrf1,50%', 'ir1,5%', 'irrf1,5%', 'ir1.50%',
                'irrf1.50%', 'ir1.5%', 'irrf1.5%', 'irr$', 'irrfr$',

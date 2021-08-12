@@ -17,26 +17,33 @@ class Invoice:
         number = int(self.get_serial_number())
         issuance_date = self.get_issuance_date()
         gross_value = self.get_gross_value()
-        iss_value = self.get_iss_value() if self.iss_withheld() else ''
+
+        iss_withheld = self.iss_withheld()
+        iss_value = self.get_iss_value() if iss_withheld else ''
 
         # 0 = IR / 1 = CSRF
+        is_ir_withheld = self.is_fed_tax_withheld(0)
         try:
-            ir_value = self.get_ir_value() if self.is_fed_tax_withheld(0) else ''
+            ir_value = self.get_ir_value() if is_ir_withheld else ''
         except Exception as e:
             print(self.d['numeroserie'], e)
             ir_value = '***ERRO***'
 
+        is_csrf_withheld = self.is_fed_tax_withheld(1)
         try:
-            csrf_withheld = self.get_csrf_value() if self.is_fed_tax_withheld(1) else ''
+            csrf_value = self.get_csrf_value() if is_csrf_withheld else ''
         except Exception as e:
             print(self.d['numeroserie'], e)
-            csrf_withheld = '***ERRO***'
+            csrf_value = '***ERRO***'
 
         net_value = gross_value
-        for tax in [iss_value, ir_value, csrf_withheld]:
+        for tax in [iss_value, ir_value, csrf_value]:
             if tax:
                 net_value -= tax
-        row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_withheld, net_value])
+
+        service_nature = self.generate_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld)
+
+        row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_value, net_value, service_nature])
 
         if self.is_canceled():
             row.append('CANCELADA')
@@ -84,7 +91,7 @@ class Invoice:
         return False
 
     def is_canceled(self) -> bool:
-        """Retorna verdadeiro se a nota foi cancelada e falso caso contrário"""
+        """Verifica se a nota foi cancelada"""
         return 'datacancelamento' in self.d and self.d['datacancelamento'] is not None
 
     @staticmethod
@@ -136,6 +143,7 @@ class Invoice:
         return d
 
     def get_serial_number(self):
+        """Retorna o número da nota"""
         return self.d['numeroserie']
 
     def get_taker_business_name(self) -> str:
@@ -156,6 +164,7 @@ class Invoice:
         return float(self.d['valortotalservicos'])
 
     def get_iss_value(self) -> float:
+        """Retorna o valor do ISS"""
         return float(self.d['valorissqn'])
 
     def get_ir_value(self) -> float:
@@ -171,10 +180,13 @@ class Invoice:
         if not pis_value + cofins_value + csll_value:
             return self.extract_tax_value(4)
 
+        if not pis_value or not cofins_value or not csll_value:
+            raise Exception('Um ou mais impostos federais não puderam ser extraídos')
+
         return pis_value + cofins_value + csll_value
 
     def extract_tax_value(self, tax_type: int) -> float:
-        """Encontra e retorna o valor do imposto federal solicitado"""
+        """Encontra e extrai o valor do imposto federal solicitado"""
 
         # 0 = IR / 1 = PIS / 2 = COFINS / 3 = CSLL / 4 = CSRF
         keywords = ALL_KEYWORDS[tax_type]
@@ -212,7 +224,7 @@ class Invoice:
                                 if next_c.isnumeric() and not aux:
                                     aux = True
                                 i += 1
-        return -1
+        return 0
 
     @staticmethod
     def convert_s_tax_value_to_float(tax_value: str) -> float:
@@ -227,3 +239,26 @@ class Invoice:
                 return float(tax_value.replace('.', '').replace(',', '.'))
         else:
             return float(tax_value.replace(',', '.'))
+
+    def generate_service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool) -> int:
+        """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
+           CFPS fornecido na nota"""
+
+        cfps = self.d['cfps']
+
+        if iss_withheld and is_ir_withheld and is_csrf_withheld:
+            return int(cfps + '302')
+        if iss_withheld and is_ir_withheld:
+            return int(cfps + '304')
+        if iss_withheld and is_csrf_withheld:
+            return int(cfps + '302')
+        if is_ir_withheld and is_csrf_withheld:
+            return int(cfps + '302')
+        if iss_withheld:
+            return int(cfps + '308')
+        if is_ir_withheld:
+            return int(cfps + '304')
+        if is_csrf_withheld:
+            return int(cfps + '306')
+
+        return int(cfps + '300')

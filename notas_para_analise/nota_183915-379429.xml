@@ -1,0 +1,89 @@
+<?xml version="1.0" encoding="UTF-8"?><xmlNfpse>
+    <numeroAEDF>183915</numeroAEDF>
+    <numeroSerie>379429</numeroSerie>
+    <codigoVerificacao>435D1E65C51C7ADD</codigoVerificacao>
+    <dataEmissao>2021-07-26T00:00:00-03:00</dataEmissao>
+    <dataProcessamento>2021-07-26T17:41:43.410-03:00</dataProcessamento>
+    <cfps>9201</cfps>
+    <statusNFPSe>0</statusNFPSe>
+    <baseCalculo>1450.88</baseCalculo>
+    <valorISSQN>29.02</valorISSQN>
+    <valorTotalServicos>1450.88</valorTotalServicos>
+    <baseCalculoSubstituicao>0</baseCalculoSubstituicao>
+    <valorISSQNSubstituicao>0</valorISSQNSubstituicao>
+    <dadosAdicionais>Número de Referência / RPS: 379577 - Pagamento via Boleto Bancário DATA DE VENCIMENTO: 15/08/2021 - Retenções: CSLL 1,00 %: R$ 14,51  - PIS ,65 %: R$ 9,43  - IR 1,50 %: R$ 21,76  - COFINS 3,00 %: R$ 43,53  -</dadosAdicionais>
+    <cnpjPrestador>82845322000104</cnpjPrestador>
+    <inscricaoMunicipalPrestador>0713759</inscricaoMunicipalPrestador>
+    <razaoSocialPrestador>SOFTPLAN PLANEJAMENTO E SISTEMAS LTDA</razaoSocialPrestador>
+    <logradouroPrestador>AVN  LUIZ BOITEUX PIAZZA, 1302, LOTE 87/89</logradouroPrestador>
+    <bairroPrestador>CACHOEIRA DO BOM JESUS</bairroPrestador>
+    <nomeMunicipioPrestador>FLORIANOPOLIS</nomeMunicipioPrestador>
+    <codigoPostalPrestador>88056000</codigoPostalPrestador>
+    <ufPrestador>SC</ufPrestador>
+    <emailPrestador>israel@softplan.com.br</emailPrestador>
+    <telefonePrestador>4830278000</telefonePrestador>
+    <identificacao>14358007</identificacao>
+    <identificacaoTomador>04724734000174</identificacaoTomador>
+    <inscricaoMunicipalTomador>000000</inscricaoMunicipalTomador>
+    <razaoSocialTomador>ARTHUR SILVEIRA CONSTRUTORA E INCORPORADORA LTDA</razaoSocialTomador>
+    <logradouroTomador>RUA GENERAL BITENCOURT</logradouroTomador>
+    <numeroEnderecoTomador>295</numeroEnderecoTomador>
+    <bairroTomador>N/C</bairroTomador>
+    <codigoMunicipioTomador>4205407</codigoMunicipioTomador>
+    <codigoPostalTomador>88020100</codigoPostalTomador>
+    <ufTomador>SC</ufTomador>
+    <paisTomador>1058</paisTomador>
+    <emailTomador>financeiro@arthursilveira.com.br;administrativo@arthursilveira.com.br</emailTomador>
+    <telefoneTomador>4830246264</telefoneTomador>
+    <itensServico>
+        <itemServico>
+            <aliquota>0.0200</aliquota>
+            <baseCalculo>1450.88</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Suporte remoto e atualizações de versões, referente ao Software Sienge.</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>1450.88</valorTotal>
+            <valorUnitario>1450.88</valorUnitario>
+        </itemServico>
+    </itensServico>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="Sign-1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="RefSignProp-1" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SigProperties-1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>HghFMJCKyygFdnhGrBaX8W5vC69Jtn1d3LeQx2w2WDo=</ds:DigestValue></ds:Reference><ds:Reference Id="RefElement-1" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/TR/1999/REC-xpath-19991116"><ds:XPath>not(ancestor-or-self::ds:Signature)</ds:XPath></ds:Transform><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>I2SrzUFZ0M6kZNNRVOKwceI6hRxN5W01CYx9FVUjaNs=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValueID-1">Shlbv34BM8ydsQKbG1tR/UT3NwyR+Zz8PaU/M1XG/QKMXYO8CQaa1w38tOEqIBECEJZihdjxIymg
+3ZsOtDNCF5EFXZGw09oThM+EpOK+4TRw46358d5Q5IS1X977Hkk9TktaQEksqwAX641aLn489rA6
+ovjd8SZpfvtQBa8EAHqWIUaA/eSPIOc5KwyEtfhxkRsm7uAniJMCZKVkGhV7bZdw+jHfeew3CNE/
+kEXBdcyNsXafrjvkSXAD7jpcE/1ygSZarRbUWk/5F5IEe8w6699ezENJRzA4IafsmVHjMiHeKKvp
+AVal/mgvcjlQ2BvZpswn/2y45dmN5fRBMIdC4Q==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509SubjectName>CN=MUNICIPIO DE FLORIANOPOLIS:82892282000143,OU=RFB e-CNPJ A1,OU=ARCIASC,OU=Secretaria da Receita Federal do Brasil - RFB,OU=83043745000165,OU=videoconferencia,O=ICP-Brasil,L=FLORIANOPOLIS,ST=SC,C=BR</ds:X509SubjectName><ds:X509Certificate>MIIHczCCBVugAwIBAgIMDyK/pjmQTsOAZ1CWMA0GCSqGSIb3DQEBCwUAMIGJMQswCQYDVQQGEwJC
+UjETMBEGA1UECgwKSUNQLUJyYXNpbDE2MDQGA1UECwwtU2VjcmV0YXJpYSBkYSBSZWNlaXRhIEZl
+ZGVyYWwgZG8gQnJhc2lsIC0gUkZCMS0wKwYDVQQDDCRBdXRvcmlkYWRlIENlcnRpZmljYWRvcmEg
+U0VSUFJPUkZCdjUwHhcNMjAwOTAxMTgxOTI2WhcNMjEwOTAxMTgxOTI2WjCCARExCzAJBgNVBAYT
+AkJSMQswCQYDVQQIDAJTQzEWMBQGA1UEBwwNRkxPUklBTk9QT0xJUzETMBEGA1UECgwKSUNQLUJy
+YXNpbDEZMBcGA1UECwwQdmlkZW9jb25mZXJlbmNpYTEXMBUGA1UECwwOODMwNDM3NDUwMDAxNjUx
+NjA0BgNVBAsMLVNlY3JldGFyaWEgZGEgUmVjZWl0YSBGZWRlcmFsIGRvIEJyYXNpbCAtIFJGQjEQ
+MA4GA1UECwwHQVJDSUFTQzEWMBQGA1UECwwNUkZCIGUtQ05QSiBBMTEyMDAGA1UEAwwpTVVOSUNJ
+UElPIERFIEZMT1JJQU5PUE9MSVM6ODI4OTIyODIwMDAxNDMwggEiMA0GCSqGSIb3DQEBAQUAA4IB
+DwAwggEKAoIBAQCBnxfUprXNrYIGRW1/WebhvggGJ/gxkcJ85ApUkvFuD6Wmz8o9J+dWlOof6JeN
+oGjFt5SuCBETRFsfT/PvHTjCrFO31umq1ol7IyapY5uOqnPv1Wgf01gYZDb21JuJaxQgz033G9bg
+fBAII1WueWZJwN1dtCgMO2CQUChANmnuO5ouvQLVe8vxzGfJ9PIRgoVzLKRldzsbltgkM2CnusA7
+moMS6uoqgul/rD+ChU6w359/40jDAaqmiO6WIrDKDNW+YBZKR3jhJkF6OUyaKL173VbN6cavkNVE
+L3KxAoqHMgDM81NhgC7bcVsefGGVzmISHNLC+0o5a73XanI1iKpnAgMBAAGjggJOMIICSjAfBgNV
+HSMEGDAWgBQUgC2dfppFwPFbPxnVQLBvL2Xg6TBbBgNVHSAEVDBSMFAGBmBMAQIBCjBGMEQGCCsG
+AQUFBwIBFjhodHRwOi8vcmVwb3NpdG9yaW8uc2VycHJvLmdvdi5ici9kb2NzL2RwY2Fjc2VycHJv
+cmZiLnBkZjCBiAYDVR0fBIGAMH4wPKA6oDiGNmh0dHA6Ly9yZXBvc2l0b3Jpby5zZXJwcm8uZ292
+LmJyL2xjci9hY3NlcnByb3JmYnY1LmNybDA+oDygOoY4aHR0cDovL2NlcnRpZmljYWRvczIuc2Vy
+cHJvLmdvdi5ici9sY3IvYWNzZXJwcm9yZmJ2NS5jcmwwVgYIKwYBBQUHAQEESjBIMEYGCCsGAQUF
+BzAChjpodHRwOi8vcmVwb3NpdG9yaW8uc2VycHJvLmdvdi5ici9jYWRlaWFzL2Fjc2VycHJvcmZi
+djUucDdiMIG3BgNVHREEga8wgaygOAYFYEwBAwSgLwQtMDkxMDE5NzI4MjMzNDE5Njk5MTAwMDAw
+MDAwMDAwMDAwMDAwMDAwMDAwMDAwoCAGBWBMAQMCoBcEFUdFQU4gTUFSUVVFUyBMT1VSRUlST6AZ
+BgVgTAEDA6AQBA44Mjg5MjI4MjAwMDE0M6AXBgVgTAEDB6AOBAwwMDAwMDAwMDAwMDCBGmdlYW5s
+b3VyZWlyb0BwbWYuc2MuZ292LmJyMA4GA1UdDwEB/wQEAwIF4DAdBgNVHSUEFjAUBggrBgEFBQcD
+BAYIKwYBBQUHAwIwDQYJKoZIhvcNAQELBQADggIBAEKfArUFzbF7lUHHskQdG85I92ep9Xuwb2y0
+/Jwh517e1/7DAXsBjRcY3mwn+tcaWOLRuCWp5X+lEJNmKHLooOWgHpwSRvA6bL3uybRdttIXYERC
+vikAFI7GzxttWfroINoagEQTrksoZ7E3GAyc/ao7j0sL/zHPC3nrTmfR3VfyrzZh/e+iGOUyScUl
+3eRfISSiWDK+QjM1Hb4AWYZJ3kOXpRIAvAiISi+j3Jw2f5OgUDZ6992U13sN0K89Qz3jJPpEm8DR
+TXdsEYP5dg8kk1uOKhPYFLW0BLeLIjB1AcOW33qzHU+DrOEtxELBSYYiR4r0ngpEtOtVerp0c8yj
+HCqOHaxnyRR3f6+FvGo42ZJ2sRsmkiFej98JpKraNZKa7aWpzsVCDYRezXBMmaspoU7cGPiaNpx0
+m12D5Dm6J5Gywew7yLkq7LFL2l5sSWVzFKH4EPv4CZzj5UvllFYPifYhFiy9Y5OiSUQyWNhfEwrG
+rTZkzULL0a58mPDZsMlEBUS5gufHDX7TXOb2B1nwhCabZUjC7mynN3LJvcLdc7LY6xezdNrbbymk
+wjEUkcawDMuT0Ee8qC9llNqSi9iFue7uZCkDV373fniH8hM9CX+uDCZXQrwD+AiE5kkpVywlv28v
+uLiMqLYCTVyrQSay/PvAaDwEq3wW/Orx2HSxbwLh</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties Id="QualProperties-1" Target="#Sign-1"><xades:SignedProperties Id="SigProperties-1"><xades:SignedSignatureProperties><xades:SigningTime>2021-07-26T17:41:43.676-03:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>rH4OqVJwZcBl9mIeKQH4mzlTzRm0AmA0dzYsthW1MfE=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=Autoridade Certificadora SERPRORFBv5,OU=Secretaria da Receita Federal do Brasil - RFB,O=ICP-Brasil,C=BR</ds:X509IssuerName><ds:X509SerialNumber>4684283663492719619221180566</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate><xades:SignaturePolicyIdentifier><xades:SignaturePolicyId><xades:SigPolicyId><xades:Identifier Qualifier="OIDAsURN">urn:oid:2.16.76.1.7.1.6.2.4</xades:Identifier></xades:SigPolicyId><xades:SigPolicyHash><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>V1oxev3+Z5tia7oVifHtePiXskTb6LP9K1QE2u1zoV4=</ds:DigestValue></xades:SigPolicyHash><xades:SigPolicyQualifiers><xades:SigPolicyQualifier><xades:SPURI>http://politicas.icpbrasil.gov.br/PA_AD_RB_v2_4.xml</xades:SPURI></xades:SigPolicyQualifier></xades:SigPolicyQualifiers></xades:SignaturePolicyId></xades:SignaturePolicyIdentifier></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#RefElement-1"><xades:MimeType>text/xml</xades:MimeType></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></xmlNfpse>
