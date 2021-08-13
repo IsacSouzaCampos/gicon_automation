@@ -1,5 +1,5 @@
 import xml.etree.ElementTree
-from constants import *
+from Model.constants import *
 
 
 class Invoice:

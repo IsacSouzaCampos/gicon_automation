@@ -1,6 +1,6 @@
 from openpyxl import Workbook
-from constants import *
-from invoice import Invoice
+from Model.constants import *
+from Model.invoice import Invoice
 import os
 
 
