@@ -52,3 +52,10 @@ Comando de pesquisa no Banco de Dados (X:\QUESTOR\Relatórios Personalizados\Lay
 
 select CODIGOEMPRESA, CODIGOESTAB, DATASALDO, VALORCRED, CONTACTB  
 from  SALDOCTB where CODIGOEMPRESA in (73) and DATASALDO between '01.06.2021' and '30.06.2021' and CONTACTB in ('2859', '2858', '2860', '2862', '2893', '4999', '5248', '4872', '4904')
+
+*******************************************************************************************************
+
+Criar arquivo executável:
+
+https://pypi.org/project/pyinstaller/
+https://pyinstaller.readthedocs.io/en/v4.5.1/
