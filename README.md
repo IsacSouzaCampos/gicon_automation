@@ -60,3 +60,4 @@ Criar arquivo executável:
 
 https://pypi.org/project/pyinstaller/
 https://pyinstaller.readthedocs.io/en/v4.5.1/
+https://stackoverflow.com/questions/12059509/create-a-single-executable-from-a-python-project
