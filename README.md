@@ -42,6 +42,7 @@ rodar pipreqs dentro da pasta do projeto:
 Conectar código com servidor SQL:
 
 https://datatofish.com/how-to-connect-python-to-sql-server-using-pyodbc/
+https://docs.microsoft.com/pt-br/sql/connect/python/pyodbc/step-3-proof-of-concept-connecting-to-sql-using-pyodbc?view=sql-server-ver15
 https://www.w3schools.com/python/python_mysql_getstarted.asp
 https://stackoverflow.com/questions/16088151/how-to-find-server-name-of-sql-server-management-studio
 https://docs.microsoft.com/pt-br/sql/ssms/download-sql-server-management-studio-ssms?view=sql-server-ver15
