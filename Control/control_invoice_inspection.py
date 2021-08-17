@@ -1,10 +1,10 @@
 from openpyxl import Workbook
 from Model.constants import *
 from Model.invoice import Invoice
-# import os
+from View import view_invoice_inspection
 
 
-def make_excel_file(folder, xml_files) -> None:
+def inspect_invoices(folder, xml_files) -> None:
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
     # cria o arquivo Excel a ser editado
@@ -19,19 +19,18 @@ def make_excel_file(folder, xml_files) -> None:
     sheet1.append([COLUMN_TITLES[0], COLUMN_TITLES[1], COLUMN_TITLES[2], COLUMN_TITLES[3],
                    COLUMN_TITLES[4], COLUMN_TITLES[5], COLUMN_TITLES[6], COLUMN_TITLES[7]])
 
-    # xml_files = os.listdir(XML_DIR)
-
-    # remove os arquivos ou pastas que não forem do formato XML
-    # ***este passo já é feito na main_gui***
-    # for file in xml_files:
-    #     if '.xml' not in file:
-    #         del(xml_files[xml_files.index(file)])
+    # inicia janela de carregamento
+    window = view_invoice_inspection.start_loading_inspection_window()
 
     # insere os dados de cada um dos arquivos xml a serem analisados
-    for invoice_file in xml_files:
+    import time
+    for i in range(len(xml_files)):
+        invoice_file = xml_files[i]
         invoice = Invoice(folder, invoice_file)
+        view_invoice_inspection.update_loading_window(window, invoice.d['numeroserie'], i, len(xml_files))
         row = invoice.excel_data_list()
         sheet1.append(row)
+        time.sleep(.5)
     
     edit_sheet_content(sheet1, xml_files)
 

@@ -1,11 +1,11 @@
 import PySimpleGUI as sg
 import os
 
-# help(sg.FolderBrowse)
-# help(sg.FileBrowse)
-
 
 def main_gui() -> tuple:
+    """Gera interface onde será informado o tipo do serviço (tomado, prestado) e a
+       localização da pasta que contém os arquivos XML a serem conferidos."""
+
     folder_name = str()
     xml_file_names = list()
 
@@ -39,3 +39,23 @@ def main_gui() -> tuple:
 
     window.close()
     return folder_name, xml_file_names
+
+
+def start_loading_inspection_window() -> sg.Window:
+    """Inicializa a janela que mostrará o progresso da conferência"""
+
+    layout = [
+        [sg.Text(key='text')],
+        [sg.ProgressBar(1, orientation='horizontal', size=(40, 20), key='progress')]
+    ]
+
+    window = sg.Window('Conferindo Notas', layout).Finalize()
+
+    return window
+
+
+def update_loading_window(window: sg.Window, invoice_number: str, progress: int, total_size: int) -> None:
+    """Atualiza a barra de progresso da conferência"""
+
+    window.Element('text').Update(f'Nota: {invoice_number}')
+    window.Element('progress').UpdateBar(progress, total_size)
