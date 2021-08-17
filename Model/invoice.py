@@ -4,9 +4,11 @@ from Model.constants import *
 
 class Invoice:
 
-    def __init__(self, file: str):
-        self.file = file
-        self.file_path = f'{XML_DIR}\\{file}'
+    def __init__(self, folder: str, file: str):
+        # self.folder = folder
+        # self.file = file
+        # self.file_path = f'{XML_DIR}\\{file}'
+        self.file_path = f'{folder}\\{file}'
 
         self.d = self.get_xml_tags_dict()
 
@@ -38,7 +40,7 @@ class Invoice:
 
         net_value = gross_value
         for tax in [iss_value, ir_value, csrf_value]:
-            if tax:
+            if type(tax) != str:
                 net_value -= tax
 
         service_nature = self.generate_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld)
@@ -181,6 +183,7 @@ class Invoice:
             return self.extract_tax_value(4)
 
         if not pis_value or not cofins_value or not csll_value:
+            print(pis_value, cofins_value, csll_value)
             raise Exception('Um ou mais impostos federais não puderam ser extraídos')
 
         return pis_value + cofins_value + csll_value
@@ -231,6 +234,8 @@ class Invoice:
         """Converte a string tax_value extraída da nota para o formato float"""
         if not tax_value[-1].isnumeric():
             tax_value = tax_value[:-1]
+        if not tax_value[0].isnumeric():
+            tax_value = tax_value[1:]
 
         dot = tax_value.find('.')
         comma = tax_value.find(',')

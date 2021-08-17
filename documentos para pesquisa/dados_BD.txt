@@ -1,0 +1,7 @@
+\\erp2-r\c$\Questor\db_questor
+
+Saraiva_teste
+
+usuario: admin
+
+enha: masterkey

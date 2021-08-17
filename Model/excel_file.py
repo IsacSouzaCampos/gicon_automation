@@ -1,10 +1,10 @@
 from openpyxl import Workbook
 from Model.constants import *
 from Model.invoice import Invoice
-import os
+# import os
 
 
-def make_excel_file() -> None:
+def make_excel_file(folder, xml_files) -> None:
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
     # cria o arquivo Excel a ser editado
@@ -19,16 +19,17 @@ def make_excel_file() -> None:
     sheet1.append([COLUMN_TITLES[0], COLUMN_TITLES[1], COLUMN_TITLES[2], COLUMN_TITLES[3],
                    COLUMN_TITLES[4], COLUMN_TITLES[5], COLUMN_TITLES[6], COLUMN_TITLES[7]])
 
-    xml_files = os.listdir(XML_DIR)
+    # xml_files = os.listdir(XML_DIR)
 
     # remove os arquivos ou pastas que não forem do formato XML
-    for file in xml_files:
-        if '.xml' not in file:
-            del(xml_files[xml_files.index(file)])
+    # ***este passo já é feito na main_gui***
+    # for file in xml_files:
+    #     if '.xml' not in file:
+    #         del(xml_files[xml_files.index(file)])
 
     # insere os dados de cada um dos arquivos xml a serem analisados
     for invoice_file in xml_files:
-        invoice = Invoice(invoice_file)
+        invoice = Invoice(folder, invoice_file)
         row = invoice.excel_data_list()
         sheet1.append(row)
     
@@ -92,15 +93,15 @@ def edit_sheet_content(sheet1, xml_files) -> None:
         csrf_value_cell = sheet1.cell(row=(i + 2), column=csrf_value_column).value
         net_value_cell = sheet1.cell(row=(i + 2), column=net_value_column).value
 
-        if gross_value_cell:
+        if type(gross_value_cell) != str and gross_value_cell is not None:
             gross_value_sum += gross_value_cell
-        if iss_value_cell:
+        if type(iss_value_cell) != str and gross_value_cell is not None:
             iss_value_sum += iss_value_cell
-        if ir_value_cell:
+        if type(ir_value_cell) != str and ir_value_cell is not None:
             ir_value_sum += ir_value_cell
-        if csrf_value_cell:
+        if type(csrf_value_cell) != str and csrf_value_cell is not None:
             csrf_value_sum += csrf_value_cell
-        if net_value_cell:
+        if type(net_value_cell) != str and net_value_cell is not None:
             net_value_sum += net_value_cell
 
     sheet1.cell(row=number_of_rows + 3, column=gross_value_column).value = gross_value_sum
