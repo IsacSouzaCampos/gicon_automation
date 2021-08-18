@@ -204,6 +204,7 @@ class Invoice:
                         splitted_string = clean_value.split(tax_kw)
 
                         for s in splitted_string[1:]:
+                            # aux server para que o algoritmo saiba quando o valor realmente começou a ser lido
                             aux = False
                             tax_value = str()
 
@@ -211,6 +212,7 @@ class Invoice:
 
                             while i < len(s):
                                 c = s[i]
+                                print(c, s[i:i+10])
                                 try:
                                     next_c = s[i + 1]
                                 except Exception as e:
@@ -221,6 +223,15 @@ class Invoice:
 
                                 if c.isnumeric() or c in [',', '.']:
                                     tax_value += c
+
+                                    # reinicia a variável tax_value caso o valor extraído até aqui tenha
+                                    # sido o de porcentagem da cobrança
+                                    if next_c == '%':
+                                        tax_value = ''
+                                        aux = False
+                                        i += 1
+                                        continue
+
                                     if not next_c.isnumeric() and next_c not in [',', '.'] and aux:
                                         return self.convert_s_tax_value_to_float(tax_value)
 

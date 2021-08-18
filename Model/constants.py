@@ -25,10 +25,13 @@ CSLL_KEYWORDS = ['csll1%', 'csll1.0%', 'csll1.00%',
 
 CSRF_KEYWORDS = ['csrf4,65%', 'csrf4.65%', 'csrfr$',
                  'crf4,65%', 'crf4.65%', 'crfr$',
+
+                 'pcc4,65%', 'pcc4.65%', 'pccr$'
                        
                  'piscofinscsll', 'piscofins', 'cofinscsll',
                        
-                 'retencaodecsrf', 'recolhercsrf'
-                 'retencaodecrf', 'recolhercrf']
+                 'retencaocsrf', 'retencaodecsrf', 'recolhercsrf'
+                 'retencaocrf', 'retencaodecrf', 'recolhercrf',
+                 'retencaopcc', 'retencaodepcc']
 
 ALL_KEYWORDS = [IR_KEYWORDS, PIS_KEYWORDS, COFINS_KEYWORDS, CSLL_KEYWORDS, CSRF_KEYWORDS]
