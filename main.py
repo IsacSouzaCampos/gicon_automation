@@ -1,5 +1,5 @@
-import Control.control_invoice_inspection as control_invoice_inspection
-import View.view_invoice_inspection as gui_invoice_inspection
+import Control.invoice_inspection as control_invoice_inspection
+import View.invoice_inspection as gui_invoice_inspection
 
 
 def main():

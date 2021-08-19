@@ -12,7 +12,7 @@ class Invoice:
 
         self.d = self.get_xml_tags_dict()
 
-    def excel_data_list(self) -> list:
+    def data_list(self) -> list:
         """Gera a linha com os dados de retencao referentes a nota contida no arquivo 
         invoice_file."""
 
@@ -34,6 +34,8 @@ class Invoice:
         is_csrf_withheld = self.is_fed_tax_withheld(1)
         try:
             csrf_value = self.get_csrf_value() if is_csrf_withheld else ''
+            if csrf_value != '' and csrf_value < 0:
+                csrf_value = '***ERRO***'
         except Exception as e:
             print(self.d['numeroserie'], e)
             csrf_value = '***ERRO***'
@@ -42,6 +44,8 @@ class Invoice:
         for tax in [iss_value, ir_value, csrf_value]:
             if type(tax) != str:
                 net_value -= tax
+
+        net_value = round(net_value, 2)
 
         service_nature = self.generate_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld)
 
@@ -180,13 +184,18 @@ class Invoice:
         csll_value = self.extract_tax_value(3)
 
         if not pis_value + cofins_value + csll_value:
-            return self.extract_tax_value(4)
+            csrf_value = self.extract_tax_value(4)
+
+            # retorna erro se CSRF for zero pois para o método ter sido chamado significa que
+            # foi detectada retenção desse imposto anteriormente
+            return -1 if csrf_value <= 0 else csrf_value
 
         if not pis_value or not cofins_value or not csll_value:
             print(pis_value, cofins_value, csll_value)
-            raise Exception('Um ou mais impostos federais não puderam ser extraídos')
+            print('Um ou mais impostos federais não puderam ser extraídos')
+            return -1
 
-        return pis_value + cofins_value + csll_value
+        return round(pis_value + cofins_value + csll_value, 2)
 
     def extract_tax_value(self, tax_type: int) -> float:
         """Encontra e extrai o valor do imposto federal solicitado"""
@@ -204,7 +213,7 @@ class Invoice:
                         splitted_string = clean_value.split(tax_kw)
 
                         for s in splitted_string[1:]:
-                            # aux server para que o algoritmo saiba quando o valor realmente começou a ser lido
+                            # aux serve para que o algoritmo saiba quando o valor realmente começou a ser lido
                             aux = False
                             tax_value = str()
 
@@ -212,7 +221,6 @@ class Invoice:
 
                             while i < len(s):
                                 c = s[i]
-                                print(c, s[i:i+10])
                                 try:
                                     next_c = s[i + 1]
                                 except Exception as e:
@@ -252,9 +260,9 @@ class Invoice:
         comma = tax_value.find(',')
         if dot > 0 and comma > 0:
             if dot < comma:
-                return float(tax_value.replace('.', '').replace(',', '.'))
+                return round(float(tax_value.replace('.', '').replace(',', '.')), 2)
         else:
-            return float(tax_value.replace(',', '.'))
+            return round(float(tax_value.replace(',', '.')), 2)
 
     def generate_service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool) -> int:
         """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
