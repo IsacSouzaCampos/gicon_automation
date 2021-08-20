@@ -6,6 +6,8 @@ def main_gui() -> tuple:
     """Gera interface onde será informado o tipo do serviço (tomado, prestado) e a
        localização da pasta que contém os arquivos XML a serem conferidos."""
 
+    # sg.theme('GrayGrayGray')
+
     folder_name = str()
     xml_file_names = list()
 
@@ -18,7 +20,7 @@ def main_gui() -> tuple:
         [sg.Submit('Conferir'), sg.Cancel('Cancelar')],
     ]
 
-    window = sg.Window('Test', layout)
+    window = sg.Window('Conferência Automatizada', layout)
 
     while True:
         event, values = window.read()
@@ -41,7 +43,7 @@ def main_gui() -> tuple:
     return folder_name, xml_file_names
 
 
-def start_loading_inspection_window() -> sg.Window:
+def start_inspection_loading_window() -> sg.Window:
     """Inicializa a janela que mostrará o progresso da conferência"""
 
     layout = [
@@ -63,9 +65,50 @@ def update_loading_window(window: sg.Window, invoice_number: str, progress: int,
 
 def show_results_table(header: list, table: list) -> None:
     layout = [
-        [sg.Table(values=table, headings=header)]
+        [sg.Table(values=table, headings=header, key='table')],
+        [sg.Button('Editar'), sg.Button('Atualizar')],
+        [sg.Input(key='invoice_n', size=(12, 20)), sg.Input(key='date', size=(12, 20)),
+         sg.Input(key='gross_value', size=(12, 20)), sg.Input(key='iss', size=(12, 20)),
+         sg.Input(key='ir', size=(12, 20)), sg.Input(key='csrf', size=(12, 20)),
+         sg.Input(key='net_value', size=(12, 20)), sg.Input(key='nature', size=(12, 20))],
+        [sg.Button('Lançar')]
     ]
 
     window = sg.Window('Resultados da Conferência', layout)
-    window.read()
+
+    selected_row = -1
+    while True:
+        event, values = window.read()
+        if event == sg.WINDOW_CLOSED:
+            break
+        if event == 'Editar':
+            try:
+                selected_row = values['table'][0]
+                edit_row(window, table[selected_row])
+            except Exception as e:
+                print(e)
+        if event == 'Atualizar':
+            row = [values['invoice_n'], values['date'],
+                   values['gross_value'], values['iss'],
+                   values['ir'], values['csrf'],
+                   values['net_value'], values['nature']]
+            table = update_table(window, table, selected_row, row)
+
     window.close()
+
+
+def edit_row(window: sg.Window, row: list) -> None:
+    window.Element('invoice_n').Update(row[0])
+    window.Element('date').Update(row[1])
+    window.Element('gross_value').Update(row[2])
+    window.Element('iss').Update(row[3])
+    window.Element('ir').Update(row[4])
+    window.Element('csrf').Update(row[5])
+    window.Element('net_value').Update(row[6])
+    window.Element('nature').Update(row[7])
+
+
+def update_table(window: sg.Window, table: list, selected_row: int, row: list) -> list:
+    table = [table[i] if i != selected_row else row for i in range(len(table))]
+    window.Element('table').Update(values=table)
+    return table

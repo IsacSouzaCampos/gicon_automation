@@ -26,7 +26,7 @@ def inspect_invoices(folder, xml_files) -> None:
     results = list()
 
     # inicia janela da barra de progresso da conferência
-    loading_window = start_loading_inspection_window()
+    loading_window = start_inspection_loading_window()
 
     # insere os dados de cada um dos arquivos xml a serem analisados
     import time
@@ -37,7 +37,7 @@ def inspect_invoices(folder, xml_files) -> None:
         row = invoice.data_list()
         sheet1.append(row)
         results.append(row)
-        time.sleep(.5)
+        time.sleep(.2)
 
     loading_window.close()
 
