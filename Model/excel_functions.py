@@ -1,7 +1,7 @@
 from Model.constants import *
 
 
-def upload_sheet_content(sheet1, xml_files) -> None:
+def upload_sheet_content(sheet1, xml_files: list) -> None:
     """Edita conteúdo da planilha passada como parâmetro com a finalidade de manter a
        organização estrutural da mesma."""
 

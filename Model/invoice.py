@@ -4,12 +4,13 @@ from Model.constants import *
 
 class Invoice:
 
-    def __init__(self, folder: str, file: str):
+    def __init__(self, folder: str, file: str, service_type: int):
         # self.folder = folder
         # self.file = file
         # self.file_path = f'{XML_DIR}\\{file}'
-        self.file_path = f'{folder}\\{file}'
 
+        self.service_type = service_type  # 0: prestado / 1: tomado
+        self.file_path = f'{folder}\\{file}'
         self.d = self.get_xml_tags_dict()
 
     def data_list(self) -> list:

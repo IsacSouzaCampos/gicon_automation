@@ -5,7 +5,7 @@ from Model.excel_functions import upload_sheet_content
 from View.invoice_inspection import *
 
 
-def inspect_invoices(folder, xml_files) -> None:
+def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
     # cria o arquivo Excel a ser editado
@@ -32,16 +32,19 @@ def inspect_invoices(folder, xml_files) -> None:
     import time
     for i in range(len(xml_files)):
         invoice_file = xml_files[i]
-        invoice = Invoice(folder, invoice_file)
+        invoice = Invoice(folder, invoice_file, service_type)
         update_loading_window(loading_window, invoice.d['numeroserie'], i, len(xml_files))
         row = invoice.data_list()
-        sheet1.append(row)
         results.append(row)
         time.sleep(.2)
 
     loading_window.close()
 
-    show_results_table(header, results)
+    results = show_results_table(header, results)
+
+    # inserir na planilha os dados obtidos após confirmação de lançamento do usuário
+    for i in range(len(xml_files)):
+        sheet1.append(results[i])
     
     upload_sheet_content(sheet1, xml_files)
 
