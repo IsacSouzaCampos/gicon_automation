@@ -48,7 +48,10 @@ class Invoice:
 
         net_value = round(net_value, 2)
 
-        service_nature = self.generate_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld)
+        if self.service_type:  # 1
+            service_nature = self.taken_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld)
+        else:  # 0
+            service_nature = self.d['cfps']
 
         row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_value, net_value, service_nature])
 
@@ -265,7 +268,7 @@ class Invoice:
         else:
             return round(float(tax_value.replace(',', '.')), 2)
 
-    def generate_service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool) -> int:
+    def taken_service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool) -> int:
         """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
            CFPS fornecido na nota"""
 
