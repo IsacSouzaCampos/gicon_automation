@@ -61,3 +61,15 @@ Criar arquivo executável:
 https://pypi.org/project/pyinstaller/
 https://pyinstaller.readthedocs.io/en/v4.5.1/
 https://stackoverflow.com/questions/12059509/create-a-single-executable-from-a-python-project
+
+*******************************************************************************************************
+
+Exemplo interface TKinter:
+
+https://www.devmedia.com.br/tkinter-interfaces-graficas-em-python/33956
+
+*******************************************************************************************************
+
+Mostrar planilha excel com TKinter:
+
+https://www.youtube.com/watch?v=l6-HG0FJPsQ
