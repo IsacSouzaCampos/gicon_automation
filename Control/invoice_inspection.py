@@ -40,11 +40,12 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
 
     loading_window.close()
 
-    results = show_results_table(header, results, service_type)
+    results = taken_service_edition_screen(header, results) if service_type else \
+        provided_service_editing_screen(header, results)
 
     # inserir na planilha os dados obtidos após confirmação de lançamento do usuário
-    for i in range(len(xml_files)):
-        sheet1.append(results[i])
+    for row in results:
+        sheet1.append(row)
     
     upload_sheet_content(sheet1, xml_files)
 

@@ -55,6 +55,16 @@ class Invoice:
 
         row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_value, net_value, service_nature])
 
+        if not self.service_type:  # ser o serviço foi prestado
+            row.append(self.d['razaosocialprestador'])
+            row.append(self.d['razaosocialtomador'])
+            if 'descricaoservico' in self.d and self.d['descricaoservico'] is not None:
+                row.append(self.d['descricaoservico'])
+            elif 'dadosadicionais' in self.d and self.d['dadosadicionais'] is not None:
+                row.append(self.d['dadosadicionais'])
+            else:
+                row.append('DESCRIÇÃO NÃO INFORMADA!')
+
         if self.is_canceled():
             row.append('CANCELADA')
 
