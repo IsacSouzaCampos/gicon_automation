@@ -39,6 +39,13 @@ rodar pipreqs dentro da pasta do projeto:
 
 *******************************************************************************************************
 
+Tabela de Inputs / Tabela Editável:
+
+https://pysimplegui.readthedocs.io/en/latest/#example-list-comprehension-to-build-rows-table-simulation-grid-of-inputs
+https://csveda.com/pysimplegui-column-and-frame/
+
+*******************************************************************************************************
+
 Conectar código com servidor SQL:
 
 https://datatofish.com/how-to-connect-python-to-sql-server-using-pyodbc/
