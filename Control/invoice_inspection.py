@@ -40,8 +40,10 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
 
     loading_window.close()
 
-    results = taken_service_edition_screen(header, results) if service_type else \
-        provided_service_editing_screen(header, results)
+    # results = taken_service_edition_screen(header, results) if service_type else \
+    #     provided_service_editing_screen(header, results)
+
+    results = editable_table(results)
 
     # inserir na planilha os dados obtidos após confirmação de lançamento do usuário
     for row in results:
