@@ -43,6 +43,7 @@ Tabela de Inputs / Tabela Editável:
 
 https://pysimplegui.readthedocs.io/en/latest/#example-list-comprehension-to-build-rows-table-simulation-grid-of-inputs
 https://csveda.com/pysimplegui-column-and-frame/
+https://stackoverflow.com/questions/65811804/how-to-automatically-update-the-pysimplegui-column-scroll-bar
 
 *******************************************************************************************************
 
