@@ -29,19 +29,16 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
     loading_window = start_inspection_loading_window()
 
     # insere os dados de cada um dos arquivos xml a serem analisados
-    import time
+    # import time
     for i in range(len(xml_files)):
         invoice_file = xml_files[i]
         invoice = Invoice(folder, invoice_file, service_type)
         update_loading_window(loading_window, invoice.d['numeroserie'], i, len(xml_files))
         row = invoice.data_list()
         results.append(row)
-        time.sleep(.2)
+        # time.sleep(.05)
 
     loading_window.close()
-
-    # results = taken_service_edition_screen(header, results) if service_type else \
-    #     provided_service_editing_screen(header, results)
 
     results = editable_table(results)
 

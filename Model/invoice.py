@@ -48,22 +48,22 @@ class Invoice:
 
         net_value = round(net_value, 2)
 
-        if self.service_type:  # 1
-            service_nature = self.taken_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld)
-        else:  # 0
-            service_nature = self.d['cfps']
+        # if self.service_type:  # 1
+        #     service_nature = self.taken_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld)
+        # else:  # 0
+        #     service_nature = self.d['cfps']
+        service_nature = self.taken_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld, self.service_type)
 
         row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_value, net_value, service_nature])
 
-        if not self.service_type:  # ser o serviço foi prestado
-            row.append(self.d['razaosocialprestador'])
-            row.append(self.d['razaosocialtomador'])
-            if 'descricaoservico' in self.d and self.d['descricaoservico'] is not None:
-                row.append(self.d['descricaoservico'])
-            elif 'dadosadicionais' in self.d and self.d['dadosadicionais'] is not None:
-                row.append(self.d['dadosadicionais'])
-            else:
-                row.append('DESCRIÇÃO NÃO INFORMADA!')
+        row.append(self.d['razaosocialprestador'])
+        row.append(self.d['razaosocialtomador'])
+        if 'descricaoservico' in self.d and self.d['descricaoservico'] is not None:
+            row.append(self.d['descricaoservico'])
+        elif 'dadosadicionais' in self.d and self.d['dadosadicionais'] is not None:
+            row.append(self.d['dadosadicionais'])
+        else:
+            row.append('DESCRIÇÃO NÃO INFORMADA!')
 
         if self.is_canceled():
             row.append('CANCELADA')
@@ -278,25 +278,26 @@ class Invoice:
         else:
             return round(float(tax_value.replace(',', '.')), 2)
 
-    def taken_service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool) -> int:
+    def taken_service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool,
+                             service_type: int) -> int:
         """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
            CFPS fornecido na nota"""
 
-        cfps = self.d['cfps']
+        cfps = self.d['cfps'] + '3' if service_type else self.d['cfps'] + '0'
 
         if iss_withheld and is_ir_withheld and is_csrf_withheld:
-            return int(cfps + '302')
+            return int(cfps + '02')
         if iss_withheld and is_ir_withheld:
-            return int(cfps + '304')
+            return int(cfps + '04')
         if iss_withheld and is_csrf_withheld:
-            return int(cfps + '302')
+            return int(cfps + '02')
         if is_ir_withheld and is_csrf_withheld:
-            return int(cfps + '302')
+            return int(cfps + '02')
         if iss_withheld:
-            return int(cfps + '308')
+            return int(cfps + '08')
         if is_ir_withheld:
-            return int(cfps + '304')
+            return int(cfps + '04')
         if is_csrf_withheld:
-            return int(cfps + '306')
+            return int(cfps + '06')
 
-        return int(cfps + '300')
+        return int(cfps + '00')

@@ -34,7 +34,6 @@ def main_gui() -> tuple:
                 sg.popup('Selecione uma pasta para a conferência!')
                 continue
             if values[0]:
-                print('Conferência ainda não desenvolvida')
                 service_type = 0
                 folder_name = values['Selecionar Pasta'] or '.'
                 xml_file_names = [file for file in os.listdir(folder_name) if '.xml' in file]
@@ -60,7 +59,7 @@ def start_inspection_loading_window() -> sg.Window:
         [sg.ProgressBar(1, orientation='horizontal', size=(40, 20), key='progress')]
     ]
 
-    window = sg.Window('Conferindo Notas', layout).Finalize()
+    window = sg.Window('Conferindo Notas', layout, disable_close=True, finalize=True)
 
     return window
 
@@ -75,26 +74,24 @@ def update_loading_window(window: sg.Window, invoice_number: str, progress: int,
 def editable_table(table: list) -> list or None:
     """Cria tabela de resultados editável."""
     header = ['Nº nota', 'Emissão', 'Valor Bruto', 'ISS', 'IR', 'CSRF', 'Valor Líquido', 'Natureza']
-    table_header = [
-        [sg.Text(header[0], pad=(35, 0)), sg.Text(header[1], pad=(30, 0)),
-         sg.Text(header[2], pad=(30, 0)), sg.Text(header[3], pad=(40, 0)),
-         sg.Text(header[4], pad=(60, 0)), sg.Text(header[5], pad=(35, 0)),
-         sg.Text(header[6], pad=(25, 0)), sg.Text(header[7], pad=(20, 0))]
+    table_header = [sg.Text(header[0], pad=(35, 0)), sg.Text(header[1], pad=(25, 0)),
+                    sg.Text(header[2], pad=(25, 0)), sg.Text(header[3], pad=(35, 0)),
+                    sg.Text(header[4], pad=(52, 0)), sg.Text(header[5], pad=(30, 0)),
+                    sg.Text(header[6], pad=(20, 0)), sg.Text(header[7], pad=(20, 0))]
+
+    input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for i, v in enumerate(row[:8])] +
+                  [sg.Button('...', pad=(0, 0), key=f'detail_{i}')] for i, row in enumerate(table)]
+
+    frame = [
+        table_header,
+        [sg.Column(input_rows, size=(900, 200), scrollable=True, key='-COL-')]
     ]
 
-    input_rows = [[sg.Input(v, size=(15, 1), justification='center') for i, v in enumerate(row[:8])] +
-                  [sg.Button('...', key=f'detail_{i}')] for i, row in enumerate(table)]
-
-    column = [[sg.Column(table_header + input_rows)]]
-
     layout = [
-        [sg.Frame('Tabela de Resultados', column, key='frame')],
+        [sg.Frame('Tabela de Resultados', frame, key='-FRAME-')],
         [sg.Text()],
         [sg.Button('Lançar', size=(10, 1))]
     ]
-
-    # frame = [[sg.Frame('Tabela de Resultados', table_header + input_rows, pad=(5, 5))]]
-    # layout = [[sg.Column(frame)]]
 
     window = sg.Window('Tabela de Edição', layout, finalize=True)
 
@@ -116,117 +113,19 @@ def editable_table(table: list) -> list or None:
             new_table = service_details(table, header, row, index)
             if new_table:
                 table = new_table
-                update_table(window, header, table)
+                window = update_table(window, header, table)
 
         if event == 'Lançar':
             if sg.popup_yes_no('Deseja realmente lançar os dados no sistema?') == 'Yes':
-                # table = update_table(window, table, selected_row, row, service_type)
-                window.close()
-                return table
+                # *** atuaizar a tabela com os valores contidos atualmente na tela ***
+                break
 
     window.close()
-    return table
-
-
-# def provided_service_editing_screen(header: list, table: list) -> list or None:
-#     """Mostra tela com os resultados da conferência de notas de serviço prestado automatizada,
-#        possibilitando edição dos resultados antes de lançá-los no banco de dados."""
-#
-#     new_table = list()
-#
-#     layout = [
-#         [sg.Table(values=table, headings=header[:-1], key='table')],
-#
-#         [sg.Button('Editar', size=(12, 1)), sg.Button('Atualizar', size=(12, 1))],
-#
-#         [sg.Input(key='invoice_n', size=(12, 20)), sg.Input(key='date', size=(12, 20)),
-#          sg.Input(key='gross_value', size=(12, 20)), sg.Input(key='iss', size=(12, 20)),
-#          sg.Input(key='ir', size=(12, 20)), sg.Input(key='csrf', size=(12, 20)),
-#          sg.Input(key='net_value', size=(12, 20))],
-#
-#         [sg.Text()],
-#         [sg.Button('Inserir Natureza(s)')]
-#     ]
-#
-#     window = sg.Window('Resultados da Conferência', layout).Finalize()
-#     window['table'].Widget.configure()
-#
-#     selected_row = -1
-#     while True:
-#         event, values = window.read()
-#         if event == sg.WINDOW_CLOSED:
-#             window.close()
-#             return
-#
-#         if event == 'Editar':
-#             try:
-#                 selected_row = values['table'][0]
-#                 edit_row(window, table[selected_row], 0)  # 0: serviço prestado
-#             except Exception as e:
-#                 print(e)
-#
-#         if event == 'Atualizar':
-#             # transforma os valores obtidos dos Inputs em lista
-#             row = [values[key] for key in values]
-#             # adiciona o resto da linha da tabela à linha que será adicionada para atualização
-#             row = row[1:] + table[selected_row][len(row) - 1:]
-#             if new_table:
-#                 new_table = update_table(window, new_table, selected_row, row, 0)  # 0: serviço prestado
-#             else:
-#                 new_table = update_table(window, table, selected_row, row, 0)  # 0: serviço prestado
-#
-#         if event == 'Inserir Natureza(s)':
-#             new_table = insert_service_nature(new_table) if new_table else insert_service_nature(table)
-#             window.close()
-#             return provided_service_editing_final_screen(header, new_table)
-
-
-# def provided_service_editing_final_screen(header: list, table: list) -> list or None:
-#     """Tela final de confirmação dos dados antes do lançamento para conferência de notas de serviço tomado"""
-#     layout = [
-#         [sg.Table(headings=header, values=table, key='table')],
-#         [sg.Text()],
-#         [sg.Button('Lançar', size=(12, 1)),  sg.Button('Editar', size=(12, 1))],
-#         [sg.Button('Cancelar', size=(12, 1))]
-#     ]
-#
-#     window = sg.Window('Lançar notas', layout)
-#
-#     while True:
-#         event, values = window.read()
-#
-#         if event == sg.WINDOW_CLOSED or event == 'Cancelar':
-#             return
-#
-#         if event == 'Editar':
-#             window.close()
-#             return provided_service_reediting_screen(header, table)
-#
-#         if event == 'Lançar':
-#             if sg.popup_yes_no('Deseja realmente lançar os dados no sistema?') == 'Yes':
-#                 break
-#
-#     window.close()
-#     return table
-
-
-# def provided_service_reediting_screen(header: list, table: list) -> list:
-#     """Tela de reedição das notas de serviço prestado. Igual à tela de edição dos serviços tomados."""
-#     return taken_service_edition_screen(header, table)
-
-
-# def insert_service_nature(table: list) -> list or None:
-#     """Mostra cada um dos serviços para que o usuário informe a natureza destes."""
-#
-#     for row in table:
-#         service_details(table, row)
-#
-#     return
+    return [row[:8] for row in table]
 
 
 def service_details(table: list, header: list, row: list, row_index: int) -> list or None:
-    new_table = list()
-    # sg.theme('default1')
+    """Mostra ao usuário detalhes referentes ao serviço que não aparecem em outras janelas."""
 
     input_size = (10, 1)
     input_padding = ((5, 20), (0, 0))
@@ -267,8 +166,6 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
         return
 
     if event == 'ok_button':
-        new_row = [values[key] for key in values]
-
         # se mantém em loop enquanto o número de dígitos da natureza não for 7
         while len(values['nature']) != 7:
             sg.popup('A natureza digitada não está de acordo com o padrão (7 dígitos)')
@@ -278,13 +175,15 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
                 return
 
             if event == 'ok_button':
-                new_row = [values[key] for key in values]
+                break
 
-            # atualizar linha com os formatos corretos dos valores
-            # gross_value, iss, ir, csrf, net_value
-            float_values = [float(new_row[i]) if new_row[i] else '' for i in range(2, 7)]
+        new_row = [values[key] for key in values] + row[len(values):]
 
-            new_row = [int(new_row[0]), new_row[1]] + float_values + [int(new_row[7])] + new_row[8:]
+        # atualizar linha com os formatos corretos dos valores
+        # gross_value, iss, ir, csrf, net_value
+        float_values = [float(new_row[i]) if new_row[i] else '' for i in range(2, 7)]
+
+        new_row = [int(new_row[0]), new_row[1]] + float_values + [int(new_row[7])] + new_row[8:]
 
         # natureza está na posição 7
         table = [row if i != row_index else new_row for i, row in enumerate(table)]
@@ -293,84 +192,33 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
     return table
 
 
-def taken_service_edition_screen(header: list, table: list) -> list or None:
-    """Mostra tela com os resultados da conferência de ntoas de serviço tomado automatizada,
-       possibilitando edição dos resultados antes de lançá-los no banco de dados."""
-    new_table = list()
+def update_table(window: sg.Window, header: list, table: list) -> sg.Window:
+    """Atualiza a tabela da GUI e a tabela final a ser usada para lançamento no banco de dados."""
+
+    # Por enquanto a tela de edição está sendo recriada ao invés de apenas atualizados os valores
+    # modificados. O ideal é corrigir isso assim que a solução for encontrada.
+
+    table_header = [sg.Text(header[0], pad=(35, 0)), sg.Text(header[1], pad=(25, 0)),
+                    sg.Text(header[2], pad=(25, 0)), sg.Text(header[3], pad=(35, 0)),
+                    sg.Text(header[4], pad=(52, 0)), sg.Text(header[5], pad=(30, 0)),
+                    sg.Text(header[6], pad=(20, 0)), sg.Text(header[7], pad=(20, 0))]
+
+    input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for i, v in enumerate(row[:8])] +
+                  [sg.Button('...', pad=(0, 0), key=f'detail_{i}')] for i, row in enumerate(table)]
+
+    frame = [
+        table_header,
+        [sg.Column(input_rows, size=(900, 200), scrollable=True, key='-COL-')]
+    ]
 
     layout = [
-        [sg.Table(values=table, headings=header, key='table')],
-
-        [sg.Button('Editar', size=(12, 1)), sg.Button('Atualizar', size=(12, 1))],
-
-        [sg.Input(key='invoice_n', size=(12, 20)), sg.Input(key='date', size=(12, 20)),
-         sg.Input(key='gross_value', size=(12, 20)), sg.Input(key='iss', size=(12, 20)),
-         sg.Input(key='ir', size=(12, 20)), sg.Input(key='csrf', size=(12, 20)),
-         sg.Input(key='net_value', size=(12, 20)), sg.Input(key='nature', size=(12, 20))],
-
+        [sg.Frame('Tabela de Resultados', frame, key='-FRAME-')],
         [sg.Text()],
-        [sg.Button('Lançar', size=(12, 1))]
+        [sg.Button('Lançar', size=(10, 1))]
     ]
 
-    window = sg.Window('Resultados da Conferência', layout)
+    # window.Element('-FRAME-').Update('Tabela de Resultados *', frame)
+    window.close()
 
-    selected_row = -1
-    while True:
-        event, values = window.read()
-        if event == sg.WINDOW_CLOSED:
-            window.close()
-            return
-
-        if event == 'Editar':
-            try:
-                selected_row = values['table'][0]
-                edit_row(window, table[selected_row], 1)  # 1: serviço tomado
-            except Exception as e:
-                print(e)
-
-        if event == 'Atualizar':
-            row = [values['invoice_n'], values['date'],
-                   values['gross_value'], values['iss'],
-                   values['ir'], values['csrf'],
-                   values['net_value'], values['nature']]
-
-            if new_table:
-                new_table = update_table(window, new_table, selected_row, row, 1)  # 1: serviço tomado
-            else:
-                new_table = update_table(window, table, selected_row, row, 1)  # 1: serviço tomado
-
-        if event == 'Lançar':
-            if sg.popup_yes_no('Deseja realmente lançar os dados no sistema?') == 'Yes':
-                window.close()
-                return new_table if new_table else table
-
-
-def edit_row(window: sg.Window, row: list, service_type: int) -> None:
-    """Atualiza os valores das caixas de texto que permitirão a modificação dos dados da tabela."""
-    window.Element('invoice_n').Update(row[0])
-    window.Element('date').Update(row[1])
-    window.Element('gross_value').Update(row[2])
-    window.Element('iss').Update(row[3])
-    window.Element('ir').Update(row[4])
-    window.Element('csrf').Update(row[5])
-    window.Element('net_value').Update(row[6])
-
-    if service_type:
-        window.Element('nature').Update(row[7])
-
-
-def update_table(window: sg.Window, header: list, table: list) -> None:
-    """Atualiza a tabela da GUI e a tabela final a ser usada para lançamento no banco de dados."""
-    table_header = [
-        [sg.Text(header[0], pad=(35, 0)), sg.Text(header[1], pad=(30, 0)),
-         sg.Text(header[2], pad=(30, 0)), sg.Text(header[3], pad=(40, 0)),
-         sg.Text(header[4], pad=(60, 0)), sg.Text(header[5], pad=(35, 0)),
-         sg.Text(header[6], pad=(25, 0)), sg.Text(header[7], pad=(20, 0))]
-    ]
-
-    input_rows = [[sg.Input(v, size=(15, 1), justification='center') for i, v in enumerate(row[:8])] +
-                  [sg.Button('...', key=f'detail_{i}')] for i, row in enumerate(table)]
-
-    column = [[sg.Column(table_header + input_rows)]]
-
-    window['frame'].Update(column)
+    window = sg.Window('Tabela de Edição', layout)
+    return window
