@@ -8,6 +8,11 @@ from View.invoice_inspection import *
 def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
+    # testa se o número de notas está dentro do limite de conferências por vez
+    if len(xml_files) > MAX_INVOICES:
+        max_invoices_popup()
+        return
+
     # cria o arquivo Excel a ser editado
     excel_file = Workbook()
 
@@ -44,6 +49,13 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
 
     # inserir na planilha os dados obtidos após confirmação de lançamento do usuário
     for row in results:
+        # adiciona a célula 'CANCELADA' caso essa esteja na linha e limpa os valores dela para que
+        # não sejam somados ao valor total, senão copia só até a natureza
+        if 'CANCELADA' in row:
+            row = row[:header.index('Natureza') + 1]
+            row.append('CANCELADA')
+        else:
+            row = row[:header.index('Natureza') + 1]
         sheet1.append(row)
     
     upload_sheet_content(sheet1, xml_files)

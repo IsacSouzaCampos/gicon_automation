@@ -16,18 +16,16 @@ def upload_sheet_content(sheet1, xml_files: list) -> None:
             cell.alignment = Alignment(horizontal='center')
 
     # torna vermelha a linha de notas canceladas
-    for cell_row in range(number_of_rows):
-        cell = sheet1.cell(row=(cell_row + 1), column=(len(COLUMN_TITLES) + 1))
+    for row in range(number_of_rows):
+        # column len(COLUMN_TITLES) + 1 pois vai até uma posição além do limite da coluna
+        cell = sheet1.cell(row=(row + 1), column=(len(COLUMN_TITLES) + 1))
         if cell.value == 'CANCELADA':
             for cell_column in range(number_of_columns):
                 red = '9e1010'
                 red_fill = PatternFill(start_color=red, end_color=red, fill_type='solid')
-                cell = sheet1.cell(row=(cell_row + 1), column=(cell_column + 1))
+                cell = sheet1.cell(row=(row + 1), column=(cell_column + 1))
                 cell.fill = red_fill
-
-                # deixa os campos com os dados da nota em branco para não alterar as somas ao final
-                if (cell_column + 1) > 1:
-                    cell.value = None
+            continue
 
     # arruma a largura das colunas
     from openpyxl.utils import get_column_letter

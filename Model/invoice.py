@@ -60,12 +60,13 @@ class Invoice:
         row.append(self.d['razaosocialtomador'])
         if 'descricaoservico' in self.d and self.d['descricaoservico'] is not None:
             row.append(self.d['descricaoservico'])
-        elif 'dadosadicionais' in self.d and self.d['dadosadicionais'] is not None:
+        if 'dadosadicionais' in self.d and self.d['dadosadicionais'] is not None:
             row.append(self.d['dadosadicionais'])
-        else:
-            row.append('DESCRIÇÃO NÃO INFORMADA!')
+        # else:
+        #     row.append('DESCRIÇÃO NÃO INFORMADA!')
 
         if self.is_canceled():
+            row = row[:2] + ['-' for _ in range(len(row) - 2)]
             row.append('CANCELADA')
 
         return row

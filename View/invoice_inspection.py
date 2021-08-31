@@ -1,4 +1,5 @@
 import PySimpleGUI as sg
+from Model.constants import MAX_INVOICES
 import os
 
 
@@ -12,10 +13,13 @@ def main_gui() -> tuple:
     xml_file_names = list()
     service_type = int()
 
+    service_type_layout = [[sg.Radio('Prestado', 'radio1', default=False)],
+                            [sg.Radio('Tomado', 'radio1', default=False)]]
+
+    service_type_col = [[sg.Column(service_type_layout, size=(425, 70))]]
+
     layout = [
-        [sg.Text('Tipo de serviço:')],
-        [sg.Radio('Prestado', 'radio1', default=False)],
-        [sg.Radio('Tomado', 'radio1', default=False)],
+        [sg.Frame('Tipo de Serviço', service_type_col)],
         [sg.Text('Selecione a pasta que contém as notas a serem conferidas:')],
         [sg.Input(), sg.FolderBrowse('Selecionar Pasta')],
         [sg.Submit('Conferir'), sg.Cancel('Cancelar')],
@@ -49,6 +53,11 @@ def main_gui() -> tuple:
 
     window.close()
     return folder_name, xml_file_names, service_type
+
+
+def max_invoices_popup():
+    sg.popup(f'Número limite de notas excedido. Separe os arquivos em subgupos de no máximo '
+             f'{MAX_INVOICES} notas e tente novamente.')
 
 
 def start_inspection_loading_window() -> sg.Window:
@@ -108,6 +117,7 @@ def editable_table(table: list) -> list or None:
             end = start + table_n_columns
 
             row = [values[i] for i in range(start, end)]
+            # complementa com os dados que estão na tabela e não são mostrados na tabela editável
             row = row + table[index][(end - start):]
 
             new_table = service_details(table, header, row, index)
@@ -121,39 +131,53 @@ def editable_table(table: list) -> list or None:
                 break
 
     window.close()
-    return [row[:8] for row in table]
+    final_table = get_table_values(values, len(table), len(header))
+    final_table = [set_row_types(header, row) for row in final_table]
+    final_table = [final_table[i] + row[(len(header) + 1):] for i, row in enumerate(table)]
+    return final_table
 
 
 def service_details(table: list, header: list, row: list, row_index: int) -> list or None:
     """Mostra ao usuário detalhes referentes ao serviço que não aparecem em outras janelas."""
 
-    input_size = (10, 1)
-    input_padding = ((5, 20), (0, 0))
-    header_size = (11, 1)
-    text_width = 107
+    input_size = (12, 1)
+    input_padding = (2, 0)
+    header_size = (10, 1)
+    text_width = 101
 
     bg_color = '#bbbbbb'
     txt_color = 'black'
 
     # gera a lista de inputs para edição dos dados conferidos
     keys = ['invoice_n', 'date', 'gross_value', 'iss', 'ir', 'csrf', 'net_value', 'nature']
-    inputs = [sg.Input(row[i], key=k, size=input_size, pad=input_padding) for i, k in enumerate(keys)]
+    inputs = [sg.Input(row[i], key=k, size=input_size, pad=input_padding, justification='center')
+              for i, k in enumerate(keys)]
 
-    table_header = [sg.Text(h, size=header_size) for h in header]
+    table_header = [sg.Text(h, size=header_size, justification='center') for h in header]
+
+    provider_name_layout = [[sg.Text(f'{row[8]}', size=(text_width, 1), text_color=txt_color)]]
+    taker_name_layout = [[sg.Text(f'{row[9]}', size=(text_width, 1), text_color=txt_color)]]
+    description_layout = [[sg.Text(row[10], size=(text_width, 7), text_color=txt_color)]]
+    additional_data_layout = [[sg.Text(row[11], size=(text_width, 7), text_color=txt_color)]]
+
+    provider_name_col = [[sg.Column(provider_name_layout)]]
+    taker_name_col = [[sg.Column(taker_name_layout)]]
+    description_col = [[sg.Column(description_layout)]]
+    additional_data_col = [[sg.Column(additional_data_layout)]]
+
+    inspection_data_layouts = [[[table_header[i]], [inputs[i]]] for i in range(len(inputs))]
+    inspection_data_cols = [[sg.Column(inspection_data_layouts[i]) for i in range(len(inputs))]]
 
     layout = [
-        [sg.Text('Prestador:')],
-        [sg.Text(f'{row[8]}', size=(text_width, 1), background_color=bg_color, text_color=txt_color)],
-        [sg.Text('Tomador:')],
-        [sg.Text(f'{row[9]}', size=(text_width, 1), background_color=bg_color, text_color=txt_color)],
+        [sg.Frame('Prestador', provider_name_col)],
+        [sg.Frame('Tomador', taker_name_col)],
         [sg.Text()],
 
-        [sg.Text('Descrição do Serviço:')],
-        [sg.Text(row[10], size=(text_width, 10), background_color=bg_color, text_color=txt_color)],
+        [sg.Frame('Descrição do Serviço', description_col)],
+        [sg.Frame('Dados Adicionais', additional_data_col)],
         [sg.Text()],
 
-        table_header,
-        inputs,
+        [sg.Frame('Dados da Conferência', inspection_data_cols)],
         [sg.Text()],
 
         [sg.OK(key='ok_button', size=(12, 1))]
@@ -181,11 +205,8 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
 
         # atualizar linha com os formatos corretos dos valores
         # gross_value, iss, ir, csrf, net_value
-        float_values = [float(new_row[i]) if new_row[i] else '' for i in range(2, 7)]
+        new_row = set_row_types(header, new_row)
 
-        new_row = [int(new_row[0]), new_row[1]] + float_values + [int(new_row[7])] + new_row[8:]
-
-        # natureza está na posição 7
         table = [row if i != row_index else new_row for i, row in enumerate(table)]
         window.close()
 
@@ -193,7 +214,7 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
 
 
 def update_table(window: sg.Window, header: list, table: list) -> sg.Window:
-    """Atualiza a tabela da GUI e a tabela final a ser usada para lançamento no banco de dados."""
+    """Cria nova tabela da GUI com os valores atualizados."""
 
     # Por enquanto a tela de edição está sendo recriada ao invés de apenas atualizados os valores
     # modificados. O ideal é corrigir isso assim que a solução for encontrada.
@@ -222,3 +243,33 @@ def update_table(window: sg.Window, header: list, table: list) -> sg.Window:
 
     window = sg.Window('Tabela de Edição', layout)
     return window
+
+
+def set_row_types(header: list, row: list) -> list:
+    """Corrige o tipo dos valores da linha."""
+    # natureza está na posição 7
+    nature_pos = header.index('Natureza')
+    float_values = list()
+
+    for i in range(2, nature_pos):
+        r = row[i]
+        if r in ['-', '******']:
+            float_values.append(r)
+        elif not r:
+            float_values.append('')
+        else:
+            float_values.append(float(r))
+
+    if row[nature_pos].isnumeric():
+        row = [int(row[0]), row[1]] + float_values + [int(row[nature_pos])] + row[(nature_pos + 1):]
+    else:
+        row = [int(row[0]), row[1]] + float_values + [row[nature_pos]] + row[(nature_pos + 1):]
+
+    return row
+
+
+def get_table_values(values: dict, n_rows: int, n_columns: int) -> list:
+    """Retorna o uma lista com os valores contidos atualmente na tabela editável."""
+
+    table = [[values[(j * n_columns) + i] for i in range(n_columns)] for j in range(n_rows)]
+    return table
