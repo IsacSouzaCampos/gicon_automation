@@ -56,16 +56,23 @@ def main_gui() -> tuple:
 
 
 def max_invoices_popup():
-    option = sg.popup(f'Número limite de notas excedido ({MAX_INVOICES}). Com um número assim, a edição das'
-                      f' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
-                      f'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
-                      f'com uma interface gráfica mais simplificada?',
-                      custom_text=(f'Criar subgrupos de {MAX_INVOICES} notas', 'Conferir com interface '
-                                                                               'simplificada'))
+    """Popup de aviso de limite de notas excedido."""
+    layout = [
+        [sg.Text(f'Número limite de notas excedido ({MAX_INVOICES}). Com um número assim, a edição das'
+                 f' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
+                 f'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
+                 f'com uma interface gráfica mais simplificada?', size=(50, 5))],
 
-    if option == f'Criar subgrupos de {MAX_INVOICES} notas':
+        [sg.Button(f'Criar subgrupos de {MAX_INVOICES} notas'), sg.Button('Conferir com interface simplificada')]
+    ]
+
+    window = sg.Window('Limite de Notas Excedido', layout)
+    event, values = window.read()
+    window.close()
+
+    if event == f'Criar subgrupos de {MAX_INVOICES} notas':
         return 0
-    elif option == 'Conferir com interface simplificada':
+    elif event == 'Conferir com interface simplificada':
         return 1
     else:
         return 2

@@ -218,6 +218,9 @@ class Invoice:
         # 0 = IR / 1 = PIS / 2 = COFINS / 3 = CSLL / 4 = CSRF
         keywords = ALL_KEYWORDS[tax_type]
 
+        # variável que alocará possíveis percetuais de imposto encontrados para caso não sejam
+        # encontrados outros valores
+        percentage = str()
         for tag in ['descricaoservico', 'dadosadicionais']:
             if tag in self.d and self.d[tag] is not None:
                 value = self.d[tag]
@@ -250,6 +253,9 @@ class Invoice:
                                     # reinicia a variável tax_value caso o valor extraído até aqui tenha
                                     # sido o de porcentagem da cobrança
                                     if next_c == '%':
+                                        print('encontrou \"%\" ->', tax_value)
+                                        percentage = tax_value
+                                        print('percentage recebeu tax', percentage)
                                         tax_value = ''
                                         aux = False
                                         i += 1
@@ -261,7 +267,15 @@ class Invoice:
                                 if next_c.isnumeric() and not aux:
                                     aux = True
                                 i += 1
-        return 0
+
+        print('percentage antes if:', percentage)
+        if percentage:
+            percentage = self.convert_s_tax_value_to_float(percentage)
+            gross_value = float(self.get_gross_value())
+            percentage = round(float(percentage * gross_value), 2)
+            print('final percentage:', percentage)
+
+        return percentage if percentage else 0
 
     @staticmethod
     def convert_s_tax_value_to_float(tax_value: str) -> float:

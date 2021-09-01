@@ -34,6 +34,7 @@ CSRF_KEYWORDS = ['csrf4,65%', 'csrf4.65%', 'csrfr$',
                        
                  'retencaocsrf', 'retencaodecsrf', 'retencoescsrf', 'recolhercsrf'
                  'retencaocrf', 'retencaodecrf', 'retencoescsr', 'recolhercrf',
-                 'retencaopcc', 'retencaodepcc', 'retencoespcc']
+                 'retencaopcc', 'retencaodepcc', 'retencoespcc',
+                 'retencoesdetributosfederais']
 
 ALL_KEYWORDS = [IR_KEYWORDS, PIS_KEYWORDS, COFINS_KEYWORDS, CSLL_KEYWORDS, CSRF_KEYWORDS]

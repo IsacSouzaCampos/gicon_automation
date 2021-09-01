@@ -2,16 +2,25 @@ from openpyxl import Workbook
 from Model.constants import *
 from Model.invoice import Invoice
 from Model.excel_functions import upload_sheet_content
-from View.invoice_inspection import *
+from View.invoices_inspection import *
+import View.many_invoices_inspection as mii
+from Model.invoice_inspection_lib import separate_xml_files
 
 
 def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
+    inspection_type = 0
     # testa se o número de notas está dentro do limite de conferências por vez
     if len(xml_files) > MAX_INVOICES:
-        max_invoices_popup()
-        return
+        option = max_invoices_popup()
+        if option == 0:  # se opcao == 0
+            separate_xml_files(folder, xml_files)
+            main_gui()
+        elif option == 1:
+            inspection_type = 1
+        else:
+            return
 
     # cria o arquivo Excel a ser editado
     excel_file = Workbook()
@@ -45,7 +54,14 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
 
     loading_window.close()
 
-    results = editable_table(results)
+    if inspection_type:
+        results = mii.show_results_table(header, results)
+    else:
+        results = editable_table(results)
+
+    # volta à tela principal enquanto a tela de conferência for fechada sem lançamento
+    while results is None:
+        main_gui()
 
     # inserir na planilha os dados obtidos após confirmação de lançamento do usuário
     for row in results:
