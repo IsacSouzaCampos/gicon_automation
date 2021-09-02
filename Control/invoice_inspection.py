@@ -7,20 +7,20 @@ import View.many_invoices_inspection as mii
 from Model.invoice_inspection_lib import separate_xml_files
 
 
-def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
+def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
-    inspection_type = 0
+    invoices_amaount_type = 0
     # testa se o número de notas está dentro do limite de conferências por vez
     if len(xml_files) > MAX_INVOICES:
         option = max_invoices_popup()
         if option == 0:  # se opcao == 0
             separate_xml_files(folder, xml_files)
-            main_gui()
+            return False
         elif option == 1:
-            inspection_type = 1
+            invoices_amaount_type = 1
         else:
-            return
+            return False
 
     # cria o arquivo Excel a ser editado
     excel_file = Workbook()
@@ -54,10 +54,14 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
 
     loading_window.close()
 
-    if inspection_type:
+    if invoices_amaount_type:  # se invoices_amount_type diferente de 0 / muito grande
         results = mii.show_results_table(header, results)
     else:
         results = editable_table(results)
+
+    # retorna false caso a conferência tenha sido fechada sem lançamento
+    if results is None:
+        return False
 
     # volta à tela principal enquanto a tela de conferência for fechada sem lançamento
     while results is None:
@@ -81,3 +85,5 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> None:
 
     # abre o arquivo Excel gerado
     # os.system(f'start excel.exe {folder.split("/")[-1]}.xlsx')
+
+    return True

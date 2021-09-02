@@ -33,8 +33,9 @@ def show_results_table(header: list, table: list) -> list or None:
             table = update_table(window, table, selected_row, row)
 
         if event == 'Lançar':
-            window.close()
-            return table
+            if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
+                window.close()
+                return table
 
     window.close()
 

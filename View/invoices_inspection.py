@@ -126,6 +126,7 @@ def editable_table(table: list) -> list or None:
         event, values = window.read()
 
         if event == sg.WINDOW_CLOSED:
+            # exit()  # REMOVER APÓS TERMINAR TESTES
             return None
 
         if 'detail_' in event:
