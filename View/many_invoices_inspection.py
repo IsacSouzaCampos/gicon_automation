@@ -1,14 +1,21 @@
 import PySimpleGUI as sg
 
 
-def show_results_table(header: list, table: list) -> list or None:
+def show_results_table(table_header: list, table: list) -> list or None:
+    """Mostra tabela de resultados simplificada por conta do número grande de notas conferidas."""
+    inputs_text_header = ['Nº Nota', 'Data', 'Valor Bruto', 'ISS', 'IR',
+                          'CSRF', 'Valor Líquido', 'Natureza']
+
+    inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in inputs_text_header]
+    inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in inputs_text_header]
+
+    inspection_data_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
+    inspection_data_cols = [[sg.Column(inspection_data_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
+
     layout = [
-        [sg.Table(values=table, headings=header, selected_row_colors=('black', 'gray'), key='table')],
+        [sg.Table(values=table, headings=table_header, selected_row_colors=('black', 'gray'), key='table')],
         [sg.Button('Editar'), sg.Button('Atualizar')],
-        [sg.Input(key='invoice_n', size=(12, 20)), sg.Input(key='date', size=(12, 20)),
-         sg.Input(key='gross_value', size=(12, 20)), sg.Input(key='iss', size=(12, 20)),
-         sg.Input(key='ir', size=(12, 20)), sg.Input(key='csrf', size=(12, 20)),
-         sg.Input(key='net_value', size=(12, 20)), sg.Input(key='nature', size=(12, 20))],
+        inspection_data_cols,
         [sg.Button('Lançar')]
     ]
 
@@ -22,14 +29,11 @@ def show_results_table(header: list, table: list) -> list or None:
         if event == 'Editar':
             try:
                 selected_row = values['table'][0]
-                edit_row(window, table[selected_row])
+                edit_row(window, inputs_text_header, table[selected_row])
             except Exception as e:
                 print(e)
         if event == 'Atualizar':
-            row = [values['invoice_n'], values['date'],
-                   values['gross_value'], values['iss'],
-                   values['ir'], values['csrf'],
-                   values['net_value'], values['nature']]
+            row = [values[inputs_text_header[i]] for i in range(len(inputs_text_header))]
             table = update_table(window, table, selected_row, row)
 
         if event == 'Lançar':
@@ -40,22 +44,14 @@ def show_results_table(header: list, table: list) -> list or None:
     window.close()
 
 
-def edit_row(window: sg.Window, row: list) -> None:
-    window.Element('invoice_n').Update(int(row[0]))
-    window.Element('date').Update(row[1])
-
-    float_values = {'gross_value': 2, 'iss': 3, 'ir': 4, 'csrf': 5, 'net_value': 6}
-    for key in float_values:
-        i = float_values[key]
-        if row[i] and row[i] != '-':
-            window.Element(key).Update(round(float(row[i]), 2))
-        else:
-            window.Element(key).Update(row[i])
-
-    window.Element('nature').Update(int(row[7]))
+def edit_row(window: sg.Window, header: list, row: list) -> None:
+    """Atualiza campos de edição de dados."""
+    [window.Element(header[i]).Update(row[i]) for i in range(len(header))]
 
 
 def update_table(window: sg.Window, table: list, selected_row: int, row: list) -> list:
+    """Atualiza tabela de conferência com os dados no formato adequado."""
+    row = row[:2] + [row[i] if row[i] in ['', '-'] else round(float(row[i])) for i in range(2, 7)] + [int(row[7])]
     table = [table[i] if i != selected_row else row for i in range(len(table))]
     window.Element('table').Update(values=table)
     return table

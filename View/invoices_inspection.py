@@ -160,17 +160,16 @@ def editable_table(table: list) -> list or None:
 def service_details(table: list, header: list, row: list, row_index: int) -> list or None:
     """Mostra ao usuário detalhes referentes ao serviço que não aparecem em outras janelas."""
 
+    keys = ['invoice_n', 'date', 'gross_value', 'iss', 'ir', 'csrf', 'net_value', 'nature']
     input_size = (12, 1)
-    input_padding = (2, 0)
     header_size = (10, 1)
-    text_width = 101
+    # tamanho dos boxes de texto informativos
+    text_width = ((input_size[0]) * len(keys)) + (len(keys) + 1)
 
-    bg_color = '#bbbbbb'
     txt_color = 'black'
 
     # gera a lista de inputs para edição dos dados conferidos
-    keys = ['invoice_n', 'date', 'gross_value', 'iss', 'ir', 'csrf', 'net_value', 'nature']
-    inputs = [sg.Input(row[i], key=k, size=input_size, pad=input_padding, justification='center')
+    inputs = [sg.Input(row[i], key=k, size=input_size, justification='center')
               for i, k in enumerate(keys)]
 
     table_header = [sg.Text(h, size=header_size, justification='center') for h in header]
