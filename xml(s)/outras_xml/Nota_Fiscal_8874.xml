@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="ISO-8859-1" standalone="yes"?>
+<ConsultarNfseResposta xmlns:ns2="http://www.w3.org/2000/09/xmldsig#">
+    <ListaNfse>
+        <CompNfse>
+            <Nfse>
+                <InfNfse>
+                    <Numero>8874</Numero>
+                    <CodigoVerificacao>LOURUQZK3</CodigoVerificacao>
+                    <DataEmissao>2021-08-02T18:13:24.940-03:00</DataEmissao>
+                    <IdentificacaoRps/>
+                    <NaturezaOperacao>1</NaturezaOperacao>
+                    <OptanteSimplesNacional>1</OptanteSimplesNacional>
+                    <Competencia>2021-08-01T00:00:00-03:00</Competencia>
+                    <OutrasInformacoes>DOCUMENTO EMITIDO POR ME OU EPP OPTANTE PELO SIMPLES NACIONAL
+NÃO GERA DIREITO A CRÉDITO FISCAL DE IPI E ISS.
+Alíquota do ISS: 5,00%</OutrasInformacoes>
+                    <Servico>
+                        <Valores>
+                            <ValorServicos>35.07</ValorServicos>
+                            <ValorDeducoes>0.00</ValorDeducoes>
+                            <IssRetido>2</IssRetido>
+                            <ValorIss>0.00</ValorIss>
+                            <BaseCalculo>35.07</BaseCalculo>
+                            <Aliquota>5</Aliquota>
+                            <ValorLiquidoNfse>35.07</ValorLiquidoNfse>
+                            <DescontoCondicionado>0.00</DescontoCondicionado>
+                            <DescontoIncondicionado>0.00</DescontoIncondicionado>
+                        </Valores>
+                        <ItemListaServico>0101</ItemListaServico>
+                        <Discriminacao>{[[Descricao=Hospedagem web landing page Palazzo Reale][ItemServico=0101][Quantidade=1][ValorUnitario=35.07][ValorServico=35.07][ValorBaseCalculo=35.07][Aliquota=5][Deducoes=0][DescontoCondicionado=0][DescontoIncondicionado=0]]}</Discriminacao>
+                        <CodigoMunicipio>4216602</CodigoMunicipio>
+                    </Servico>
+                    <PrestadorServico>
+                        <IdentificacaoPrestador>
+                            <Cnpj>09410632000106</Cnpj>
+                            <InscricaoMunicipal>9003251</InscricaoMunicipal>
+                        </IdentificacaoPrestador>
+                        <RazaoSocial>TIKI WEB INTELIGENTE LTDA</RazaoSocial>
+                        <Endereco>
+                            <Endereco>AV PRESIDENTE KENNEDY</Endereco>
+                            <Numero>815</Numero>
+                            <Complemento>SALA 03</Complemento>
+                            <Bairro>Campinas</Bairro>
+                            <CodigoMunicipio>4216602</CodigoMunicipio>
+                            <Cep>88101000</Cep>
+                        </Endereco>
+                        <Contato>
+                            <Telefone>4830293199</Telefone>
+                            <Email>contato@tikiweb.com.br</Email>
+                        </Contato>
+                    </PrestadorServico>
+                    <TomadorServico>
+                        <IdentificacaoTomador>
+                            <CpfCnpj>
+                                <Cnpj>04724734000174</Cnpj>
+                            </CpfCnpj>
+                        </IdentificacaoTomador>
+                        <RazaoSocial>ARTHUR SILVEIRA CONSTRUTORA E INCORPORADORA LTDA</RazaoSocial>
+                        <Endereco>
+                            <Endereco>RUA. GENERAL BITTENCOURT</Endereco>
+                            <Numero>295</Numero>
+                            <Complemento>_</Complemento>
+                            <Bairro>Centro</Bairro>
+                            <CodigoMunicipio>4205407</CodigoMunicipio>
+                            <Uf>SC</Uf>
+                            <Cep>88020100</Cep>
+                        </Endereco>
+                        <Contato>
+                            <Telefone>4832240022</Telefone>
+                            <Email>fiscal@gicon.cnt.br</Email>
+                        </Contato>
+                    </TomadorServico>
+                    <IntermediarioServico/>
+                    <ConstrucaoCivil/>
+                    <CondicaoPagamento>
+                        <Condicao>1</Condicao>
+                        <QtdParcela>1</QtdParcela>
+                        <Parcelas>
+                            <Parcela>1</Parcela>
+                            <Valor>35.07</Valor>
+                        </Parcelas>
+                    </CondicaoPagamento>
+                </InfNfse>
+            </Nfse>
+            <NfseCancelamento>
+                <Confirmacao>
+                    <Pedido>
+                        <InfPedidoCancelamento/>
+                        <ns2:Signature/>
+                    </Pedido>
+                    <InfConfirmacaoCancelamento>
+                        <Sucesso>false</Sucesso>
+                    </InfConfirmacaoCancelamento>
+                </Confirmacao>
+            </NfseCancelamento>
+            <NfseSubstituicao>
+                <SubstituicaoNfse/>
+            </NfseSubstituicao>
+        </CompNfse>
+    </ListaNfse>
+    <ListaMensagemRetorno/>
+</ConsultarNfseResposta>
