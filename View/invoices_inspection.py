@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
-from Model.constants import MAX_INVOICES
+from Model.constants import MAX_INVOICES, ERROR_LINK_TEXT, TAX_EXTRACTION_ERROR
+from Model.invoice_inspection_lib import number_of_errors
 import os
 
 
@@ -98,7 +99,7 @@ def update_loading_window(window: sg.Window, invoice_number: str, progress: int,
     window.Element('progress').UpdateBar(progress, total_size)
 
 
-def editable_table(table: list) -> list or None:
+def editable_table(table: list, n_errors: int = None) -> list or None:
     """Cria tabela de resultados editável."""
     header = ['Nº nota', 'Emissão', 'Valor Bruto', 'ISS', 'IR', 'CSRF', 'Valor Líquido', 'Natureza']
     table_header = [sg.Text(header[0], pad=(35, 0)), sg.Text(header[1], pad=(25, 0)),
@@ -114,10 +115,20 @@ def editable_table(table: list) -> list or None:
         [sg.Column(input_rows, size=(900, 200), scrollable=True, key='-COL-')]
     ]
 
+    errors_link = []
+    if n_errors is not None:
+        errors_link = [sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
+                       if n_errors > 0 else sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', key='-ERRORS-')]
+
+    # o botão que aparece ao final da tela será escolhido de acordo com o valor de n_errors
+    # Atualizar caso seja tela com erros apenas e lançar caso seja tela com todos os resultados
+    button = [sg.Button('Atualizar', size=(10, 1))] if n_errors is None else [sg.Button('Lançar', size=(10, 1))]
+
     layout = [
         [sg.Frame('Tabela de Resultados', frame, key='-FRAME-')],
+        errors_link,
         [sg.Text()],
-        [sg.Button('Lançar', size=(10, 1))]
+        button
     ]
 
     window = sg.Window('Tabela de Edição', layout, finalize=True)
@@ -125,7 +136,7 @@ def editable_table(table: list) -> list or None:
     while True:
         event, values = window.read()
 
-        if event == sg.WINDOW_CLOSED:
+        if event == sg.WINDOW_CLOSED or event is None:
             # exit()  # REMOVER APÓS TERMINAR TESTES
             return None
 
@@ -139,10 +150,50 @@ def editable_table(table: list) -> list or None:
             # complementa com os dados que estão na tabela e não são mostrados na tabela editável
             row = row + table[index][(end - start):]
 
-            new_table = service_details(table, header, row, index)
+            # atualiza tabela com os valores contidos na GUI
+            new_table = get_table_values(values, len(table), len(header))
+            new_table = [set_row_types(header, row) for row in new_table]
+            new_table = [new_table[i] + row[(len(header)):] for i, row in enumerate(table)]
+
+            print('len row[0]:', len(table[0]))
+            print('len row[1]:', len(table[1]))
+            print('len row[2]:', len(table[2]))
+            if len(table[0]) > 12 or len(table[1]) > 12 or len(table[2]) > 12:
+                print()
+                print('row[0]:', table[0])
+                print()
+                print('row[1]:', table[1])
+                print()
+                print('row[2]:', table[2])
+
+            new_table = service_details(new_table, header, row, index)
             if new_table:
                 table = new_table
-                window = update_table(window, header, table)
+                window = update_table(window, header, table, n_errors)
+
+        if event == '-ERRORS-':
+            errors_indexes = [i for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
+            errors_table = [row for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
+            resulting_table = editable_table(errors_table)
+
+            if resulting_table is None:
+                continue
+
+            new_table = list()
+            i = 0
+            for index, row in enumerate(table):
+                if index in errors_indexes:
+                    new_table.append(resulting_table[i])
+                    i += 1
+                else:
+                    new_table.append(row)
+            table = new_table
+            print('len row3:', len(table[0]))
+            n_errors = number_of_errors(table)
+            window = update_table(window, header, table, n_errors)
+
+        if event == 'Atualizar':
+            break
 
         if event == 'Lançar':
             if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
@@ -153,7 +204,7 @@ def editable_table(table: list) -> list or None:
     # atualiza tabela com os valores contidos atualmente na tabela de edição
     final_table = get_table_values(values, len(table), len(header))
     final_table = [set_row_types(header, row) for row in final_table]
-    final_table = [final_table[i] + row[(len(header) + 1):] for i, row in enumerate(table)]
+    final_table = [final_table[i] + row[(len(header)):] for i, row in enumerate(table)]
     return final_table
 
 
@@ -202,7 +253,7 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
         [sg.OK(key='ok_button', size=(12, 1))]
     ]
 
-    window = sg.Window(f'Natureza da Nota: {row[0]}', layout)
+    window = sg.Window(f'Nota: {row[0]}', layout)
     event, values = window.read()
 
     if event == sg.WINDOW_CLOSED:
@@ -232,7 +283,7 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
     return table
 
 
-def update_table(window: sg.Window, header: list, table: list) -> sg.Window:
+def update_table(window: sg.Window, header: list, table: list, n_errors: int or None) -> sg.Window:
     """Cria nova tabela da GUI com os valores atualizados."""
 
     # Por enquanto a tela de edição está sendo recriada ao invés de apenas atualizados os valores
@@ -251,10 +302,18 @@ def update_table(window: sg.Window, header: list, table: list) -> sg.Window:
         [sg.Column(input_rows, size=(900, 200), scrollable=True, key='-COL-')]
     ]
 
+    errors_link = []
+    if n_errors is not None:
+        errors_link = [sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
+                       if n_errors > 0 else sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', key='-ERRORS-')]
+
+    button = [sg.Button('Atualizar', size=(10, 1))] if n_errors is None else [sg.Button('Lançar', size=(10, 1))]
+
     layout = [
         [sg.Frame('Tabela de Resultados', frame, key='-FRAME-')],
+        errors_link,
         [sg.Text()],
-        [sg.Button('Lançar', size=(10, 1))]
+        button
     ]
 
     # window.Element('-FRAME-').Update('Tabela de Resultados *', frame)

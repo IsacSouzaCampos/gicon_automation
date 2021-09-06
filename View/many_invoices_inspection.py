@@ -1,7 +1,8 @@
 import PySimpleGUI as sg
+from Model.constants import ERROR_LINK_TEXT
 
 
-def show_results_table(table_header: list, table: list) -> list or None:
+def show_results_table(table_header: list, table: list, n_errors: int) -> list or None:
     """Mostra tabela de resultados simplificada por conta do número grande de notas conferidas."""
     inputs_text_header = ['Nº Nota', 'Data', 'Valor Bruto', 'ISS', 'IR',
                           'CSRF', 'Valor Líquido', 'Natureza']
@@ -12,10 +13,15 @@ def show_results_table(table_header: list, table: list) -> list or None:
     inspection_data_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
     inspection_data_cols = [[sg.Column(inspection_data_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
 
+    errors_link = [sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
+                   if n_errors > 0 else sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', key='-ERRORS-')]
+
     layout = [
         [sg.Table(values=table, headings=table_header, selected_row_colors=('black', 'gray'), key='table')],
         [sg.Button('Editar'), sg.Button('Atualizar')],
         inspection_data_cols,
+        errors_link,
+        [sg.Text()],
         [sg.Button('Lançar')]
     ]
 
@@ -35,6 +41,9 @@ def show_results_table(table_header: list, table: list) -> list or None:
         if event == 'Atualizar':
             row = [values[inputs_text_header[i]] for i in range(len(inputs_text_header))]
             table = update_table(window, table, selected_row, row)
+
+        if event == '-ERRORS-':
+            print('Número de erros:', n_errors)
 
         if event == 'Lançar':
             if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':

@@ -4,13 +4,13 @@ from Model.invoice import Invoice
 from Model.excel_functions import upload_sheet_content
 from View.invoices_inspection import *
 import View.many_invoices_inspection as mii
-from Model.invoice_inspection_lib import separate_xml_files
+from Model.invoice_inspection_lib import *
 
 
 def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
-    invoices_amaount_type = 0
+    invoices_amount_type = 0
     # testa se o número de notas está dentro do limite de conferências por vez
     if len(xml_files) > MAX_INVOICES:
         option = max_invoices_popup()
@@ -18,7 +18,7 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
             separate_xml_files(folder, xml_files)
             return False
         elif option == 1:
-            invoices_amaount_type = 1
+            invoices_amount_type = 1
         else:
             return False
 
@@ -54,10 +54,12 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
 
     loading_window.close()
 
-    if invoices_amaount_type:  # se invoices_amount_type diferente de 0 / muito grande
-        results = mii.show_results_table(header, results)
+    n_errors = number_of_errors(results)
+
+    if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
+        results = mii.show_results_table(header, results, n_errors)
     else:
-        results = editable_table(results)
+        results = editable_table(results, n_errors)
 
     # retorna false caso a conferência tenha sido fechada sem lançamento
     if results is None:

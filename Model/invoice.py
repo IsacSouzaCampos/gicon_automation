@@ -30,16 +30,16 @@ class Invoice:
             ir_value = self.get_ir_value() if is_ir_withheld else ''
         except Exception as e:
             print(self.d['numeroserie'], e)
-            ir_value = '******'
+            ir_value = TAX_EXTRACTION_ERROR
 
         is_csrf_withheld = self.is_fed_tax_withheld(1)
         try:
             csrf_value = self.get_csrf_value() if is_csrf_withheld else ''
             if csrf_value != '' and csrf_value < 0:
-                csrf_value = '******'
+                csrf_value = TAX_EXTRACTION_ERROR
         except Exception as e:
             print(self.d['numeroserie'], e)
-            csrf_value = '******'
+            csrf_value = TAX_EXTRACTION_ERROR
 
         net_value = gross_value
         for tax in [iss_value, ir_value, csrf_value]:

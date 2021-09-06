@@ -20,3 +20,12 @@ def separate_xml_files(folder: str, xml_files: list) -> None:
                 return
             xml_file = xml_files[pos]
             os.replace(f'{folder}/{xml_file}', f'{new_folder}/{xml_file}')
+
+
+def number_of_errors(table: list) -> int:
+    """Retorna o número de conferências com erros."""
+    n_errors = 0
+    for row in table:
+        if '******' in row:
+            n_errors += 1
+    return n_errors
