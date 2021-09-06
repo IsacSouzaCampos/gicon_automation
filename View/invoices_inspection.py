@@ -155,17 +155,6 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
             new_table = [set_row_types(header, row) for row in new_table]
             new_table = [new_table[i] + row[(len(header)):] for i, row in enumerate(table)]
 
-            print('len row[0]:', len(table[0]))
-            print('len row[1]:', len(table[1]))
-            print('len row[2]:', len(table[2]))
-            if len(table[0]) > 12 or len(table[1]) > 12 or len(table[2]) > 12:
-                print()
-                print('row[0]:', table[0])
-                print()
-                print('row[1]:', table[1])
-                print()
-                print('row[2]:', table[2])
-
             new_table = service_details(new_table, header, row, index)
             if new_table:
                 table = new_table
