@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 from Model.constants import MAX_INVOICES, ERROR_LINK_TEXT, TAX_EXTRACTION_ERROR
-from Model.invoice_inspection_lib import number_of_errors
+from Model.invoices_inspection_lib import number_of_errors
 import os
 
 
@@ -15,7 +15,7 @@ def main_gui() -> tuple:
     service_type = int()
 
     service_type_layout = [[sg.Radio('Prestado', 'radio1', default=False)],
-                            [sg.Radio('Tomado', 'radio1', default=False)]]
+                           [sg.Radio('Tomado', 'radio1', default=False)]]
 
     service_type_col = [[sg.Column(service_type_layout, size=(425, 70))]]
 
@@ -32,6 +32,7 @@ def main_gui() -> tuple:
         event, values = window.read()
 
         if event == sg.WINDOW_CLOSED or event == 'Cancelar':
+            window.close()
             exit()
 
         if event == 'Conferir':
@@ -112,7 +113,7 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
 
     frame = [
         table_header,
-        [sg.Column(input_rows, size=(900, 200), scrollable=True, key='-COL-')]
+        [sg.Column(input_rows, size=(900, 200), scrollable=True, vertical_scroll_only=True, key='-COL-')]
     ]
 
     errors_link = []
@@ -133,7 +134,10 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
 
     window = sg.Window('Tabela de Edição', layout, finalize=True)
 
+    scroll_position = 0
     while True:
+        # inicia a tela de edição na posição 'scroll_position'
+        window['-COL-'].Widget.canvas.yview_moveto(scroll_position)
         event, values = window.read()
 
         if event == sg.WINDOW_CLOSED or event is None:
@@ -141,6 +145,12 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
             return None
 
         if 'detail_' in event:
+            # obtém a posição atual da barra de rolagem para que a tela a ser criada
+            # posteriormente à atualização inicializar na mesma posição
+            scroll_position = window['-COL-'].Widget.canvas.yview()[0]
+
+            # prepara para informações necessárias para obtenção de lista com os
+            # valores contidos na linha selecionada
             table_n_columns = len(header)
             index = int(event.split('_')[1])
             start = index * table_n_columns
@@ -308,7 +318,7 @@ def update_table(window: sg.Window, header: list, table: list, n_errors: int or 
     # window.Element('-FRAME-').Update('Tabela de Resultados *', frame)
     window.close()
 
-    window = sg.Window('Tabela de Edição', layout)
+    window = sg.Window('Tabela de Edição', layout, finalize=True)
     return window
 
 

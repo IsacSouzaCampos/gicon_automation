@@ -4,7 +4,7 @@ from Model.invoice import Invoice
 from Model.excel_functions import upload_sheet_content
 from View.invoices_inspection import *
 import View.many_invoices_inspection as mii
-from Model.invoice_inspection_lib import *
+from Model.invoices_inspection_lib import *
 
 
 def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:

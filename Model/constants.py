@@ -39,8 +39,8 @@ CSRF_KEYWORDS = ['csrf4,65%', 'csrf4.65%', 'csrfr$',
 
                  'pcc4,65%', 'pcc4.65%', 'pccr$'
                        
-                 'piscofinscsll', 'piscofins', 'cofinscsll',
-                 'pis/confins/csll', 'pis/cofins', 'cofins/csll'
+                 'piscofins', 'cofinscsll',
+                 'pis/cofins', 'cofins/csll',
                        
                  'retencaocsrf', 'retencaodecsrf', 'retencoescsrf', 'recolhercsrf'
                  'retencaocrf', 'retencaodecrf', 'retencoescsr', 'recolhercrf',

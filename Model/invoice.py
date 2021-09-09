@@ -1,5 +1,6 @@
 import xml.etree.ElementTree
 from Model.constants import *
+from Model.invoices_inspection_lib import clear_string, extract_tax_value, extract_tax_from_percentage
 
 
 class Invoice:
@@ -47,7 +48,7 @@ class Invoice:
                 net_value -= tax
 
         net_value = round(net_value, 2)
-        service_nature = self.taken_service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld, self.service_type)
+        service_nature = self.service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld, self.service_type)
 
         row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_value, net_value, service_nature])
 
@@ -97,7 +98,7 @@ class Invoice:
             if tag in self.d and self.d[tag] is not None:
                 value = self.d[tag]
 
-                clean_value = self.clear_string(value)
+                clean_value = clear_string(value)
                 for ir_note in keywords:
                     if ir_note in clean_value:
                         return True
@@ -107,41 +108,6 @@ class Invoice:
     def is_canceled(self) -> bool:
         """Verifica se a nota foi cancelada"""
         return 'datacancelamento' in self.d and self.d['datacancelamento'] is not None
-
-    @staticmethod
-    def clear_string(s: str) -> str:
-        """Altera a string a ser analisada de maneira conveniente para a detecção de 
-        possíveis retenções"""
-        s = s.lower()
-
-        s = s.replace(' ', '')
-        # s = s.replace('(', '')
-        s = s.replace('=', '')
-        s = s.replace('-', '')
-        s = s.replace(':', '')
-        
-        s = s.replace('ç', 'c')
-        
-        s = s.replace('ã', 'a')
-        s = s.replace('õ', 'o')
-        
-        s = s.replace('á', 'a')
-        s = s.replace('é', 'e')
-        s = s.replace('í', 'i')
-        s = s.replace('ó', 'o')
-        s = s.replace('ú', 'u')
-
-        s = s.replace('â', 'a')
-        s = s.replace('ê', 'e')
-        s = s.replace('ó', 'o')
-
-        if s.count('leidatransparencia') > 1:
-            before = s[: s.find('leidatransparencia') + 1]
-            after = s[s.find('leidatransparencia') + len('leidatransparencia'): len(s)]
-            after = after[after.find('leidatransparencia') + len('leidatransparencia'): len(after)]
-            s = before + after
-
-        return s
 
     def get_xml_tags_dict(self) -> dict:
         """Retorna o dicionário referente as tags do xml e seus valores associados"""
@@ -181,27 +147,32 @@ class Invoice:
 
     def get_ir_value(self) -> float:
         """Retorna o valor do IR"""
-        ir_value = self.extract_tax_value(0)
-        return ir_value if ir_value else self.extract_tax_from_percentage(0)
+        ir_value = extract_tax_value(self.d, 0)
+        if not ir_value:
+            print('entrou aqui')
+            return TAX_EXTRACTION_ERROR
+        return ir_value if ir_value else extract_tax_from_percentage(self.d, float(self.get_gross_value()), 0)
 
     def get_csrf_value(self) -> float:
         """Retorna o valor do CSRF"""
-        pis_value = self.extract_tax_value(1)
+        gross_value = self.get_gross_value()
+
+        pis_value = extract_tax_value(self.d, 1)
         if not pis_value:
-            pis_value = self.extract_tax_from_percentage(1)
+            pis_value = extract_tax_from_percentage(self.d, float(gross_value), 1)
 
-        cofins_value = self.extract_tax_value(2)
+        cofins_value = extract_tax_value(self.d, 2)
         if not cofins_value:
-            cofins_value = self.extract_tax_from_percentage(2)
+            cofins_value = extract_tax_from_percentage(self.d, float(gross_value), 2)
 
-        csll_value = self.extract_tax_value(3)
+        csll_value = extract_tax_value(self.d, 3)
         if not csll_value:
-            csll_value = self.extract_tax_from_percentage(3)
+            csll_value = extract_tax_from_percentage(self.d, float(gross_value), 3)
 
         if not pis_value + cofins_value + csll_value:
-            csrf_value = self.extract_tax_value(4)
+            csrf_value = extract_tax_value(self.d, 4)
             if not csrf_value:
-                self.extract_tax_from_percentage(4)
+                extract_tax_from_percentage(self.d, float(gross_value), 4)
 
             # retorna erro se CSRF for zero pois para o método ter sido chamado significa que
             # foi detectada retenção desse imposto anteriormente
@@ -214,121 +185,14 @@ class Invoice:
 
         return round(pis_value + cofins_value + csll_value, 2)
 
-    def extract_tax_value(self, tax_type: int) -> float:
-        """Encontra e extrai o valor do imposto federal solicitado"""
-
-        # 0 = IR / 1 = PIS / 2 = COFINS / 3 = CSLL / 4 = CSRF
-        keywords = ALL_KEYWORDS[tax_type]
-
-        for tag in ['descricaoservico', 'dadosadicionais']:
-            if tag in self.d and self.d[tag] is not None:
-                value = self.d[tag]
-
-                clean_value = self.clear_string(value)
-                for tax_kw in keywords:
-                    if tax_kw in clean_value or ('retencao' + tax_kw) in clean_value:
-                        splitted_string = clean_value.split(tax_kw)
-
-                        for s in splitted_string[1:]:
-                            # aux serve para que o algoritmo saiba quando o valor realmente começou a ser lido
-                            aux = False
-                            tax_value = str()
-
-                            i = 0
-                            while i < len(s):
-                                c = s[i]
-                                if (i + 1) >= len(s):
-                                    # não encontrou valor referente ao imposto em análise
-                                    if c.isnumeric():
-                                        tax_value += c
-                                    if not tax_value:
-                                        return 0
-                                    return self.convert_s_tax_value_to_float(tax_value)
-
-                                next_c = s[i + 1]
-                                if c.isnumeric() or c in [',', '.']:
-                                    tax_value += c
-
-                                    # reinicia a variável tax_value caso o valor extraído até aqui tenha
-                                    # sido o de porcentagem da cobrança
-                                    if next_c == '%':
-                                        tax_value = ''
-                                        aux = False
-                                        i += 1
-                                        continue
-
-                                    if not next_c.isnumeric() and next_c not in [',', '.'] and aux:
-                                        return self.convert_s_tax_value_to_float(tax_value)
-
-                                if next_c.isnumeric() and not aux:
-                                    aux = True
-                                i += 1
-        return 0
-
-    def extract_tax_from_percentage(self, tax_type: int) -> float:
-        """Encontra e extrai o valor do imposto federal solicitado com base no seu percentual"""
-
-        # 0 = IR / 1 = PIS / 2 = COFINS / 3 = CSLL / 4 = CSRF
-        keywords = ALL_KEYWORDS[tax_type]
-
-        for tag in ['descricaoservico', 'dadosadicionais']:
-            if tag in self.d and self.d[tag] is not None:
-                value = self.d[tag]
-
-                clean_value = self.clear_string(value)
-                for tax_kw in keywords:
-                    if tax_kw in clean_value:
-                        splitted_string = clean_value.split(tax_kw)
-
-                        for s in splitted_string[1:]:
-                            tax_value = str()
-
-                            i = 0
-                            s_len = len(s)
-                            while i < s_len:
-                                c = s[i]
-                                if (i + 1) >= s_len and c != '%':
-                                    break
-
-                                next_c = s[i + 1]
-                                if c.isnumeric() or c in [',', '.']:
-                                    tax_value += c
-
-                                    # reinicia a variável tax_value caso o valor extraído até aqui tenha
-                                    # sido o de porcentagem da cobrança
-                                    if next_c == '%':
-                                        percentage = tax_value
-                                        percentage = self.convert_s_tax_value_to_float(percentage)
-                                        gross_value = float(self.get_gross_value())
-                                        tax_value = round(float((percentage / 100) * gross_value), 2)
-
-                                        return tax_value
-
-                                i += 1
-
-        return 0
-
-    @staticmethod
-    def convert_s_tax_value_to_float(tax_value: str) -> float:
-        """Converte a string tax_value extraída da nota para o formato float"""
-        if not tax_value[-1].isnumeric():
-            tax_value = tax_value[:-1]
-        if not tax_value[0].isnumeric():
-            tax_value = tax_value[1:]
-
-        dot = tax_value.find('.')
-        comma = tax_value.find(',')
-        if dot > 0 and comma > 0:
-            if dot < comma:
-                return round(float(tax_value.replace('.', '').replace(',', '.')), 2)
-        else:
-            return round(float(tax_value.replace(',', '.')), 2)
-
-    def taken_service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool,
-                             service_type: int) -> int:
+    def service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool,
+                       service_type: int) -> int:
         """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
            CFPS fornecido na nota"""
 
+        # service_type: 0 - prestado / 1 - tomado
+        # o prestado é temporário, enquanto não se acha uma solução para detectar a natureza exata para este
+        # caso. Esta solução temporária gera resultados errados e serve apenas para testes.
         cfps = self.d['cfps'] + '3' if service_type else self.d['cfps'] + '0'
 
         if iss_withheld and is_ir_withheld and is_csrf_withheld:
