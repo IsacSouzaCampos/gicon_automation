@@ -33,6 +33,7 @@ def main_gui() -> tuple:
 
         if event == sg.WINDOW_CLOSED or event == 'Cancelar':
             window.close()
+            from sys import exit  # para não gerar erro no executável
             exit()
 
         if event == 'Conferir':
@@ -103,12 +104,14 @@ def update_loading_window(window: sg.Window, invoice_number: str, progress: int,
 def editable_table(table: list, n_errors: int = None) -> list or None:
     """Cria tabela de resultados editável."""
     header = ['Nº nota', 'Emissão', 'Valor Bruto', 'ISS', 'IR', 'CSRF', 'Valor Líquido', 'Natureza']
+    n_columns = len(header)
+
     table_header = [sg.Text(header[0], pad=(35, 0)), sg.Text(header[1], pad=(25, 0)),
                     sg.Text(header[2], pad=(25, 0)), sg.Text(header[3], pad=(35, 0)),
                     sg.Text(header[4], pad=(52, 0)), sg.Text(header[5], pad=(30, 0)),
                     sg.Text(header[6], pad=(20, 0)), sg.Text(header[7], pad=(20, 0))]
 
-    input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for i, v in enumerate(row[:8])] +
+    input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for j, v in enumerate(row[:8])] +
                   [sg.Button('...', pad=(0, 0), key=f'detail_{i}')] for i, row in enumerate(table)]
 
     frame = [
@@ -151,10 +154,9 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
 
             # prepara para informações necessárias para obtenção de lista com os
             # valores contidos na linha selecionada
-            table_n_columns = len(header)
             index = int(event.split('_')[1])
-            start = index * table_n_columns
-            end = start + table_n_columns
+            start = index * n_columns
+            end = start + n_columns
 
             row = [values[i] for i in range(start, end)]
             # complementa com os dados que estão na tabela e não são mostrados na tabela editável
@@ -168,9 +170,12 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
             new_table = service_details(new_table, header, row, index)
             if new_table:
                 table = new_table
-                window = update_table(window, header, table, n_errors)
+                update_table(window, table[index], range(start, end))
 
         if event == '-ERRORS-':
+            if not n_errors:  # não faz nada caso não haja erros
+                continue
+
             errors_indexes = [i for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
             errors_table = [row for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
             resulting_table = editable_table(errors_table)
@@ -182,14 +187,22 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
             i = 0
             for index, row in enumerate(table):
                 if index in errors_indexes:
+                    row = resulting_table[i]
+
+                    start = index * n_columns
+                    end = start + n_columns
+                    r = range(start, end)
+
+                    update_table(window, row, r)
                     new_table.append(resulting_table[i])
                     i += 1
                 else:
                     new_table.append(row)
             table = new_table
-            print('len row3:', len(table[0]))
+
+            # atualiza o número de erros
             n_errors = number_of_errors(table)
-            window = update_table(window, header, table, n_errors)
+            window.Element('-ERRORS-').Update(f'{n_errors} {ERROR_LINK_TEXT}')
 
         if event == 'Atualizar':
             break
@@ -282,44 +295,9 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
     return table
 
 
-def update_table(window: sg.Window, header: list, table: list, n_errors: int or None) -> sg.Window:
-    """Cria nova tabela da GUI com os valores atualizados."""
-
-    # Por enquanto a tela de edição está sendo recriada ao invés de apenas atualizados os valores
-    # modificados. O ideal é corrigir isso assim que a solução for encontrada.
-
-    table_header = [sg.Text(header[0], pad=(35, 0)), sg.Text(header[1], pad=(25, 0)),
-                    sg.Text(header[2], pad=(25, 0)), sg.Text(header[3], pad=(35, 0)),
-                    sg.Text(header[4], pad=(52, 0)), sg.Text(header[5], pad=(30, 0)),
-                    sg.Text(header[6], pad=(20, 0)), sg.Text(header[7], pad=(20, 0))]
-
-    input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for i, v in enumerate(row[:8])] +
-                  [sg.Button('...', pad=(0, 0), key=f'detail_{i}')] for i, row in enumerate(table)]
-
-    frame = [
-        table_header,
-        [sg.Column(input_rows, size=(900, 200), scrollable=True, key='-COL-')]
-    ]
-
-    errors_link = []
-    if n_errors is not None:
-        errors_link = [sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
-                       if n_errors > 0 else sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', key='-ERRORS-')]
-
-    button = [sg.Button('Atualizar', size=(10, 1))] if n_errors is None else [sg.Button('Lançar', size=(10, 1))]
-
-    layout = [
-        [sg.Frame('Tabela de Resultados', frame, key='-FRAME-')],
-        errors_link,
-        [sg.Text()],
-        button
-    ]
-
-    # window.Element('-FRAME-').Update('Tabela de Resultados *', frame)
-    window.close()
-
-    window = sg.Window('Tabela de Edição', layout, finalize=True)
-    return window
+def update_table(window: sg.Window, row: list, r: range) -> None:
+    """Atualiza uma determinada linha na tabela da GUI."""
+    [window.Element(n).Update(row[i]) for i, n in enumerate(r)]
 
 
 def set_row_types(header: list, row: list) -> list:
@@ -347,6 +325,5 @@ def set_row_types(header: list, row: list) -> list:
 
 def get_table_values(values: dict, n_rows: int, n_columns: int) -> list:
     """Retorna o uma lista com os valores contidos atualmente na tabela editável."""
-
     table = [[values[(j * n_columns) + i] for i in range(n_columns)] for j in range(n_rows)]
     return table

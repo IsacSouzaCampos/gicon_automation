@@ -6,10 +6,6 @@ from Model.invoices_inspection_lib import clear_string, extract_tax_value, extra
 class Invoice:
 
     def __init__(self, folder: str, file: str, service_type: int):
-        # self.folder = folder
-        # self.file = file
-        # self.file_path = f'{XML_DIR}\\{file}'
-
         self.service_type = service_type  # 0: prestado / 1: tomado
         self.file_path = f'{folder}\\{file}'
         self.d = self.get_xml_tags_dict()
@@ -29,6 +25,8 @@ class Invoice:
         is_ir_withheld = self.is_fed_tax_withheld(0)
         try:
             ir_value = self.get_ir_value() if is_ir_withheld else ''
+            if ir_value != '' and ir_value < 0:
+                ir_value = TAX_EXTRACTION_ERROR
         except Exception as e:
             print(self.d['numeroserie'], e)
             ir_value = TAX_EXTRACTION_ERROR
@@ -99,8 +97,8 @@ class Invoice:
                 value = self.d[tag]
 
                 clean_value = clear_string(value)
-                for ir_note in keywords:
-                    if ir_note in clean_value:
+                for kw in keywords:
+                    if kw in clean_value:
                         return True
         
         return False
@@ -148,9 +146,8 @@ class Invoice:
     def get_ir_value(self) -> float:
         """Retorna o valor do IR"""
         ir_value = extract_tax_value(self.d, 0)
-        if not ir_value:
-            print('entrou aqui')
-            return TAX_EXTRACTION_ERROR
+        # if not ir_value:
+        #     return TAX_EXTRACTION_ERROR
         return ir_value if ir_value else extract_tax_from_percentage(self.d, float(self.get_gross_value()), 0)
 
     def get_csrf_value(self) -> float:

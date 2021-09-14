@@ -79,7 +79,7 @@ def extract_tax_value(d: dict, tax_type: int) -> float:
 
             clean_value = clear_string(value)
             for tax_kw in keywords:
-                if tax_kw in clean_value or ('retencao' + tax_kw) in clean_value:
+                if tax_kw in clean_value:
                     splitted_string = clean_value.split(tax_kw)
 
                     for s in splitted_string[1:]:
