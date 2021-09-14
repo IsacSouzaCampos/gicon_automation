@@ -1,0 +1,180 @@
+<?xml version="1.0" encoding="UTF-8"?><xmlNfpse>
+    <numeroAEDF>506112</numeroAEDF>
+    <numeroSerie>45224</numeroSerie>
+    <codigoVerificacao>41CCA50D815E0DBC</codigoVerificacao>
+    <dataEmissao>2021-09-01T00:00:00-03:00</dataEmissao>
+    <dataProcessamento>2021-09-01T10:14:19.084-03:00</dataProcessamento>
+    <cfps>9201</cfps>
+    <statusNFPSe>0</statusNFPSe>
+    <baseCalculo>7276.70</baseCalculo>
+    <valorISSQN>145.53</valorISSQN>
+    <valorTotalServicos>7276.70</valorTotalServicos>
+    <dadosAdicionais>VALOR APROX. TRIBUTOS FEDERAL - R$ 978,72 (13,45%) ESTADUAL - R$ 0,00 (0,00%) MUNICIPAL - R$ 240,86 (0,03%), COM BASE NA LEI N 12.741/2012 E NO DECRETO 8.264/2014 - FONTE:IBPT - IR 1,50% = R$ 109,15 Retencao CRF 4,65% = R$ 338,37 VL Liquido = R$ 6.829,18</dadosAdicionais>
+    <cnpjPrestador>80750714000156</cnpjPrestador>
+    <inscricaoMunicipalPrestador>0652512</inscricaoMunicipalPrestador>
+    <razaoSocialPrestador>MANAGER CONSULTORIA EM INFORMATICA - EIRELI</razaoSocialPrestador>
+    <logradouroPrestador>RUA  PATRICIO FARIAS, 55, SALAS 307 A 311</logradouroPrestador>
+    <bairroPrestador>ITACORUBI</bairroPrestador>
+    <nomeMunicipioPrestador>FLORIANOPOLIS</nomeMunicipioPrestador>
+    <codigoPostalPrestador>88034132</codigoPostalPrestador>
+    <ufPrestador>SC</ufPrestador>
+    <emailPrestador>leandro@managersystems.com.br</emailPrestador>
+    <telefonePrestador>4821084000</telefonePrestador>
+    <identificacaoTomador>01623561000100</identificacaoTomador>
+    <razaoSocialTomador>Clinica Cardiosport de Prevencao e Reabilitacao S/C Ltda.</razaoSocialTomador>
+    <logradouroTomador>Rua Crispim Mira</logradouroTomador>
+    <numeroEnderecoTomador>458</numeroEnderecoTomador>
+    <bairroTomador>Centro</bairroTomador>
+    <codigoMunicipioTomador>4205407</codigoMunicipioTomador>
+    <codigoPostalTomador>88020540</codigoPostalTomador>
+    <ufTomador>SC</ufTomador>
+    <paisTomador>1058</paisTomador>
+    <emailTomador>financeiro@cardiosport.com.br,contas@cardiosport.com.br;nfse@mngs.com.br,nfse@mngs.com.br</emailTomador>
+    <itensServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>1757.50</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Servico de Confirmacao Individual</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>1757.50</valorTotal>
+            <valorUnitario>1757.50</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>964.53</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Mensalidade LAN</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>964.53</valorTotal>
+            <valorUnitario>964.53</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>318.96</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Mensalidade Agendamento online</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>318.96</valorTotal>
+            <valorUnitario>318.96</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>387.55</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Mensalidade Locacao Agiliza</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>387.55</valorTotal>
+            <valorUnitario>387.55</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>169.48</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Mensalidade Locacao Software NFS-E</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>169.48</valorTotal>
+            <valorUnitario>169.48</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>1025.61</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Mensalidade Contrato Manutencao PACS</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>1025.61</valorTotal>
+            <valorUnitario>1025.61</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>752.10</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Mensalidade Locacao Libera Laudo</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>752.10</valorTotal>
+            <valorUnitario>752.10</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>1611.83</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Mensalidade Contrato de Manutencao</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>1611.83</valorTotal>
+            <valorUnitario>1611.83</valorUnitario>
+        </itemServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>289.14</baseCalculo>
+            <codigoCNAE>6209100</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>SUPORTE TECNICO, MANUTENCAO E OUTROS SERVICOS EM TECNOLOGIA DA INFORMACAO</descricaoCNAE>
+            <descricaoServico>Integracao BI Data de Vencimento:25/09/2021</descricaoServico>
+            <idCNAE>11544</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>289.14</valorTotal>
+            <valorUnitario>289.14</valorUnitario>
+        </itemServico>
+    </itensServico>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="Sign-1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="RefSignProp-1" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SigProperties-1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>ual2G47Or6slrwcqklHXUYyWfpFqFdXmZDFB2Lyq+YQ=</ds:DigestValue></ds:Reference><ds:Reference Id="RefElement-1" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/TR/1999/REC-xpath-19991116"><ds:XPath>not(ancestor-or-self::ds:Signature)</ds:XPath></ds:Transform><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>b41Hi2HSL+7MD12wWDPnHHuxs+GKF28lu5xICTBUbcA=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValueID-1">mbF30i0Mo8uTv+VF2yS+lEFp1Abt1kFZCP4QT3wY3aUoEfujyzISdfUgPcJ5LypwmdSWmGUKER82
+oly6KJHitY7UWnDEc60cu5iIpF392ecyid0sueUa3z2NUllyB6IXiZzL7PK5qtlbEA+XUdC8Czqx
+JzGceTbN7CaGhi6BQf2HYNavOSM4wrnjdkeoc3BXydVU8zDUS5O6Dcml1eqKgmEhr6DauZ55SKGZ
+2MQwbIKIwI9AaScczuyICFhoULOuD6Y9N02+hq9ARm3lksjspjS8sjZZcpU5cE4wOtSnEYooTNKB
+Syi4AFrpOV7CkzolGWoIDXoYBV9F80M5qqIBOQ==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509SubjectName>CN=MUNICIPIO DE FLORIANOPOLIS:82892282000143,OU=RFB e-CNPJ A1,OU=ARCIASC,OU=Secretaria da Receita Federal do Brasil - RFB,OU=83043745000165,OU=videoconferencia,O=ICP-Brasil,L=FLORIANOPOLIS,ST=SC,C=BR</ds:X509SubjectName><ds:X509Certificate>MIIHdDCCBVygAwIBAgINAMLRNL0jbgu7HoZmHjANBgkqhkiG9w0BAQsFADCBiTELMAkGA1UEBhMC
+QlIxEzARBgNVBAoMCklDUC1CcmFzaWwxNjA0BgNVBAsMLVNlY3JldGFyaWEgZGEgUmVjZWl0YSBG
+ZWRlcmFsIGRvIEJyYXNpbCAtIFJGQjEtMCsGA1UEAwwkQXV0b3JpZGFkZSBDZXJ0aWZpY2Fkb3Jh
+IFNFUlBST1JGQnY1MB4XDTIxMDgyNzE5MzczOVoXDTIyMDgyNzE5MzczOVowggERMQswCQYDVQQG
+EwJCUjELMAkGA1UECAwCU0MxFjAUBgNVBAcMDUZMT1JJQU5PUE9MSVMxEzARBgNVBAoMCklDUC1C
+cmFzaWwxGTAXBgNVBAsMEHZpZGVvY29uZmVyZW5jaWExFzAVBgNVBAsMDjgzMDQzNzQ1MDAwMTY1
+MTYwNAYDVQQLDC1TZWNyZXRhcmlhIGRhIFJlY2VpdGEgRmVkZXJhbCBkbyBCcmFzaWwgLSBSRkIx
+EDAOBgNVBAsMB0FSQ0lBU0MxFjAUBgNVBAsMDVJGQiBlLUNOUEogQTExMjAwBgNVBAMMKU1VTklD
+SVBJTyBERSBGTE9SSUFOT1BPTElTOjgyODkyMjgyMDAwMTQzMIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEAtXT4AcCvyiNvef4ZafSuUeGl2ejE8LQK27lTztImqI/nL5cOj0E777PVVRSY
+WZEoyyPLqMMVAfHptHyQF1j5kdrphB/YjyKoiyeyzOJs0E9/p0tZAOD/WpNjun33kIidR1zNeWzY
+VCvydfHqNdOGGpL4jL3ZcyEMAv9wKa8NwZBcJpzi9SVXQXsdpaUrTO8+sb6Oj/N9kYYBaVHGMuoA
+ZW0N6wBqupUArokEqnbvM6iV0nhuxGr15vPDtlTMrtGCoz+QQ44cZ5nQL9p4AXberv+Z2adNXrw4
+ZY0gtQh6fhIcNEQn0DAfKfp6nqj4BePXkZaXROzfzVIdGjWudP6KWQIDAQABo4ICTjCCAkowHwYD
+VR0jBBgwFoAUFIAtnX6aRcDxWz8Z1UCwby9l4OkwgYgGA1UdHwSBgDB+MDygOqA4hjZodHRwOi8v
+cmVwb3NpdG9yaW8uc2VycHJvLmdvdi5ici9sY3IvYWNzZXJwcm9yZmJ2NS5jcmwwPqA8oDqGOGh0
+dHA6Ly9jZXJ0aWZpY2Fkb3MyLnNlcnByby5nb3YuYnIvbGNyL2Fjc2VycHJvcmZidjUuY3JsMFYG
+CCsGAQUFBwEBBEowSDBGBggrBgEFBQcwAoY6aHR0cDovL3JlcG9zaXRvcmlvLnNlcnByby5nb3Yu
+YnIvY2FkZWlhcy9hY3NlcnByb3JmYnY1LnA3YjCBtwYDVR0RBIGvMIGsoDgGBWBMAQMEoC8ELTA5
+MTAxOTcyODIzMzQxOTY5OTEwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMKAgBgVgTAEDAqAXBBVH
+RUFOIE1BUlFVRVMgTE9VUkVJUk+gGQYFYEwBAwOgEAQOODI4OTIyODIwMDAxNDOgFwYFYEwBAweg
+DgQMMDAwMDAwMDAwMDAwgRpnZWFubG91cmVpcm9AcG1mLnNjLmdvdi5icjAOBgNVHQ8BAf8EBAMC
+BeAwHQYDVR0lBBYwFAYIKwYBBQUHAwQGCCsGAQUFBwMCMFsGA1UdIARUMFIwUAYGYEwBAgEKMEYw
+RAYIKwYBBQUHAgEWOGh0dHA6Ly9yZXBvc2l0b3Jpby5zZXJwcm8uZ292LmJyL2RvY3MvZHBjYWNz
+ZXJwcm9yZmIucGRmMA0GCSqGSIb3DQEBCwUAA4ICAQCyc/yyZ/bE1hOXjslkrmdY74lehrUo6+zH
+hIyhFzZ1ITIr1kU3CjKYztpiMnNa6Zg2+ZWjuiFXrvV2tN17+HX+Jv5NwPsV9afwso5+F9W24KF9
+JlI+7OeZiiLWEw1HPPt2YDJpskR+jQQ7sam+cOXyZm1zZJsb3wbbT2OANBINC8pkckt6S0mHyv/f
+riUhNjoBd3ZvrJQOm7oNjTAWuFWNr2gPBbS/6Xhv32bcl0amC2Xv4riy+YBaY6pnSzKb6tkHDcF0
+17AFhvPZY9Qpnsec3x5SE/YAbEGOp6+wrv5D8/kICgBQXw6HXMw7J6arG7Vc5kNtT+q9yXPEJKS4
+YZqNMJcj7IuEooxp7kpe3whlkTcOztnPGtdxPGC+jLBsPhqtJ75R9Jm90mlQB47Oyuf2FOiq1vH2
+QYkkbi8n9dWV4cQOlCm5nVY4EGYsyAXxXv+reLNBw1aRQFLkVcAzu6UTRInsVq+77ZqGl+OHMog7
+IQTsnC0rduE1eFzAcUuItoI6Bes6BCFk2xlawS/10B9d/i6hOPDT0446AnwlsCDMlhcq0BD28Up3
+mbTYXGKRTiQpqA/gNbRxxY208pelIPkrnoE/cthItFdxj7x2zMjv5v/unO0CDEb3QUU+UzoGDWMS
+OSadyXk3e84BiYLqyC/0+mglWQU+PsT3fvbsGK75rw==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties Id="QualProperties-1" Target="#Sign-1"><xades:SignedProperties Id="SigProperties-1"><xades:SignedSignatureProperties><xades:SigningTime>2021-09-01T10:14:19.414-03:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>AtKLiNj4+unI4AFPJxeKtMTHz6XH5joQy7+YUch+1gs=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=Autoridade Certificadora SERPRORFBv5,OU=Secretaria da Receita Federal do Brasil - RFB,O=ICP-Brasil,C=BR</ds:X509IssuerName><ds:X509SerialNumber>60293006453685130919842047518</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate><xades:SignaturePolicyIdentifier><xades:SignaturePolicyId><xades:SigPolicyId><xades:Identifier Qualifier="OIDAsURN">urn:oid:2.16.76.1.7.1.6.2.4</xades:Identifier></xades:SigPolicyId><xades:SigPolicyHash><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>V1oxev3+Z5tia7oVifHtePiXskTb6LP9K1QE2u1zoV4=</ds:DigestValue></xades:SigPolicyHash><xades:SigPolicyQualifiers><xades:SigPolicyQualifier><xades:SPURI>http://politicas.icpbrasil.gov.br/PA_AD_RB_v2_4.xml</xades:SPURI></xades:SigPolicyQualifier></xades:SigPolicyQualifiers></xades:SignaturePolicyId></xades:SignaturePolicyIdentifier></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#RefElement-1"><xades:MimeType>text/xml</xades:MimeType></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></xmlNfpse>
