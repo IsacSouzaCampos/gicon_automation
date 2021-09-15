@@ -27,8 +27,13 @@ def number_of_errors(table: list) -> int:
     """Retorna o número de conferências com erros."""
     n_errors = 0
     for row in table:
-        if '******' in row:
-            n_errors += 1
+        for value in row[2:7]:
+            try:
+                if value not in ['-', '']:
+                    float(value)
+            except Exception as e:
+                print(e)
+                n_errors += 1
     return n_errors
 
 
@@ -95,7 +100,7 @@ def extract_tax_value(d: dict, tax_type: int) -> float:
                                 if c.isnumeric():
                                     tax_value += c
                                 if not tax_value:
-                                    return 0
+                                    return -1
                                 return convert_s_tax_value_to_float(tax_value)
 
                             next_c = s[i + 1]
@@ -116,7 +121,7 @@ def extract_tax_value(d: dict, tax_type: int) -> float:
                             if next_c.isnumeric() and not aux:
                                 aux = True
                             i += 1
-    return 0
+    return -1
 
 
 def convert_s_tax_value_to_float(tax_value: str) -> float:
@@ -175,4 +180,4 @@ def extract_tax_from_percentage(d: dict, gross_value: float, tax_type: int) -> f
 
                             i += 1
 
-    return 0
+    return -1

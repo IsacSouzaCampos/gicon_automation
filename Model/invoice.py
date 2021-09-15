@@ -148,37 +148,43 @@ class Invoice:
         ir_value = extract_tax_value(self.d, 0)
         # if not ir_value:
         #     return TAX_EXTRACTION_ERROR
-        return ir_value if ir_value else extract_tax_from_percentage(self.d, float(self.get_gross_value()), 0)
+        return ir_value if ir_value > -1 else extract_tax_from_percentage(self.d, float(self.get_gross_value()), 0)
 
     def get_csrf_value(self) -> float:
         """Retorna o valor do CSRF"""
         gross_value = self.get_gross_value()
 
         pis_value = extract_tax_value(self.d, 1)
-        if not pis_value:
+        if pis_value < 0:
             pis_value = extract_tax_from_percentage(self.d, float(gross_value), 1)
 
         cofins_value = extract_tax_value(self.d, 2)
-        if not cofins_value:
+        if cofins_value < 0:
             cofins_value = extract_tax_from_percentage(self.d, float(gross_value), 2)
 
         csll_value = extract_tax_value(self.d, 3)
-        if not csll_value:
+        if csll_value < 0:
             csll_value = extract_tax_from_percentage(self.d, float(gross_value), 3)
 
-        if not pis_value + cofins_value + csll_value:
+        if pis_value < 0 and cofins_value < 0 and csll_value < 0:
             csrf_value = extract_tax_value(self.d, 4)
-            if not csrf_value:
-                extract_tax_from_percentage(self.d, float(gross_value), 4)
+            if csrf_value < 0:
+                csrf_value = extract_tax_from_percentage(self.d, float(gross_value), 4)
 
-            # retorna erro se CSRF for zero pois para o método ter sido chamado significa que
+            # retorna erro se CSRF for -1 pois para o método ter sido chamado significa que
             # foi detectada retenção desse imposto anteriormente
-            return -1 if csrf_value <= 0 else csrf_value
+            return -1 if csrf_value < 0 else csrf_value
 
-        if not pis_value or not cofins_value or not csll_value:
-            print(pis_value, cofins_value, csll_value)
-            print('Um ou mais impostos federais não puderam ser extraídos')
-            return -1
+        if pis_value < 0 or cofins_value < 0 or csll_value < 0:
+            csrf_value = extract_tax_value(self.d, 4)
+            if csrf_value < 0:
+                csrf_value = extract_tax_from_percentage(self.d, float(gross_value), 4)
+
+                # retorna erro se CSRF for -1 pois para o método ter sido chamado significa que
+                # foi detectada retenção desse imposto anteriormente
+                return -1 if csrf_value < 0 else round(csrf_value, 2)
+            else:
+                return round(csrf_value, 2)
 
         return round(pis_value + cofins_value + csll_value, 2)
 

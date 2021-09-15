@@ -43,7 +43,8 @@ def show_results_table(table_header: list, table: list, n_errors: int) -> list o
                 print(e)
         if event == 'Atualizar':
             row = [values[inputs_text_header[i]] for i in range(len(inputs_text_header))]
-            table = update_table(window, table, selected_row, row)
+            table, n_errors = update_table(window, table, selected_row, row)
+            window.Element('-ERRORS-').Update(f'{n_errors} {ERROR_LINK_TEXT}')
 
         if event == '-ERRORS-':
             if not n_errors:
@@ -87,7 +88,9 @@ def update_table(window: sg.Window, table: list, selected_row: int = None, row: 
         window.Element('-ERRORS-').Update(value=f'{n_errors} {ERROR_LINK_TEXT}')
         return table, n_errors
 
-    row = row[:2] + [row[i] if row[i] in ['', '-'] else round(float(row[i])) for i in range(2, 7)] + [int(row[7])]
+    row = row[:2] + [row[i] if row[i] in ['', '-'] else round(float(row[i].replace(',', '.')), 2)
+                     for i in range(2, 7)] + [int(row[7])]
     table = [table[i] if i != selected_row else row for i in range(len(table))]
     window.Element('table').Update(values=table)
+
     return table, number_of_errors(table)

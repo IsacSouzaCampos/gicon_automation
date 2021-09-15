@@ -66,7 +66,7 @@ def max_invoices_popup():
                  f'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
                  f'com uma interface gráfica mais simplificada?', size=(50, 5))],
 
-        [sg.Button(f'Criar subgrupos de {MAX_INVOICES} notas'), sg.Button('Conferir com interface simplificada')]
+        [sg.Button('Conferir com interface simplificada'), sg.Button(f'Criar subgrupos de {MAX_INVOICES} notas')]
     ]
 
     window = sg.Window('Limite de Notas Excedido', layout)
@@ -307,7 +307,7 @@ def set_row_types(header: list, row: list) -> list:
     float_values = list()
 
     for i in range(2, nature_pos):
-        r = row[i]
+        r = row[i].replace(',', '.')
         if r in ['-', '******']:
             float_values.append(r)
         elif not r:
