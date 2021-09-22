@@ -47,7 +47,16 @@ https://stackoverflow.com/questions/65811804/how-to-automatically-update-the-pys
 
 *******************************************************************************************************
 
+Automatizar gerenciamento do sistema nSQL (Questor)
+
+https://stackoverflow.com/questions/14288177/interact-with-other-programs-using-python
+
+*******************************************************************************************************
+
 Conectar código com servidor SQL:
+
+C:\nQuestor
+dentro do questor > Configurações > Configuração Sistema
 
 https://datatofish.com/how-to-connect-python-to-sql-server-using-pyodbc/
 https://docs.microsoft.com/pt-br/sql/connect/python/pyodbc/step-3-proof-of-concept-connecting-to-sql-using-pyodbc?view=sql-server-ver15
