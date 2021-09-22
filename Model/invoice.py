@@ -1,16 +1,17 @@
+# -*- coding: utf-8 -*-
 import xml.etree.ElementTree
 from Model.constants import *
-from Model.invoices_inspection_lib import clear_string, extract_tax_value, extract_tax_from_percentage
+from Model.inspection_lib import clear_string, extract_tax_value, extract_tax_from_percentage
 
 
 class Invoice:
 
-    def __init__(self, folder: str, file: str, service_type: int):
+    def __init__(self, folder, file_name, service_type):
         self.service_type = service_type  # 0: prestado / 1: tomado
-        self.file_path = f'{folder}\\{file}'
+        self.file_path = folder + '\\' + file_name
         self.d = self.get_xml_tags_dict()
 
-    def data_list(self) -> list:
+    def data_list(self):
         """Gera a linha com os dados de retencao referentes a nota contida no arquivo 
         invoice_file."""
 
@@ -50,8 +51,6 @@ class Invoice:
 
         row = list([number, issuance_date, gross_value, iss_value, ir_value, csrf_value, net_value, service_nature])
 
-        row.append(self.d['razaosocialprestador'])
-        row.append(self.d['razaosocialtomador'])
         if 'descricaoservico' in self.d and self.d['descricaoservico'] is not None:
             row.append(self.d['descricaoservico'])
         else:
@@ -61,13 +60,18 @@ class Invoice:
         else:
             row.append('')
 
+        row.append(self.d['cnpjprestador'])
+        row.append(self.d['razaosocialprestador'])
+        row.append(self.d['identificacaotomador'])
+        row.append(self.d['razaosocialtomador'])
+
         if self.is_canceled():
             row = row[:2] + ['-' for _ in range(len(row) - 2)]
             row.append('CANCELADA')
 
         return row
 
-    def iss_withheld(self) -> bool:
+    def iss_withheld(self):
         """Verifica se há retencao de ISS com base no CFPS e CST"""
 
         iss_withheld = False
@@ -80,11 +84,11 @@ class Invoice:
                 iss_withheld = True
 
         except Exception as e:
-            print(f'Erro: {e} - Arquivo: {self.file_path}')
+            print('Erro: ' + str(e) + ' - Arquivo: ' + self.file_path)
 
         return iss_withheld
 
-    def is_fed_tax_withheld(self, tax_type: int) -> bool:
+    def is_fed_tax_withheld(self, tax_type):
         """Verifica se há retenção de imposto federal com base em palavras chave"""
 
         if tax_type not in [0, 1]:  # 0 = IR / 1 = CSRF
@@ -103,11 +107,11 @@ class Invoice:
         
         return False
 
-    def is_canceled(self) -> bool:
+    def is_canceled(self):
         """Verifica se a nota foi cancelada"""
         return 'datacancelamento' in self.d and self.d['datacancelamento'] is not None
 
-    def get_xml_tags_dict(self) -> dict:
+    def get_xml_tags_dict(self):
         """Retorna o dicionário referente as tags do xml e seus valores associados"""
         tree = xml.etree.ElementTree.parse(self.file_path)
         root = tree.getroot()
@@ -122,36 +126,37 @@ class Invoice:
         """Retorna o número da nota"""
         return self.d['numeroserie']
 
-    def get_taker_business_name(self) -> str:
+    def get_taker_business_name(self):
         """Retorna a razão social do tomador do serviço"""
         return self.d['razaosocialtomador']
 
-    def get_provider_business_name(self) -> str:
+    def get_provider_business_name(self):
         """Retorna a razão social do prestador do serviço"""
         return self.d['razaosocialprestador']
 
-    def get_issuance_date(self) -> str:
+    def get_issuance_date(self):
         """Retorna a data de emissão no formato nacional de datas"""
         issuance_date = self.d['dataemissao'][:10].split('-')
-        return f'{issuance_date[2]}/{issuance_date[1]}/{issuance_date[0]}'
+        return issuance_date[2] + '/' + issuance_date[1] + '/' + issuance_date[0]
 
-    def get_gross_value(self) -> float:
+    def get_gross_value(self):
         """Retorna o valor bruto do serviço"""
         return float(self.d['valortotalservicos'])
 
-    def get_iss_value(self) -> float:
+    def get_iss_value(self):
         """Retorna o valor do ISS"""
         return float(self.d['valorissqn'])
 
-    def get_ir_value(self) -> float:
+    def get_ir_value(self):
         """Retorna o valor do IR"""
         ir_value = extract_tax_value(self.d, 0)
         # if not ir_value:
         #     return TAX_EXTRACTION_ERROR
         return ir_value if ir_value > -1 else extract_tax_from_percentage(self.d, float(self.get_gross_value()), 0)
 
-    def get_csrf_value(self) -> float:
-        """Retorna o valor do CSRF"""
+    def get_csrf_value(self):
+        """Retorna o valor do CSRF."""
+
         gross_value = self.get_gross_value()
 
         pis_value = extract_tax_value(self.d, 1)
@@ -188,8 +193,7 @@ class Invoice:
 
         return round(pis_value + cofins_value + csll_value, 2)
 
-    def service_nature(self, iss_withheld: bool, is_ir_withheld: bool, is_csrf_withheld: bool,
-                       service_type: int) -> int:
+    def service_nature(self, iss_withheld, is_ir_withheld, is_csrf_withheld, service_type):
         """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
            CFPS fornecido na nota"""
 

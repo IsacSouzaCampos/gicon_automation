@@ -1,12 +1,18 @@
+# -*- coding: utf-8 -*-
 import PySimpleGUI as sg
 from Model.constants import MAX_INVOICES, ERROR_LINK_TEXT, TAX_EXTRACTION_ERROR
-from Model.invoices_inspection_lib import number_of_errors
+from Model.inspection_lib import number_of_errors
 import os
 
 
-def main_gui() -> tuple:
-    """Gera interface onde será informado o tipo do serviço (tomado, prestado) e a
-       localização da pasta que contém os arquivos XML a serem conferidos."""
+def main_gui():
+    """
+    Gera interface onde será informado o tipo do serviço (tomado, prestado) e a
+    localização da pasta que contém os arquivos XML a serem conferidos.
+
+    :return: Tupla contendo o nome da pasta escolhida, arquivos xml nela contidos e o tipo de serviço selecionado.
+    :rtype:  (tuple)
+    """
 
     sg.theme('default1')
 
@@ -41,15 +47,17 @@ def main_gui() -> tuple:
                 sg.popup('Selecione uma pasta para a conferência!')
                 continue
             if values[0]:
-                service_type = 0
-                folder_name = values['Selecionar Pasta'] or '.'
-                xml_file_names = [file for file in os.listdir(folder_name) if '.xml' in file]
-                break
+                # service_type = 0
+                # folder_name = values['Selecionar Pasta'] or '.'
+                # xml_file_names = [f for f in os.listdir(folder_name) if '.xml' in f]
+                sg.popup('A conferência deste tipo de serviço ainda está em desenvolvimento.')
+                continue
+                # break
             elif values[1]:
                 # se a pasta não foi selecionada use a pasta atual `.`
                 service_type = 1
                 folder_name = values['Selecionar Pasta'] or '.'
-                xml_file_names = [file for file in os.listdir(folder_name) if '.xml' in file]
+                xml_file_names = [f for f in os.listdir(folder_name) if '.xml' in f]
                 break
             else:
                 sg.popup('Selecione o tipo de conferência a ser feita!')
@@ -59,21 +67,26 @@ def main_gui() -> tuple:
 
 
 def max_invoices_popup():
-    """Popup de aviso de limite de notas excedido."""
-    layout = [
-        [sg.Text(f'Número limite de notas excedido ({MAX_INVOICES}). Com um número assim, a edição das'
-                 f' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
-                 f'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
-                 f'com uma interface gráfica mais simplificada?', size=(50, 5))],
+    """
+    Popup de aviso de limite de notas excedido.
 
-        [sg.Button('Conferir com interface simplificada'), sg.Button(f'Criar subgrupos de {MAX_INVOICES} notas')]
+    :return: Valor referente à opçõa escolhida pelo usuário no tratamento do caso.
+    :rtype:  (int)
+    """
+    layout = [
+        [sg.Text('Número limite de notas excedido (' + MAX_INVOICES + '). Com um número assim, a edição das'
+                 ' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
+                 'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
+                 'com uma interface gráfica mais simplificada?', size=(50, 5))],
+
+        [sg.Button('Conferir com interface simplificada'), sg.Button('Criar subgrupos de ' + MAX_INVOICES + ' notas')]
     ]
 
     window = sg.Window('Limite de Notas Excedido', layout)
     event, values = window.read()
     window.close()
 
-    if event == f'Criar subgrupos de {MAX_INVOICES} notas':
+    if event == 'Criar subgrupos de ' + MAX_INVOICES + ' notas':
         return 0
     elif event == 'Conferir com interface simplificada':
         return 1
@@ -81,8 +94,13 @@ def max_invoices_popup():
         return 2
 
 
-def start_inspection_loading_window() -> sg.Window:
-    """Inicializa a janela que mostrará o progresso da conferência"""
+def start_inspection_loading_window():
+    """
+    Inicializa a janela que mostrará o progresso da conferência
+
+    :return: Janela de carregamento das conferências.
+    :rtype:  (sg.Window)
+    """
 
     layout = [
         [sg.Text(key='text')],
@@ -95,14 +113,37 @@ def start_inspection_loading_window() -> sg.Window:
 
 
 def update_loading_window(window: sg.Window, invoice_number: str, progress: int, total_size: int) -> None:
-    """Atualiza a barra de progresso da conferência"""
+    """
+    Atualiza a barra de progresso da conferência.
 
-    window.Element('text').Update(f'Nota: {invoice_number}')
+    :param window:         Janela de carregamento a ser atualizada.
+    :type window:          (sg.Window)
+    :param invoice_number: Número da nota sendo conferida atualmente.
+    :type invoice_number:  (str)
+    :param progress:       Número da conferência sendo realizada.
+    :type progress:        (int)
+    :param total_size:     Número total de notas a serem conferidas.
+    :type total_size:      (int)
+    """
+
+    window.Element('text').Update('Nota: ' + invoice_number)
     window.Element('progress').UpdateBar(progress, total_size)
 
 
-def editable_table(table: list, n_errors: int = None) -> list or None:
-    """Cria tabela de resultados editável."""
+def editable_table(table: list, companies: list = None, n_errors: int = None) -> list or None:
+    """
+    Cria tabela de resultados editável.
+
+    :param table:     Tabela 2x2 contendo os dados das notas conferidas.
+    :type table:      (list)
+    :param companies: Empresa tomadora e prestadora do serviço.
+    :type companies:  (list)
+    :param n_errors:  Número de erros detectados pelo algoritmo.
+    :type n_errors:   (int)
+    :return:          Lista com o resultado da edição ou None se o botão de fechar janela for acionado.
+    :rtype:           (list or None)
+    """
+
     header = ['Nº nota', 'Emissão', 'Valor Bruto', 'ISS', 'IR', 'CSRF', 'Valor Líquido', 'Natureza']
     n_columns = len(header)
 
@@ -112,7 +153,7 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
                     sg.Text(header[6], pad=(20, 0)), sg.Text(header[7], pad=(20, 0))]
 
     input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for j, v in enumerate(row[:8])] +
-                  [sg.Button('...', pad=(0, 0), key=f'detail_{i}')] for i, row in enumerate(table)]
+                  [sg.Button('...', pad=(0, 0), key='detail_' + str(i))] for i, row in enumerate(table)]
 
     frame = [
         table_header,
@@ -121,26 +162,32 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
 
     errors_link = []
     if n_errors is not None:
-        errors_link = [sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
-                       if n_errors > 0 else sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', key='-ERRORS-')]
+        errors_link = [sg.Text(str(n_errors) + ' ' + ERROR_LINK_TEXT, text_color='blue', enable_events=True,
+                               key='-ERRORS-')
+                       if n_errors > 0 else sg.Text(str(n_errors) + ' ' + ERROR_LINK_TEXT, text_color='blue',
+                                                    key='-ERRORS-')]
 
     # o botão que aparece ao final da tela será escolhido de acordo com o valor de n_errors
     # Atualizar caso seja tela com erros apenas e lançar caso seja tela com todos os resultados
     button = [sg.Button('Atualizar', size=(10, 1))] if n_errors is None else [sg.Button('Lançar', size=(10, 1))]
 
+    # combo_text = 'Filtro por empresa: '
+    # combo_layout = [[sg.Text(combo_text), sg.Combo(companies, size=(45, 1), key='-COMBO-'), sg.Button('Filtrar')]]
+    # combo_column = [[sg.Column(combo_layout, size=(910, 40))]]
+
     layout = [
+        # implementar futuramente
+        # [sg.Text(combo_text), sg.Combo(companies, size=(45, 1), key='-COMBO-'), sg.Button('Filtrar')],
+        # [sg.Frame('Filtro', combo_column)],
         [sg.Frame('Tabela de Resultados', frame, key='-FRAME-')],
         errors_link,
         [sg.Text()],
         button
     ]
 
-    window = sg.Window('Tabela de Edição', layout, finalize=True)
+    window = sg.Window('Resultados da Conferênca', layout, finalize=True)
 
-    scroll_position = 0
     while True:
-        # inicia a tela de edição na posição 'scroll_position'
-        window['-COL-'].Widget.canvas.yview_moveto(scroll_position)
         event, values = window.read()
 
         if event == sg.WINDOW_CLOSED or event is None:
@@ -148,10 +195,6 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
             return None
 
         if 'detail_' in event:
-            # obtém a posição atual da barra de rolagem para que a tela a ser criada
-            # posteriormente à atualização inicializar na mesma posição
-            scroll_position = window['-COL-'].Widget.canvas.yview()[0]
-
             # prepara para informações necessárias para obtenção de lista com os
             # valores contidos na linha selecionada
             index = int(event.split('_')[1])
@@ -202,7 +245,7 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
 
             # atualiza o número de erros
             n_errors = number_of_errors(table)
-            window.Element('-ERRORS-').Update(f'{n_errors} {ERROR_LINK_TEXT}')
+            window.Element('-ERRORS-').Update(str(n_errors) + ' ' + ERROR_LINK_TEXT)
 
         if event == 'Atualizar':
             break
@@ -221,7 +264,20 @@ def editable_table(table: list, n_errors: int = None) -> list or None:
 
 
 def service_details(table: list, header: list, row: list, row_index: int) -> list or None:
-    """Mostra ao usuário detalhes referentes ao serviço que não aparecem em outras janelas."""
+    """
+    Mostra ao usuário detalhes referentes ao serviço que não aparecem em outras janelas.
+
+    :param table:     Tabela 2x2 contendo os dados das notas conferidas.
+    :type table:      (list)
+    :param header:    Cabeçalho dos dados a serem possivelmente editados.
+    :type header:     (list)
+    :param row:       Linha selecionada a ser mostrada na janela.
+    :type row:        (list)
+    :param row_index: Índice da linha selecionada (row).
+    :type row_index:  (int)
+    :return:          Linha selecionada com os valores atualizados.
+    :rtype:           (list or None)
+    """
 
     keys = ['invoice_n', 'date', 'gross_value', 'iss', 'ir', 'csrf', 'net_value', 'nature']
     input_size = (12, 1)
@@ -237,10 +293,10 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
 
     table_header = [sg.Text(h, size=header_size, justification='center') for h in header]
 
-    provider_name_layout = [[sg.Text(f'{row[8]}', size=(text_width, 1), text_color=txt_color)]]
-    taker_name_layout = [[sg.Text(f'{row[9]}', size=(text_width, 1), text_color=txt_color)]]
-    description_layout = [[sg.Text(row[10], size=(text_width, 7), text_color=txt_color)]]
-    additional_data_layout = [[sg.Text(row[11], size=(text_width, 7), text_color=txt_color)]]
+    provider_name_layout = [[sg.Text(row[11], size=(text_width, 1), text_color=txt_color)]]
+    taker_name_layout = [[sg.Text(row[13], size=(text_width, 1), text_color=txt_color)]]
+    description_layout = [[sg.Text(row[8], size=(text_width, 7), text_color=txt_color)]]
+    additional_data_layout = [[sg.Text(row[9], size=(text_width, 7), text_color=txt_color)]]
 
     provider_name_col = [[sg.Column(provider_name_layout)]]
     taker_name_col = [[sg.Column(taker_name_layout)]]
@@ -265,7 +321,7 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
         [sg.OK(key='ok_button', size=(12, 1))]
     ]
 
-    window = sg.Window(f'Nota: {row[0]}', layout)
+    window = sg.Window('Nota: ' + row[0], layout)
     event, values = window.read()
 
     if event == sg.WINDOW_CLOSED:
@@ -296,12 +352,32 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
 
 
 def update_table(window: sg.Window, row: list, r: range) -> None:
-    """Atualiza uma determinada linha na tabela da GUI."""
+    """
+    Atualiza uma determinada linha na tabela da GUI.
+
+    :param window: Janela a ser atualizada.
+    :type window:  (sg.Window)
+    :param row:    Valores da linha a ser atualizada.
+    :type row:     (list)
+    :param r:      Faixa de posições a serem atualizadas.
+    :type r:       (range)
+    """
+
     [window.Element(n).Update(row[i]) for i, n in enumerate(r)]
 
 
 def set_row_types(header: list, row: list) -> list:
-    """Corrige o tipo dos valores da linha."""
+    """
+    Corrige o tipo dos valores da linha.
+
+    :param header: Lista de títulos do cabeçalho da tabela mostrada ao usuário.
+    :type header:  (list)
+    :param row:    Linha contendo os valores a terem seus tipos settados.
+    :type row:     (list)
+    :return:       Linha dada como entrada com seus valores settados para o formato correto.
+    :rtype:        (list)
+    """
+
     # natureza está na posição 7
     nature_pos = header.index('Natureza')
     float_values = list()
@@ -324,6 +400,18 @@ def set_row_types(header: list, row: list) -> list:
 
 
 def get_table_values(values: dict, n_rows: int, n_columns: int) -> list:
-    """Retorna o uma lista com os valores contidos atualmente na tabela editável."""
+    """
+    Retorna o uma lista com os valores contidos atualmente na tabela editável.
+
+    :param values:    Números dos inputs da tabela editável e seus respectivos valores.
+    :type values:     (dict)
+    :param n_rows:    Número de linhas da tabela editável.
+    :type n_rows:     (int)
+    :param n_columns: Número de colunas da tabela editável.
+    :type n_columns:  (int)
+    :return:          Tabela com os valores extraídos da GUI da tabela editável.
+    :rtype:           (list)
+    """
+
     table = [[values[(j * n_columns) + i] for i in range(n_columns)] for j in range(n_rows)]
     return table

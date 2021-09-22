@@ -1,8 +1,8 @@
 import PySimpleGUI as sg
 from Model.constants import ERROR_LINK_TEXT, TAX_EXTRACTION_ERROR
 
-import View.invoices_inspection as inv_inspect
-from Model.invoices_inspection_lib import number_of_errors
+import View.inspection as inv_inspect
+from Model.inspection_lib import number_of_errors
 
 
 def show_results_table(table_header: list, table: list, n_errors: int) -> list or None:

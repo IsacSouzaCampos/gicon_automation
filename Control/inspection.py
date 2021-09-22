@@ -1,13 +1,14 @@
+# -*- coding: utf-8 -*-
 from openpyxl import Workbook
 from Model.constants import *
 from Model.invoice import Invoice
-from Model.excel_functions import upload_sheet_content
-from View.invoices_inspection import *
-import View.many_invoices_inspection as mii
-from Model.invoices_inspection_lib import *
+from Model.excel import upload_sheet_content
+from View.inspection import *
+import View.super_inspection as mii
+from Model.inspection_lib import *
 
 
-def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
+def inspect(folder, xml_files, service_type):
     """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
 
     invoices_amount_type = 0
@@ -43,14 +44,19 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
     loading_window = start_inspection_loading_window()
 
     # insere os dados de cada um dos arquivos xml a serem analisados
-    # import time
+    companies_cnpjs = list()
+    companies_names = list()
     for i in range(len(xml_files)):
         invoice_file = xml_files[i]
         invoice = Invoice(folder, invoice_file, service_type)
+        company_cnpj = invoice.d['cnpjprestador'] if service_type else invoice.d['identificacaotomador']
+        company_name = invoice.d['razaosocialprestador'] if service_type else invoice.d['razaosocialtomador']
+        if company_cnpj not in companies_cnpjs:
+            companies_names.append(company_name)
+            companies_cnpjs.append(company_cnpj)
         update_loading_window(loading_window, invoice.d['numeroserie'], i, len(xml_files))
         row = invoice.data_list()
         results.append(row)
-        # time.sleep(.05)
 
     loading_window.close()
 
@@ -59,7 +65,7 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
     if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
         results = mii.show_results_table(header, results, n_errors)
     else:
-        results = editable_table(results, n_errors)
+        results = editable_table(results, companies_names, n_errors)
 
     # retorna false caso a conferência tenha sido fechada sem lançamento
     if results is None:
@@ -83,7 +89,8 @@ def inspect_invoices(folder: str, xml_files: list, service_type: int) -> bool:
     upload_sheet_content(sheet1, xml_files)
 
     # salva o arquivo Excel
-    excel_file.save(f'{folder.split("/")[-1]}.xlsx')
+    # excel_file.save(f'{folder.split("/")[-1]}.xlsx')
+    excel_file.save(folder.split('/')[-1] + '.xlsx')
 
     # abre o arquivo Excel gerado
     # os.system(f'start excel.exe {folder.split("/")[-1]}.xlsx')
