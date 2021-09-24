@@ -1,19 +1,24 @@
-# import execnet
+import execnet
 import fdb
-import sys
+# import sys
+# import subprocess
 
 
 def main():
-    # call_python_version('2.7', 'GUI_examples.bd_connection', 'start_bd', '')
-    return start_bd(sys.argv[1])
+    call_python_version('2.7', 'GUI_examples.test', 'my_function', ['Hello', 'World'])
+    # return start_bd(sys.argv[1])
 
 
-# def call_python_version(version, module, function, argument_list):
-#     gw = execnet.makegateway("popen//python=python%s" % version)
-#     channel = gw.remote_exec("""from %s import %s as the_function channel.send(the_function(*channel.receive()))"""
-#                              % (module, function))
-#     channel.send(argument_list)
-#     return channel.receive()
+def call_python_version(version, module, function, argument_list):
+    gw = execnet.makegateway("popen//python=python%s" % version)
+    channel = gw.remote_exec("""from %s import %s as the_function channel.send(the_function(*channel.receive()))"""
+                             % (module, function))
+    channel.send(argument_list)
+    return channel.receive()
+
+
+def my_function(x, y):
+    return "%s %s!" % (x, y)
 
 
 def start_bd(command):
@@ -70,8 +75,11 @@ if __name__ == '__main__':
     #     cursor = cnxn.cursor()
     #
     #     # Sample select query
-    #     cursor.execute("select SEQ,CHAVELCTOFISENT,CODIGOPRODUTO from LCTOFISENTPRODUTO where codigoempresa = 116  " +
-    #                    "and CODIGOCFOP in (1403,2403) and datalctofis between '01.10.2019' and '31.10.2019';")
+
+    #    "select SEQ,CHAVELCTOFISENT,CODIGOPRODUTO from LCTOFISENTPRODUTO where codigoempresa = 116 and CODIGOCFOP in (1403,2403) and datalctofis between '01.10.2019' and '31.10.2019';"
+
+    #    cursor.execute("select SEQ,CHAVELCTOFISENT,CODIGOPRODUTO from LCTOFISENTPRODUTO where codigoempresa = 116  " +
+    #                   "and CODIGOCFOP in (1403,2403) and datalctofis between '01.10.2019' and '31.10.2019';")
     #     row = cursor.fetchone()
     #     while row:
     #         print(row)

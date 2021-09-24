@@ -8,8 +8,19 @@ import View.super_inspection as mii
 from Model.inspection_lib import *
 
 
-def inspect(folder, xml_files, service_type):
-    """Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota"""
+def inspect(folder: str, xml_files: list, service_type: int) -> bool:
+    """
+    Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota
+
+    :param folder:       Caminho da pasta que contém as notas a serem conferidas.
+    :type folder:        (str)
+    :param xml_files:    Nomes dos arquivos XML a serem conferidos.
+    :type xml_files:     (list)
+    :param service_type: Tipo de serviço das notas conferidas (tomado, prestado).
+    :type service_type:  (int)
+    :return:             Verdadeiro se houver êxito na conferência, caso contrário, False.
+    :rtype:              (bool)
+    """
 
     invoices_amount_type = 0
     # testa se o número de notas está dentro do limite de conferências por vez
@@ -23,19 +34,9 @@ def inspect(folder, xml_files, service_type):
         else:
             return False
 
-    # cria o arquivo Excel a ser editado
-    excel_file = Workbook()
-
-    # gera uma planilha (sheet1)
-    sheet1 = excel_file.active
-
-    # insere o cabeçalho da planilha
-    # 'Nº Nota', 'Data', 'Valor Bruto', 'Retenção ISS',
-    # 'Retenção IR', 'Retenção CSRF', 'Valor Líquido', 'Natureza'
+    # cabeçalho da planilha
     header = [COLUMN_TITLES[0], COLUMN_TITLES[1], COLUMN_TITLES[2], COLUMN_TITLES[3], COLUMN_TITLES[4],
               COLUMN_TITLES[5], COLUMN_TITLES[6], COLUMN_TITLES[7]]
-
-    sheet1.append(header)
 
     # lista que será passada como parâmetro para ser mostrada na tela pela GUI
     results = list()
@@ -43,18 +44,23 @@ def inspect(folder, xml_files, service_type):
     # inicia janela da barra de progresso da conferência
     loading_window = start_inspection_loading_window()
 
-    # insere os dados de cada um dos arquivos xml a serem analisados
+    # insere os dados de cada um dos arquivos xml a serem analisados em results
     companies_cnpjs = list()
     companies_names = list()
+    invoices = list()
     for i in range(len(xml_files)):
         invoice_file = xml_files[i]
         invoice = Invoice(folder, invoice_file, service_type)
-        company_cnpj = invoice.d['cnpjprestador'] if service_type else invoice.d['identificacaotomador']
-        company_name = invoice.d['razaosocialprestador'] if service_type else invoice.d['razaosocialtomador']
+        invoices.append(invoice)  # implementar esta lista no código ao invés da lista de dados anterior
+
+        # dados da empresa que está trocando serviço com o nosso cliente
+        company_cnpj = invoice.provider.cnpj if service_type else invoice.taker.cnpj
+        company_name = invoice.provider.name if service_type else invoice.taker.name
         if company_cnpj not in companies_cnpjs:
             companies_names.append(company_name)
             companies_cnpjs.append(company_cnpj)
-        update_loading_window(loading_window, invoice.d['numeroserie'], i, len(xml_files))
+
+        update_loading_window(loading_window, invoice.serial_number, i, len(xml_files))
         row = invoice.data_list()
         results.append(row)
 
@@ -72,8 +78,38 @@ def inspect(folder, xml_files, service_type):
         return False
 
     # volta à tela principal enquanto a tela de conferência for fechada sem lançamento
-    while results is None:
-        main_gui()
+    # while results is None:
+    #     main_gui()
+
+    xlsx_file_name = folder.split('/')[-1] + '.xlsx'
+    create_xlsx(header, results, xlsx_file_name, xml_files)
+
+    for invoice in invoices:
+        bd_insert(invoice)
+
+    return True
+
+
+def create_xlsx(header: list, results: list, file_name: str, xml_files: list) -> None:
+    """
+    Cria o arquivo XLSX com os dados extraídos da conferência.
+
+    :param header:    Cabeçalho da tabela de dados.
+    :type header:     (list)
+    :param results:   Dados extraídos da conferência.
+    :type results:    (list)
+    :param file_name: Nome do arquivo XLSX a ser criado.
+    :type file_name:  (str)
+    :param xml_files: Nomes dos arquivos XML que foram conferidos.
+    :type xml_files:  (list)
+    """
+    # cria o arquivo Excel a ser editado
+    excel_file = Workbook()
+
+    # gera uma planilha (sheet1)
+    sheet1 = excel_file.active
+
+    sheet1.append(header)
 
     # inserir na planilha os dados obtidos após confirmação de lançamento do usuário
     for row in results:
@@ -85,14 +121,17 @@ def inspect(folder, xml_files, service_type):
         else:
             row = row[:header.index('Natureza') + 1]
         sheet1.append(row)
-    
+
     upload_sheet_content(sheet1, xml_files)
 
     # salva o arquivo Excel
     # excel_file.save(f'{folder.split("/")[-1]}.xlsx')
-    excel_file.save(folder.split('/')[-1] + '.xlsx')
+    excel_file.save(file_name)
 
     # abre o arquivo Excel gerado
     # os.system(f'start excel.exe {folder.split("/")[-1]}.xlsx')
 
-    return True
+
+def bd_insert(invoice: Invoice) -> None:
+    # import Model.sql
+    pass

@@ -5,7 +5,7 @@ from Model.inspection_lib import number_of_errors
 import os
 
 
-def main_gui():
+def main_gui() -> tuple:
     """
     Gera interface onde será informado o tipo do serviço (tomado, prestado) e a
     localização da pasta que contém os arquivos XML a serem conferidos.
@@ -66,7 +66,7 @@ def main_gui():
     return folder_name, xml_file_names, service_type
 
 
-def max_invoices_popup():
+def max_invoices_popup() -> int:
     """
     Popup de aviso de limite de notas excedido.
 
@@ -74,19 +74,19 @@ def max_invoices_popup():
     :rtype:  (int)
     """
     layout = [
-        [sg.Text('Número limite de notas excedido (' + MAX_INVOICES + '). Com um número assim, a edição das'
+        [sg.Text(f'Número limite de notas excedido ({MAX_INVOICES}). Com um número assim, a edição das'
                  ' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
                  'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
                  'com uma interface gráfica mais simplificada?', size=(50, 5))],
 
-        [sg.Button('Conferir com interface simplificada'), sg.Button('Criar subgrupos de ' + MAX_INVOICES + ' notas')]
+        [sg.Button('Conferir com interface simplificada'), sg.Button('Criar subgrupos de {MAX_INVOICES} notas')]
     ]
 
     window = sg.Window('Limite de Notas Excedido', layout)
     event, values = window.read()
     window.close()
 
-    if event == 'Criar subgrupos de ' + MAX_INVOICES + ' notas':
+    if event == f'Criar subgrupos de {MAX_INVOICES} notas':
         return 0
     elif event == 'Conferir com interface simplificada':
         return 1
@@ -94,7 +94,7 @@ def max_invoices_popup():
         return 2
 
 
-def start_inspection_loading_window():
+def start_inspection_loading_window() -> sg.Window:
     """
     Inicializa a janela que mostrará o progresso da conferência
 
@@ -126,7 +126,7 @@ def update_loading_window(window: sg.Window, invoice_number: str, progress: int,
     :type total_size:      (int)
     """
 
-    window.Element('text').Update('Nota: ' + invoice_number)
+    window.Element('text').Update('Nota: ' + str(invoice_number))
     window.Element('progress').UpdateBar(progress, total_size)
 
 

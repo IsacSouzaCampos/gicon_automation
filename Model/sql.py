@@ -20,3 +20,8 @@ def run_command(command):
 
     except Exception as e:
         print(e)
+
+
+if __name__ == '__main__':
+    import sys
+    run_command(str(sys.argv[1]))
