@@ -55,6 +55,11 @@ https://stackoverflow.com/questions/14288177/interact-with-other-programs-using-
 
 Conectar código com servidor SQL:
 
+Criar arquivo com DataFrame em formato binário
+https://stackoverflow.com/questions/21910059/create-binary-file-in-python
+
+https://firebirdsql.org/file/documentation/drivers_documentation/python/fdb/usage-guide.html
+
 C:\nQuestor
 dentro do questor > Configurações > Configuração Sistema
 
