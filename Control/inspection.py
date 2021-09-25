@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 from openpyxl import Workbook
-from Model.constants import *
+import Model.constants as constants
 from Model.invoice import Invoice
 from Model.excel import upload_sheet_content
 from View.inspection import *
@@ -34,10 +34,6 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
         else:
             return False
 
-    # cabeçalho da planilha
-    header = [COLUMN_TITLES[0], COLUMN_TITLES[1], COLUMN_TITLES[2], COLUMN_TITLES[3], COLUMN_TITLES[4],
-              COLUMN_TITLES[5], COLUMN_TITLES[6], COLUMN_TITLES[7]]
-
     # lista que será passada como parâmetro para ser mostrada na tela pela GUI
     results = list()
 
@@ -49,8 +45,8 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     companies_names = list()
     invoices = list()
     for i in range(len(xml_files)):
-        invoice_file = xml_files[i]
-        invoice = Invoice(folder, invoice_file, service_type)
+        xml_file = xml_files[i]
+        invoice = Invoice(f'{folder}\\{xml_file}', service_type)
         invoices.append(invoice)  # implementar esta lista no código ao invés da lista de dados anterior
 
         # dados da empresa que está trocando serviço com o nosso cliente
@@ -61,17 +57,15 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
             companies_cnpjs.append(company_cnpj)
 
         update_loading_window(loading_window, invoice.serial_number, i, len(xml_files))
-        row = invoice.data_list()
-        results.append(row)
 
     loading_window.close()
 
-    n_errors = number_of_errors(results)
+    n_errors = number_of_errors(invoices)
 
     if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
-        results = mii.show_results_table(header, results, n_errors)
+        results = mii.show_results_table(invoices, n_errors)
     else:
-        results = editable_table(results, companies_names, n_errors)
+        results = editable_table(invoices, companies_names, n_errors)
 
     # retorna false caso a conferência tenha sido fechada sem lançamento
     if results is None:
@@ -82,7 +76,7 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     #     main_gui()
 
     xlsx_file_name = folder.split('/')[-1] + '.xlsx'
-    create_xlsx(header, results, xlsx_file_name, xml_files)
+    create_xlsx(constants.HEADER1, results, xlsx_file_name, xml_files)
 
     for invoice in invoices:
         bd_insert(invoice)

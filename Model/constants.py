@@ -6,8 +6,11 @@ ROOT_DIR = sys.path[0]
 MAX_INVOICES = 100
 TAX_EXTRACTION_ERROR = '******'
 
-COLUMN_TITLES = ['Nº Nota', 'Data', 'Valor Bruto', 'Retenção ISS',
+HEADER1 = ['Nº Nota', 'Data', 'Valor Bruto', 'Retenção ISS',
                  'Retenção IR', 'Retenção CSRF', 'Valor Líquido', 'Natureza']
+
+HEADER2 = ['Nº Nota', 'Data', 'Valor Bruto', 'ISS', 'IR',
+                          'CSRF', 'Valor Líquido', 'Natureza']
 
 ERROR_LINK_TEXT = 'erros detectados'
 

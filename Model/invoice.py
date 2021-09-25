@@ -7,9 +7,9 @@ from Model.inspection_lib import clear_string, extract_tax_value, extract_tax_fr
 
 class Invoice:
 
-    def __init__(self, folder, file_name, service_type):
+    def __init__(self, file_path, service_type):
         self.service_type = service_type  # 0: prestado / 1: tomado
-        self.file_path = folder + '\\' + file_name
+        self.file_path = file_path
 
         d = self.get_xml_tags_dict()
 

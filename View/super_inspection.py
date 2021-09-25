@@ -1,26 +1,29 @@
 import PySimpleGUI as sg
-from Model.constants import ERROR_LINK_TEXT, TAX_EXTRACTION_ERROR
-
+import Model.constants as const
 import View.inspection as inv_inspect
 from Model.inspection_lib import number_of_errors
 
 
-def show_results_table(table_header: list, table: list, n_errors: int) -> list or None:
+def show_results_table(invoices: list, n_errors: int) -> list or None:
     """Mostra tabela de resultados simplificada por conta do número grande de notas conferidas."""
-    inputs_text_header = ['Nº Nota', 'Data', 'Valor Bruto', 'ISS', 'IR',
-                          'CSRF', 'Valor Líquido', 'Natureza']
 
-    inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in inputs_text_header]
-    inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in inputs_text_header]
+    inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in const.HEADER2]
+    inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in const.HEADER2]
 
     inspection_data_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
     inspection_data_cols = [[sg.Column(inspection_data_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
 
-    errors_link = [sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
-                   if n_errors > 0 else sg.Text(f'{n_errors} {ERROR_LINK_TEXT}', text_color='blue', key='-ERRORS-')]
+    errors_link = [sg.Text(f'{n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
+                   if n_errors > 0 else sg.Text(f'{n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
+                                                key='-ERRORS-')]
+
+    table = list()
+    for invoice in invoices:
+        table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.iss_value,
+                      invoice.ir_value, invoice.csrf_value, invoice.net_value, invoice.service_nature])
 
     layout = [
-        [sg.Table(values=table, headings=table_header, selected_row_colors=('black', 'gray'), key='table')],
+        [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
         [sg.Button('Editar'), sg.Button('Atualizar')],
         inspection_data_cols,
         errors_link,
@@ -38,19 +41,19 @@ def show_results_table(table_header: list, table: list, n_errors: int) -> list o
         if event == 'Editar':
             try:
                 selected_row = values['table'][0]
-                edit_row(window, inputs_text_header, table[selected_row])
+                edit_row(window, const.HEADER2, table[selected_row])
             except Exception as e:
                 print(e)
         if event == 'Atualizar':
-            row = [values[inputs_text_header[i]] for i in range(len(inputs_text_header))]
+            row = [values[const.HEADER2[i]] for i in range(len(const.HEADER2))]
             table, n_errors = update_table(window, table, selected_row, row)
-            window.Element('-ERRORS-').Update(f'{n_errors} {ERROR_LINK_TEXT}')
+            window.Element('-ERRORS-').Update(f'{n_errors} {const.ERROR_LINK_TEXT}')
 
         if event == '-ERRORS-':
             if not n_errors:
                 continue
-            errors_indexes = [i for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
-            errors_table = [row for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
+            errors_indexes = [i for i, row in enumerate(table) if const.TAX_EXTRACTION_ERROR in row]
+            errors_table = [row for i, row in enumerate(table) if const.TAX_EXTRACTION_ERROR in row]
             resulting_table = inv_inspect.editable_table(errors_table)
 
             if resulting_table is None:
@@ -85,7 +88,7 @@ def update_table(window: sg.Window, table: list, selected_row: int = None, row: 
     if not selected_row:  # se selected_row = None, a atualização vem de outra tela
         window.Element('table').Update(values=table)
         n_errors = number_of_errors(table)
-        window.Element('-ERRORS-').Update(value=f'{n_errors} {ERROR_LINK_TEXT}')
+        window.Element('-ERRORS-').Update(value=f'{n_errors} {const.ERROR_LINK_TEXT}')
         return table, n_errors
 
     row = row[:2] + [row[i] if row[i] in ['', '-'] else round(float(row[i].replace(',', '.')), 2)
