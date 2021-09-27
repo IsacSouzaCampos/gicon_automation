@@ -1,11 +1,10 @@
-# -*- coding: utf-8 -*-
-from openpyxl import Workbook
 import Model.constants as constants
 from Model.invoice import Invoice
-from Model.excel import upload_sheet_content
+import Model.excel as excel
 from View.inspection import *
 import View.super_inspection as mii
 from Model.inspection_lib import *
+from Model.invoices_list import InvoicesList
 
 
 def inspect(folder: str, xml_files: list, service_type: int) -> bool:
@@ -43,11 +42,11 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     # insere os dados de cada um dos arquivos xml a serem analisados em results
     companies_cnpjs = list()
     companies_names = list()
-    invoices = list()
+    invoices = InvoicesList()
     for i in range(len(xml_files)):
         xml_file = xml_files[i]
         invoice = Invoice(f'{folder}\\{xml_file}', service_type)
-        invoices.append(invoice)  # implementar esta lista no código ao invés da lista de dados anterior
+        invoices.add_invoice(invoice)  # implementar esta lista no código ao invés da lista de dados anterior
 
         # dados da empresa que está trocando serviço com o nosso cliente
         company_cnpj = invoice.provider.cnpj if service_type else invoice.taker.cnpj
@@ -60,15 +59,16 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
 
     loading_window.close()
 
-    n_errors = number_of_errors(invoices)
+    n_errors = invoices.number_of_errors()
 
     if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
-        results = mii.show_results_table(invoices, n_errors)
+        # results = mii.show_results_table(invoices, n_errors)
+        print('Funcionalidade a ser atualizada!')
     else:
-        results = editable_table(invoices, companies_names, n_errors)
+        invoices = editable_table(invoices, companies_names, n_errors)
 
     # retorna false caso a conferência tenha sido fechada sem lançamento
-    if results is None:
+    if invoices.empty():
         return False
 
     # volta à tela principal enquanto a tela de conferência for fechada sem lançamento
@@ -76,54 +76,12 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     #     main_gui()
 
     xlsx_file_name = folder.split('/')[-1] + '.xlsx'
-    create_xlsx(constants.HEADER1, results, xlsx_file_name, xml_files)
+    excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
 
     for invoice in invoices:
         bd_insert(invoice)
 
     return True
-
-
-def create_xlsx(header: list, results: list, file_name: str, xml_files: list) -> None:
-    """
-    Cria o arquivo XLSX com os dados extraídos da conferência.
-
-    :param header:    Cabeçalho da tabela de dados.
-    :type header:     (list)
-    :param results:   Dados extraídos da conferência.
-    :type results:    (list)
-    :param file_name: Nome do arquivo XLSX a ser criado.
-    :type file_name:  (str)
-    :param xml_files: Nomes dos arquivos XML que foram conferidos.
-    :type xml_files:  (list)
-    """
-    # cria o arquivo Excel a ser editado
-    excel_file = Workbook()
-
-    # gera uma planilha (sheet1)
-    sheet1 = excel_file.active
-
-    sheet1.append(header)
-
-    # inserir na planilha os dados obtidos após confirmação de lançamento do usuário
-    for row in results:
-        # adiciona a célula 'CANCELADA' caso essa esteja na linha e limpa os valores dela para que
-        # não sejam somados ao valor total, senão copia só até a natureza
-        if 'CANCELADA' in row:
-            row = row[:header.index('Natureza') + 1]
-            row.append('CANCELADA')
-        else:
-            row = row[:header.index('Natureza') + 1]
-        sheet1.append(row)
-
-    upload_sheet_content(sheet1, xml_files)
-
-    # salva o arquivo Excel
-    # excel_file.save(f'{folder.split("/")[-1]}.xlsx')
-    excel_file.save(file_name)
-
-    # abre o arquivo Excel gerado
-    # os.system(f'start excel.exe {folder.split("/")[-1]}.xlsx')
 
 
 def bd_insert(invoice: Invoice) -> None:

@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import os
 from Model.constants import ALL_KEYWORDS
 
@@ -22,29 +21,6 @@ def separate_xml_files(folder, xml_files):
                 return
             xml_file = xml_files[pos]
             os.replace(folder + '/' + xml_file, new_folder + '/' + xml_file)
-
-
-def number_of_errors(invoices: list) -> int:
-    """
-    Retorna o número de conferências com erros.
-
-    :param invoices: Tabela de notas.
-    :type invoices:  (table)
-    :return:         Número de erros detectados.
-    :rtype:          (int)
-    """
-
-    n_errors = 0
-    for invoice in invoices:
-        values = [invoice.gross_value, invoice.iss_value, invoice.ir_value, invoice.csrf_value, invoice.net_value]
-        for value in values:
-            try:
-                if value not in ['-', '']:
-                    float(value)
-            except Exception as e:
-                print(e)
-                n_errors += 1
-    return n_errors
 
 
 def clear_string(s: str) -> str:

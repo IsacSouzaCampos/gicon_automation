@@ -47,7 +47,7 @@ class Invoice:
             self.csrf_value = TAX_EXTRACTION_ERROR
         self.csrf_percentage = self.tax_percentage(self.csrf_value) if type(self.csrf_value) == float else 0
 
-        print('IR(%):', self.ir_percentage, '- CSRF(%):', self.csrf_percentage)
+        # print('IR(%):', self.ir_percentage, '- CSRF(%):', self.csrf_percentage)
 
         self.net_value = self.gross_value
         for tax in [self.iss_value, self.ir_value, self.csrf_value]:

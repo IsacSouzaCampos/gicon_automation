@@ -1,7 +1,6 @@
-# -*- coding: utf-8 -*-
 import PySimpleGUI as sg
 from Model.constants import MAX_INVOICES, ERROR_LINK_TEXT, TAX_EXTRACTION_ERROR
-from Model.inspection_lib import number_of_errors
+from Model.invoices_list import InvoicesList
 import os
 
 
@@ -130,18 +129,18 @@ def update_loading_window(window: sg.Window, invoice_number: str, progress: int,
     window.Element('progress').UpdateBar(progress, total_size)
 
 
-def editable_table(table: list, companies: list = None, n_errors: int = None) -> list or None:
+def editable_table(invoices: InvoicesList, companies: list = None, n_errors: int = None) -> InvoicesList:
     """
     Cria tabela de resultados editável.
 
-    :param table:     Tabela 2x2 contendo os dados das notas conferidas.
-    :type table:      (list)
-    :param companies: Empresa tomadora e prestadora do serviço.
-    :type companies:  (list)
-    :param n_errors:  Número de erros detectados pelo algoritmo.
-    :type n_errors:   (int)
-    :return:          Lista com o resultado da edição ou None se o botão de fechar janela for acionado.
-    :rtype:           (list or None)
+    :param invoices:     Lista de notas.
+    :type invoices:      (InvoiceList)
+    :param companies:    Empresa tomadora e prestadora do serviço.
+    :type companies:     (list)
+    :param n_errors:     Número de erros detectados pelo algoritmo.
+    :type n_errors:      (int)
+    :return:             Lista com o resultado da edição ou None se o botão de fechar janela for acionado.
+    :rtype:              (list or None)
     """
 
     header = ['Nº nota', 'Emissão', 'Valor Bruto', 'ISS', 'IR', 'CSRF', 'Valor Líquido', 'Natureza']
@@ -151,6 +150,12 @@ def editable_table(table: list, companies: list = None, n_errors: int = None) ->
                     sg.Text(header[2], pad=(25, 0)), sg.Text(header[3], pad=(35, 0)),
                     sg.Text(header[4], pad=(52, 0)), sg.Text(header[5], pad=(30, 0)),
                     sg.Text(header[6], pad=(20, 0)), sg.Text(header[7], pad=(20, 0))]
+
+    # print('invoices type:', type(invoices.invoices[0]))
+    # input()
+    table = invoices.get_gui_table()
+    # print('invoices type:', type(invoices))
+    # input()
 
     input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for j, v in enumerate(row[:8])] +
                   [sg.Button('...', pad=(0, 0), key='detail_' + str(i))] for i, row in enumerate(table)]
@@ -192,7 +197,7 @@ def editable_table(table: list, companies: list = None, n_errors: int = None) ->
 
         if event == sg.WINDOW_CLOSED or event is None:
             # exit()  # REMOVER APÓS TERMINAR TESTES
-            return None
+            return InvoicesList([])
 
         if 'detail_' in event:
             # prepara para informações necessárias para obtenção de lista com os
@@ -201,29 +206,36 @@ def editable_table(table: list, companies: list = None, n_errors: int = None) ->
             start = index * n_columns
             end = start + n_columns
 
-            row = [values[i] for i in range(start, end)]
-            # complementa com os dados que estão na tabela e não são mostrados na tabela editável
-            row = row + table[index][(end - start):]
+            selected_row = [values[i] for i in range(start, end)]
+
+            # # complementa com os dados que estão na tabela e não são mostrados na tabela editável
+            # row = row + table[index][(end - start):]
 
             # atualiza tabela com os valores contidos na GUI
-            new_table = get_table_values(values, len(table), len(header))
-            new_table = [set_row_types(header, row) for row in new_table]
-            new_table = [new_table[i] + row[(len(header)):] for i, row in enumerate(table)]
+            new_table = get_gui_table_values(values, len(invoices), len(header))
+            for i, row in enumerate(new_table):
+                new_table[i] = set_row_types(header, row)
+                invoices.update_invoice(i, row)
+            # new_table = [set_row_types(header, row) for row in new_table]
 
-            new_table = service_details(new_table, header, row, index)
-            if new_table:
-                table = new_table
+            invoices, changed = service_details(invoices, header, selected_row, index)
+            if changed:
+                table = invoices.get_gui_table()
                 update_table(window, table[index], range(start, end))
+            n_errors = update_errors(invoices, window)
 
         if event == '-ERRORS-':
-            if not n_errors:  # não faz nada caso não haja erros
+            if not n_errors:
                 continue
 
             errors_indexes = [i for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
-            errors_table = [row for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
-            resulting_table = editable_table(errors_table)
+            errors_list = [invoices.invoice(i) for i in errors_indexes]
 
-            if resulting_table is None:
+            errors_inv_list = InvoicesList(errors_list)
+            resulting_invoices = editable_table(errors_inv_list)
+            resulting_table = resulting_invoices.get_gui_table()
+
+            if not resulting_table:
                 continue
 
             new_table = list()
@@ -237,15 +249,14 @@ def editable_table(table: list, companies: list = None, n_errors: int = None) ->
                     r = range(start, end)
 
                     update_table(window, row, r)
-                    new_table.append(resulting_table[i])
+                    new_table.append(row)
+                    invoices.update_invoice(i, row)
                     i += 1
                 else:
                     new_table.append(row)
             table = new_table
 
-            # atualiza o número de erros
-            n_errors = number_of_errors(table)
-            window.Element('-ERRORS-').Update(str(n_errors) + ' ' + ERROR_LINK_TEXT)
+            n_errors = update_errors(invoices, window)
 
         if event == 'Atualizar':
             break
@@ -257,26 +268,27 @@ def editable_table(table: list, companies: list = None, n_errors: int = None) ->
     window.close()
 
     # atualiza tabela com os valores contidos atualmente na tabela de edição
-    final_table = get_table_values(values, len(table), len(header))
+    final_table = get_gui_table_values(values, len(table), len(header))
     final_table = [set_row_types(header, row) for row in final_table]
-    final_table = [final_table[i] + row[(len(header)):] for i, row in enumerate(table)]
-    return final_table
+    [invoices.update_invoice(i, row) for i, row in enumerate(final_table)]
+    invoices.print_list()
+    return invoices if not invoices.empty() else InvoicesList([])
 
 
-def service_details(table: list, header: list, row: list, row_index: int) -> list or None:
+def service_details(invoices: InvoicesList, header: list, row: list, row_index: int) -> tuple:
     """
     Mostra ao usuário detalhes referentes ao serviço que não aparecem em outras janelas.
 
-    :param table:     Tabela 2x2 contendo os dados das notas conferidas.
-    :type table:      (list)
-    :param header:    Cabeçalho dos dados a serem possivelmente editados.
-    :type header:     (list)
-    :param row:       Linha selecionada a ser mostrada na janela.
-    :type row:        (list)
-    :param row_index: Índice da linha selecionada (row).
-    :type row_index:  (int)
-    :return:          Linha selecionada com os valores atualizados.
-    :rtype:           (list or None)
+    :param invoices:     Lista de notas.
+    :type invoices:      (InvoicesList)
+    :param header:       Cabeçalho dos dados a serem possivelmente editados.
+    :type header:        (list)
+    :param row:          Linha selecionada a ser mostrada na janela.
+    :type row:           (list)
+    :param row_index:    Índice da linha selecionada (row).
+    :type row_index:     (int)
+    :return:             Linha selecionada com os valores atualizados.
+    :rtype:              (list or None)
     """
 
     keys = ['invoice_n', 'date', 'gross_value', 'iss', 'ir', 'csrf', 'net_value', 'nature']
@@ -293,10 +305,12 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
 
     table_header = [sg.Text(h, size=header_size, justification='center') for h in header]
 
-    provider_name_layout = [[sg.Text(row[11], size=(text_width, 1), text_color=txt_color)]]
-    taker_name_layout = [[sg.Text(row[13], size=(text_width, 1), text_color=txt_color)]]
-    description_layout = [[sg.Text(row[8], size=(text_width, 7), text_color=txt_color)]]
-    additional_data_layout = [[sg.Text(row[9], size=(text_width, 7), text_color=txt_color)]]
+    invoice = invoices.invoice(row_index)
+
+    provider_name_layout = [[sg.Text(invoice.provider.name, size=(text_width, 1), text_color=txt_color)]]
+    taker_name_layout = [[sg.Text(invoice.taker.name, size=(text_width, 1), text_color=txt_color)]]
+    description_layout = [[sg.Text(invoice.service_description, size=(text_width, 7), text_color=txt_color)]]
+    additional_data_layout = [[sg.Text(invoice.aditional_data, size=(text_width, 7), text_color=txt_color)]]
 
     provider_name_col = [[sg.Column(provider_name_layout)]]
     taker_name_col = [[sg.Column(taker_name_layout)]]
@@ -325,7 +339,7 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
     event, values = window.read()
 
     if event == sg.WINDOW_CLOSED:
-        return
+        return invoices, False
 
     if event == 'ok_button':
         # se mantém em loop enquanto o número de dígitos da natureza não for 7
@@ -334,21 +348,21 @@ def service_details(table: list, header: list, row: list, row_index: int) -> lis
             event, values = window.read()
 
             if event == sg.WINDOW_CLOSED:
-                return
+                return invoices, False
 
             if event == 'ok_button':
                 break
 
-        new_row = [values[key] for key in values] + row[len(values):]
+        new_row = [values[key] for key in values]
 
         # atualizar linha com os formatos corretos dos valores
         # gross_value, iss, ir, csrf, net_value
         new_row = set_row_types(header, new_row)
 
-        table = [row if i != row_index else new_row for i, row in enumerate(table)]
+        invoices.update_invoice(row_index, new_row)
         window.close()
 
-    return table
+    return invoices, True
 
 
 def update_table(window: sg.Window, row: list, r: range) -> None:
@@ -364,6 +378,12 @@ def update_table(window: sg.Window, row: list, r: range) -> None:
     """
 
     [window.Element(n).Update(row[i]) for i, n in enumerate(r)]
+
+
+def update_errors(invoices, window):
+    n_errors = invoices.number_of_errors()
+    window.Element('-ERRORS-').Update(str(n_errors) + ' ' + ERROR_LINK_TEXT)
+    return n_errors
 
 
 def set_row_types(header: list, row: list) -> list:
@@ -399,7 +419,7 @@ def set_row_types(header: list, row: list) -> list:
     return row
 
 
-def get_table_values(values: dict, n_rows: int, n_columns: int) -> list:
+def get_gui_table_values(values: dict, n_rows: int, n_columns: int) -> list:
     """
     Retorna o uma lista com os valores contidos atualmente na tabela editável.
 
