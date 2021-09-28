@@ -17,6 +17,12 @@ links para pesquisas relacionadas:
 
 *******************************************************************************************************
 
+Super Classes em Python:
+
+https://pt.stackoverflow.com/questions/22452/como-se-usa-e-para-que-serve-o-super-em-classes-python
+
+*******************************************************************************************************
+
 Para baixar módulos:
 
 https://pt.stackoverflow.com/questions/239047/como-instalar-o-pip-no-windows-10

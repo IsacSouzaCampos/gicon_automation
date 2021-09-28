@@ -1,8 +1,8 @@
 import Model.constants as constants
 from Model.invoice import Invoice
 import Model.excel as excel
-from View.inspection import *
-import View.super_inspection as mii
+from View.short_inspection import *
+import View.long_inspection as mii
 from Model.inspection_lib import *
 from Model.invoices_list import InvoicesList
 
@@ -29,7 +29,9 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
             separate_xml_files(folder, xml_files)
             return False
         elif option == 1:
-            invoices_amount_type = 1
+            # invoices_amount_type = 1
+            mii.temp_msg('Funcionalidade a ser atualizada!')
+            return False
         else:
             return False
 
@@ -42,7 +44,7 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     # insere os dados de cada um dos arquivos xml a serem analisados em results
     companies_cnpjs = list()
     companies_names = list()
-    invoices = InvoicesList()
+    invoices = InvoicesList([])  # precisa receber lista vazia '[]' para não acumular notas conferidas antes
     for i in range(len(xml_files)):
         xml_file = xml_files[i]
         invoice = Invoice(f'{folder}\\{xml_file}', service_type)
@@ -63,7 +65,7 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
 
     if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
         # results = mii.show_results_table(invoices, n_errors)
-        print('Funcionalidade a ser atualizada!')
+        pass
     else:
         invoices = editable_table(invoices, companies_names, n_errors)
 
@@ -79,11 +81,26 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
 
     for invoice in invoices:
-        bd_insert(invoice)
+        bd_insert(invoice, service_type)
 
     return True
 
 
-def bd_insert(invoice: Invoice) -> None:
-    # import Model.sql
-    pass
+def bd_insert(invoice: Invoice, service_type: int) -> None:
+    from Model.sql import SQL
+
+    bd = SQL()
+
+    # pegar o código das empresas envolvidas
+    # tomador
+    # _select =
+
+    codigoempresa = 421
+    codigopessoa = 48888
+
+    if service_type == 1:  # serviço tomado
+        _select = ['CODIGOEMPRESA']  # CODIGOEMPRESA = código do tomador (cliente)
+        _from = ['LCTOFISENT']  # LCTOFISENT = lançamento fiscal entrada
+        _where = {'CODIGOEMPRESA': codigoempresa, 'CODIGOPESSOA': codigopessoa, 'NUMERONF': invoice.serial_number,
+                  'ESPECIENF': 'NFSE', 'SERIENF': 'U'}
+        bd.select(_select, _from, _where)

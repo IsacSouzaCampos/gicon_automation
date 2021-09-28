@@ -1,6 +1,5 @@
-# -*- coding: utf-8 -*-
 import Control.inspection as control_inspection
-import View.inspection as gui_inspection
+import View.short_inspection as gui_inspection
 
 
 def main():
@@ -17,7 +16,7 @@ def main():
         invoice_inspected = control_inspection.inspect(folder, xml_files, service_type)
 
     # import os
-    # os.system(r'py -2 Model\sql.py "select SEQ,CHAVELCTOFISENT,CODIGOPRODUTO from LCTOFISENTPRODUTO where '
+    # os.system(r'py -2 Model\sql_run.py "select SEQ,CHAVELCTOFISENT,CODIGOPRODUTO from LCTOFISENTPRODUTO where '
     #           r'codigoempresa = 116 and CODIGOCFOP in (1403,2403) and datalctofis between \'01.10.2019\' '
     #           r'and \'31.10.2019\';"')
 

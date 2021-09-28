@@ -39,7 +39,7 @@ def clear_string(s: str) -> str:
     # s = s.replace('(', '')
     s = s.replace('=', '')
     s = s.replace('-', '')
-    s = s.replace(':', '')
+    # s = s.replace(':', '')
 
     s = s.replace('ç', 'c')
 

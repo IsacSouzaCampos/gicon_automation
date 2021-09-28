@@ -75,10 +75,10 @@ def max_invoices_popup() -> int:
     layout = [
         [sg.Text(f'Número limite de notas excedido ({MAX_INVOICES}). Com um número assim, a edição das'
                  ' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
-                 'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
+                 f'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
                  'com uma interface gráfica mais simplificada?', size=(50, 5))],
 
-        [sg.Button('Conferir com interface simplificada'), sg.Button('Criar subgrupos de {MAX_INVOICES} notas')]
+        [sg.Button('Conferir com interface simplificada'), sg.Button(f'Criar subgrupos de {MAX_INVOICES} notas')]
     ]
 
     window = sg.Window('Limite de Notas Excedido', layout)
@@ -271,7 +271,7 @@ def editable_table(invoices: InvoicesList, companies: list = None, n_errors: int
     final_table = get_gui_table_values(values, len(table), len(header))
     final_table = [set_row_types(header, row) for row in final_table]
     [invoices.update_invoice(i, row) for i, row in enumerate(final_table)]
-    invoices.print_list()
+    # invoices.print_list()
     return invoices if not invoices.empty() else InvoicesList([])
 
 
