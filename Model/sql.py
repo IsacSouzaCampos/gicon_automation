@@ -18,4 +18,5 @@ class SQL:
 
         # print('SQL command:', command)
 
-        os.system(fr'py -2 Model\sql_run.py {command} {self.host} {self.database} {self.user} {self.password}')
+        os.system(fr'py -2 Model\sql_run.py {command.replace(" ", "_")} {self.host} {self.database} {self.user} '
+                  fr'{self.password}')
