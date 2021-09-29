@@ -1,4 +1,5 @@
 import os
+from Model.constants import SYS_PATH
 
 
 class SQL:
@@ -9,14 +10,41 @@ class SQL:
         self.user = user
         self.password = password
 
-    def select(self, _select: list, _from: list, _where: dict):
-        command = f'SELECT {",".join([s for s in _select])} ' \
-                  f'FROM {",".join([f for f in _from])} ' \
-                  f'WHERE CODIGOEMPRESA = {_where["CODIGOEMPRESA"]} and CODIGOPESSOA = {_where["CODIGOPESSOA"]} ' \
-                  f'and NUMERONF = {_where["NUMERONF"]} and ESPECIENF = \'{_where["ESPECIENF"]}\' and SERIENF = ' \
-                  f'\'{_where["SERIENF"]}\''
+    def invoice_in_bd(self, taker_code, provider_code, inv_number):
+        command = f'SELECT CODIGOEMPRESA CODIGOPESSOA NUMERONF FROM LCTOFISENT ' \
+                  f'WHERE CODIGOEMPRESA = {taker_code} and CODIGOPESSOA = {provider_code} ' \
+                  f'and NUMERONF = {inv_number} and ESPECIENF = \'NFSE\' and SERIENF = \'U\''
 
-        # print('SQL command:', command)
+        self.run_command(command)
 
+    def get_company_code(self, cnpj: str) -> str:
+        """
+        Retorna o código da empresa com base no seu nome.
+
+        :param cnpj:  CNPJ da empresa.
+        :type cnpj:   (str)
+        :param _type: Tipo da empresa (cliente[0] ou não[1])
+        :type _type:  (int)
+        """
+
+        cnpj = f'{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:14]}'
+        command = f'SELECT CODIGOPESSOA FROM PESSOA WHERE INSCRFEDERAL = \'{cnpj}\''
+
+        # print('command:', command)
+        self.run_command(command)
+        return self.result()[0]
+
+    def get_city_code(self, city):
+        command = f'SELECT CODIGOMUNIC FROM MUNICIPIO WHERE LOWER(NOMEMUNIC) LIKE LOWER(\'%{city}%\')'
+        self.run_command(command)
+        return self.result()[0]
+
+    def run_command(self, command) -> None:
         os.system(fr'py -2 Model\sql_run.py {command.replace(" ", "_")} {self.host} {self.database} {self.user} '
                   fr'{self.password}')
+
+    @staticmethod
+    def result() -> list:
+        with open(fr'{SYS_PATH}\bd_results.bin', 'rb') as fin:
+            arr = fin.read().decode('utf8')
+        return arr.split(';')

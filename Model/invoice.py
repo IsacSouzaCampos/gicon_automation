@@ -21,7 +21,7 @@ class Invoice:
         self.gross_value = float(d['valortotalservicos'])
 
         self.provider = Company(d['cnpjprestador'], d['razaosocialprestador'], d['nomemunicipioprestador'])
-        self.taker = Company(d['identificacaotomador'], d['razaosocialtomador'])
+        self.taker = Company(d['identificacaotomador'], d['razaosocialtomador'], 'Florianópolis')
 
         iss_withheld = self.iss_withheld()
         self.iss_value = d['valorissqn'] if iss_withheld else ''
@@ -100,6 +100,11 @@ class Invoice:
 
         for text in [self.service_description, self.aditional_data]:
             clean_value = clear_string(text)
+
+            # if 'leidatransparencia' in clean_value or 'lei12.741/2012' in clean_value:
+            #     if 'retencao' not in clean_value and 'retencoes' not in clean_value:
+            #         return False
+
             for kw in keywords:
                 if kw in clean_value:
                     return True

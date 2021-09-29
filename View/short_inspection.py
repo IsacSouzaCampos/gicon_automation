@@ -222,7 +222,7 @@ def editable_table(invoices: InvoicesList, companies: list = None, n_errors: int
             if changed:
                 table = invoices.get_gui_table()
                 update_table(window, table[index], range(start, end))
-            n_errors = update_errors(invoices, window)
+            n_errors = update_errors(invoices, window) if n_errors is not None else None
 
         if event == '-ERRORS-':
             if not n_errors:
@@ -256,7 +256,7 @@ def editable_table(invoices: InvoicesList, companies: list = None, n_errors: int
                     new_table.append(row)
             table = new_table
 
-            n_errors = update_errors(invoices, window)
+            n_errors = update_errors(invoices, window) if n_errors is not None else None
 
         if event == 'Atualizar':
             break

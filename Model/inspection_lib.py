@@ -56,11 +56,13 @@ def clear_string(s: str) -> str:
     s = s.replace('ê', 'e')
     s = s.replace('ó', 'o')
 
-    if s.count('leidatransparencia') > 1:
-        before = s[: s.find('leidatransparencia') + 1]
-        after = s[s.find('leidatransparencia') + len('leidatransparencia'): len(s)]
-        after = after[after.find('leidatransparencia') + len('leidatransparencia'): len(after)]
-        s = before + after
+    law_terms = ['leidatransparencia', 'lei12.741/2012']
+    for law_term in law_terms:
+        if s.count(law_term) > -1:
+            before = s[: s.find(law_term) + 1]
+            after = s[s.find(law_term) + len(law_term): len(s)]
+            after = after[after.find(law_term) + len(law_term): len(after)]
+            s = before + after
 
     return s
 
