@@ -1,4 +1,5 @@
 from View.short_inspection import *
+from View.inspection_lib import insertion_commands
 import View.long_inspection as mii
 
 from Model.inspection_lib import *
@@ -79,7 +80,14 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     xlsx_file_name = folder.split('/')[-1] + '.xlsx'
     excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
 
+    launch_commands = list()
+    launch_keys = dict()
     for invoice in invoices:
-        sql.bd_insert(invoice, service_type)
+        launch_key = launch_keys[invoice.taker.cnpj] if invoice.taker.cnpj in launch_keys else None
+        launch_command, launch_key = sql.bd_insert(invoice, service_type, launch_key)
+        launch_commands.append(launch_command)
+        launch_keys[invoice.taker.cnpj] = launch_key
+
+    insertion_commands(launch_commands)
 
     return True

@@ -7,7 +7,10 @@ from Model.inspection_lib import clear_string, extract_tax_value, extract_tax_fr
 
 class Invoice:
 
-    def __init__(self, file_path, service_type):
+    def __init__(self, file_path, service_type, doc_type=99):
+        self.operation_purpose = 1
+        self.issuer = 'T' if service_type else 'P'
+        self.doc_type = doc_type
         self.service_type = service_type  # 0: prestado / 1: tomado
         self.file_path = file_path
 
@@ -18,13 +21,14 @@ class Invoice:
         self.issuance_date = self.issuance_date[2] + '/' + self.issuance_date[1] + '/' + self.issuance_date[0]
         self.cst = d['cst']
         self.cfps = d['cfps']
+        self.aliquot = d['aliquota']
         self.gross_value = float(d['valortotalservicos'])
 
         self.provider = Company(d['cnpjprestador'], d['razaosocialprestador'], d['nomemunicipioprestador'])
         self.taker = Company(d['identificacaotomador'], d['razaosocialtomador'], 'Florianópolis')
 
-        iss_withheld = self.iss_withheld()
-        self.iss_value = d['valorissqn'] if iss_withheld else ''
+        self.iss_withheld = self.iss_withheld()
+        self.iss_value = d['valorissqn'] if self.iss_withheld else ''
 
         if 'descricaoservico' in d and d['descricaoservico'] is not None:
             self.service_description = d['descricaoservico']
@@ -55,9 +59,10 @@ class Invoice:
                 self.net_value -= tax
 
         self.net_value = round(self.net_value, 2)
-        self.service_nature = self.service_nature(iss_withheld, is_ir_withheld, is_csrf_withheld, self.service_type)
+        self.service_nature = self.service_nature(self.iss_withheld, is_ir_withheld, is_csrf_withheld, self.service_type)
 
         self.is_canceled = 'datacancelamento' in d and d['datacancelamento'] is not None
+        self.invoice_situation = 2 if self.is_canceled else 0
 
     def data_list(self) -> list:
         """
@@ -81,7 +86,7 @@ class Invoice:
         """Verifica se há retencao de ISS com base no CFPS e CST"""
 
         iss_withheld = False
-        if self.provider.city == 'FLORIANOPOLIS':
+        if self.provider.city.lower() in ['florianopolis', 'florianópolis']:
             if self.cst in ['2', '4', '6', '10']:
                 iss_withheld = True
 

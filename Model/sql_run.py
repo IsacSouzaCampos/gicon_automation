@@ -9,18 +9,28 @@ def run_command(command, host='10.0.4.92', database=r'C:\Questor\db_questor\Sara
     result = str()
     try:
         con = fdb.connect(host=host, database=database, user=user, password=password)
+        # print('conexão com BD aberta')
 
         # Create a Cursor object that operates in the context of Connection con:
         cur = con.cursor()
 
         # Execute the SELECT statement:
+
+        # if 'select' in command.lower():
+        # print('executando comando')
         cur.execute(command)
+        # print('comando executado')
+
         result = ';'.join([';'.join([str(item) for item in row]) for row in cur])
         con.close()
+        # print('conexão com BD fechada')
+
     except Exception as e:
         print('Erro na conexão com o BD:', e)
 
-    write_to_binary(result)
+    if 'select' in command.lower():
+        # print('escrevendo resultado em arquivo')
+        write_to_binary(result)
 
 
 def write_to_binary(result):
