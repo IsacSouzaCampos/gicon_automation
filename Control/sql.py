@@ -5,10 +5,11 @@ from Model.ipi import IPI
 from Model.funrural import FunRural
 
 
-def bd_insert(invoice: Invoice, service_type: int, launch_key: int or None) -> tuple:
+def bd_insert(invoice: Invoice, service_type: int, lctofisent_key: int or None,
+              lctofisentretido_key: int or None) -> tuple:
     bd = SQL()
 
-    launch_command = str()
+    commands = list()
     if service_type:  # = 1 / serviço tomado
         invoice.taker.code = bd.get_company_code(invoice.taker.cnpj, 0)  # cliente
         invoice.provider.code = bd.get_company_code(invoice.provider.cnpj, 1)  # outra empresa
@@ -20,10 +21,18 @@ def bd_insert(invoice: Invoice, service_type: int, launch_key: int or None) -> t
             print(f'Nota {invoice.serial_number} já lançada')
         else:
             print(f'Nota {invoice.serial_number} não lançada')
-            if not launch_key:
-                launch_key = bd.launch_key(invoice.taker.code)
+            if not lctofisent_key:
+                lctofisent_key = bd.lctofisent_key(invoice.taker.code)
             else:
-                launch_key += 1
-            launch = LCTOFISENTData(invoice, launch_key, IPI(), FunRural())
-            launch_command = bd.lctofisent(launch)
-    return launch_command, launch_key
+                lctofisent_key += 1
+
+            if not lctofisentretido_key:
+                lctofisent_key = bd.lctofisentretido_key(invoice.taker.code)
+            else:
+                lctofisentretido_key += 1
+            launch = LCTOFISENTData(invoice, lctofisent_key, lctofisentretido_key, lctofisentretido_key, IPI(),
+                                    FunRural())
+
+            commands.append(bd.lctofisent(launch))
+            commands.append(bd.lctofisentcfop(launch))
+    return commands, lctofisent_key

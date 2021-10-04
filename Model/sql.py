@@ -51,13 +51,20 @@ class SQL:
         self.run_command(command)
         return self.result()[0]
 
-    def launch_key(self, company_code) -> int:
+    def lctofisent_key(self, company_code) -> int:
         command = f'SELECT MAX(CHAVELCTOFISENT) FROM LCTOFISENT WHERE CODIGOEMPRESA = {company_code}'
         self.run_command(command)
 
         return int(self.result()[0]) + 1
 
-    def lctofisent(self, l: LCTOFISENTData) -> str:
+    def lctofisentretido_key(self, company_code):
+        command = f'SELECT MAX(CHAVELCTOFISENTRETIDO) FROM LCTOFISENTRETIDO WHERE CODIGOEMPRESA = {company_code}'
+        self.run_command(command)
+
+        return int(self.result()[0]) + 1
+
+    @staticmethod
+    def lctofisent(l: LCTOFISENTData) -> str:
         import datetime
 
         diff = datetime.timedelta(hours=-3)
@@ -78,21 +85,64 @@ class SQL:
         command = str()
         if str(inv.service_nature)[-3:] == '308':
             command = f'INSERT INTO LCTOFISENT(CODIGOEMPRESA, CHAVELCTOFISENT, CODIGOESTAB, CODIGOPESSOA, ' \
-                      f'NUMERONF, ESPECIENF, SERIENF, DATAENTRADA, DATALCTOFIS, DATAEMISSAO, VALORCONTABIL, ' \
+                      f'NUMERONF, ESPECIENF, SERIENF, DATALCTOFIS, DATAEMISSAO, VALORCONTABIL, ' \
                       f'BASECALCULOIPI, VALORIPI, ISENTASIPI, OUTRASIPI, BASECALCULOFUNRURAL, ALIQFUNRURAL, ' \
                       f'VALORFUNRURAL, CODIGOTIPODCTOSINTEGRA, CDMODELO, VERSAONFE, EMITENTENF, FINALIDADEOPERACAO, ' \
                       f'MEIOPAGAMENTO, MODALIDADEFRETE, CDSITUACAO, CANCELADA, CONCILIADA, CODIGOUSUARIO, ' \
                       f'DATAHORALCTOFIS, ORIGEMDADO) ' \
-                      f'VALUES({inv.taker.code}, {l.key}, {int(inv.taker.cnpj[-6:-2])}, {inv.provider.code}, ' \
-                      f'{inv.serial_number}, \'NFSE\', \'U\', \'{today}\', ' \
+                      f'VALUES({inv.taker.code}, {l.lctofisent_key}, {int(inv.taker.cnpj[-6:-2])}, {inv.provider.code}, ' \
+                      f'{inv.serial_number}, \'NFSE\', \'U\', ' \
                       f'\'{issuance_date}\', \'{issuance_date}\', {inv.gross_value}, {l.ipi.base}, {l.ipi.value}, ' \
                       f'{l.ipi.exemption}, ' \
                       f'{l.ipi.others}, {l.funrural.base}, {l.funrural.aliquot}, {l.funrural.value}, {99}, ' \
-                      f'{inv.doc_type}, {4.00}, \'{inv.issuer}\', {inv.operation_purpose}, {l.payment_method}, {l.freight_category}, ' \
+                      f'{inv.doc_type}, {4.00}, \'{inv.issuer}\', {inv.operation_purpose}, {l.payment_method}, ' \
+                      f'{l.freight_category}, ' \
                       f'{inv.invoice_situation}, {int(inv.is_canceled)}, {0}, {238}, \'{now_txt}\', {2})'
 
         print(command)
         return command
+
+    @staticmethod
+    def lctofisentcfop(l: LCTOFISENTData) -> str:
+        inv = l.invoice
+
+        issuance_date = inv.issuance_date.split('/')
+        issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
+
+        command = str()
+        if str(inv.service_nature)[-3:] == '308':
+            command = f'INSERT INTO LCTOFISENTCFOP(CODIGOEMPRESA, CHAVELCTOFISENT, CODIGOCFOP, TIPOIMPOSTO,' \
+                      f'ALIQIMPOSTO, DATALCTOFIS, CODIGOESTAB, VALORCONTABILIMPOSTO, BASECALCULOIMPOSTO,' \
+                      f'VALORIMPOSTO, ISENTASIMPOSTO, OUTRASIMPOSTO, VALOREXVALORADICIONAL) VALUES({inv.taker.code}, ' \
+                      f'{l.lctofisent_key}, {inv.service_nature}, {2}, {float(inv.aliquot) * 100}, \'{issuance_date}\', ' \
+                      f'{int(inv.taker.cnpj[-6:-2])}, {inv.gross_value}, {inv.gross_value}, ' \
+                      f'{float(inv.gross_value) * float(inv.aliquot)}, {0}, {0}, {0})'
+
+        print(command)
+        return command
+
+    @staticmethod
+    def lctofisentretido(l: LCTOFISENTData):
+        inv = l.invoice
+
+        issuance_date = inv.issuance_date.split('/')
+        issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
+
+        command = str()
+        if str(inv.service_nature)[-3:] == '308':
+            command = f'INSERT INTO LCTOFISENTRETIDO(CODIGOEMPRESA, CHAVELCTOFISENTRETIDO, CODIGOPESSOA,' \
+                      f'NUMERONF, ESPECIENF, SERIENF, DATALCTOFIS, DATAEMISSAO, VALORCONTABIL, CODIGOESTAB, ' \
+                      f'CHAVELCTOFISENT, CODIGOCFOP, BASECALCULOINSS, ALIQINSS, VALORINSS, BASECALCULOISSQN, ' \
+                      f'ALIQISSQN, VALORISSQN, BASECALCULOIRPJ, ' \
+                      f'APURADOIRPJ, BASECALCULOIRRF, ALIQIRRF, VALORIRRF, ' \
+                      f'DATAIRRF, APURADOIRRF, TOTALPISCOFINSCSLL, BASECALCULOPIS, ALIQPIS, VALORPIS, ' \
+                      f'BASECALCULOCOFINS, ALIQCOFINS, VALORCOFINS, BASECALCULOCSLL, ALIQCSLL, VALORCSLL, ' \
+                      f'APURADOPISCOFINSCSLL, CONCILIADA, CODIGOUSUARIO, DATAHORALCTOFIS, ORIGEMDADO) ' \
+                      f'VALUES({inv.taker.code}, {l.lctofisentretido_key}, {inv.provider.code}, {inv.serial_number}, ' \
+                      f'\'NFSE\', \'U\', {issuance_date}, {issuance_date}, {inv.gross_value}, ' \
+                      f'{int(inv.taker.cnpj[-6:-2])}, {l.lctofisent_key}, {inv.service_nature}, {0}, {0}, {0}, ' \
+                      f'{inv.gross_value}, {inv.aliquot}, {float(inv.gross_value) * float(inv.aliquot)}, ' \
+                      f'BASECALCULOIRPJ...)'
 
     def run_command(self, command) -> None:
         os.system(fr'py -2 Model\sql_run.py {command.replace(" ", "_")} {self.host} {self.database} {self.user} '

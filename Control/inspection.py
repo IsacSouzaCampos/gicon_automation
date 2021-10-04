@@ -83,10 +83,10 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     launch_commands = list()
     launch_keys = dict()
     for invoice in invoices:
-        launch_key = launch_keys[invoice.taker.cnpj] if invoice.taker.cnpj in launch_keys else None
-        launch_command, launch_key = sql.bd_insert(invoice, service_type, launch_key)
-        launch_commands.append(launch_command)
-        launch_keys[invoice.taker.cnpj] = launch_key
+        key = launch_keys[invoice.taker.cnpj] if invoice.taker.cnpj in launch_keys else None
+        commands, key = sql.bd_insert(invoice, service_type, key)
+        launch_commands += commands
+        launch_keys[invoice.taker.cnpj] = key
 
     insertion_commands(launch_commands)
 
