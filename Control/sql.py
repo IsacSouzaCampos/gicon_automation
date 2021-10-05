@@ -5,8 +5,7 @@ from Model.ipi import IPI
 from Model.funrural import FunRural
 
 
-def bd_insert(invoice: Invoice, service_type: int, lctofisent_key: int or None,
-              lctofisentretido_key: int or None) -> tuple:
+def bd_insert(invoice: Invoice, service_type: int) -> list:
     bd = SQL()
 
     commands = list()
@@ -14,25 +13,20 @@ def bd_insert(invoice: Invoice, service_type: int, lctofisent_key: int or None,
         invoice.taker.code = bd.get_company_code(invoice.taker.cnpj, 0)  # cliente
         invoice.provider.code = bd.get_company_code(invoice.provider.cnpj, 1)  # outra empresa
 
-        # print(invoice.taker.name, ':', invoice.taker.code)
-        # print(invoice.provider.name, ':', invoice.provider.code)
-
-        if bd.invoice_in_bd(invoice.taker.code, invoice.provider.code, invoice.serial_number):
-            print(f'Nota {invoice.serial_number} já lançada')
+        if bd.invoice_in_bd(invoice):
+            print(f'Nota {invoice.serial_number} - tomador: {invoice.taker.code} - prestador: {invoice.provider.code}'
+                  f' já lançada')
         else:
             print(f'Nota {invoice.serial_number} não lançada')
-            if not lctofisent_key:
-                lctofisent_key = bd.lctofisent_key(invoice.taker.code)
-            else:
-                lctofisent_key += 1
+            launch = LCTOFISENTData(invoice, IPI(), FunRural())
 
-            if not lctofisentretido_key:
-                lctofisent_key = bd.lctofisentretido_key(invoice.taker.code)
-            else:
-                lctofisentretido_key += 1
-            launch = LCTOFISENTData(invoice, lctofisent_key, lctofisentretido_key, lctofisentretido_key, IPI(),
-                                    FunRural())
+            commands.append(clear_command(bd.lctofisent(launch)))
+            commands.append(clear_command(bd.lctofisentcfop(launch)))
+            commands.append(clear_command(bd.lctofisentretido(launch)))
+    return commands
 
-            commands.append(bd.lctofisent(launch))
-            commands.append(bd.lctofisentcfop(launch))
-    return commands, lctofisent_key
+
+def clear_command(command: str) -> str:
+    while '  ' in command:
+        command = command.replace('  ', ' ')
+    return command

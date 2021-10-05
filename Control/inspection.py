@@ -40,7 +40,7 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
             return False
 
     # lista que será passada como parâmetro para ser mostrada na tela pela GUI
-    results = list()
+    # results = list()
 
     # inicia janela da barra de progresso da conferência
     loading_window = start_inspection_loading_window()
@@ -81,12 +81,9 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
 
     launch_commands = list()
-    launch_keys = dict()
     for invoice in invoices:
-        key = launch_keys[invoice.taker.cnpj] if invoice.taker.cnpj in launch_keys else None
-        commands, key = sql.bd_insert(invoice, service_type, key)
+        commands = sql.bd_insert(invoice, service_type)
         launch_commands += commands
-        launch_keys[invoice.taker.cnpj] = key
 
     insertion_commands(launch_commands)
 
