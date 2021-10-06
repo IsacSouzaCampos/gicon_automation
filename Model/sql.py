@@ -201,6 +201,31 @@ class SQL:
 
         return command
 
+    def lctofisentvaloriss(self, l: LCTOFISENTData):
+        inv = l.invoice
+        iss_aliquot = float(inv.aliquot) * 100
+
+        lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
+
+        command = str()
+        if str(inv.service_nature)[-3:] == '308':
+            command = f'INSERT INTO LCTOFISENTVALORISS(' \
+                      f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
+                      f'VALUES(' \
+                      f'{inv.taker.code},       {lctofisent_key},           {125},                  {inv.full_cnae});' \
+                      f'\n\n' \
+                      f'INSERT INTO LCTOFISENTVALORISS(' \
+                      f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
+                      f'VALUES(' \
+                      f'{inv.taker.code},       {lctofisent_key},           {126},                  {inv.cst});' \
+                      f'\n\n' \
+                      f'INSERT INTO LCTOFISENTVALORISS(' \
+                      f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
+                      f'VALUES(' \
+                      f'{inv.taker.code},       {lctofisent_key},           {131},                  {iss_aliquot})'
+
+        return command
+
     def run_command(self, command) -> None:
         os.system(fr'py -2 Model\sql_run.py {command.replace(" ", "_")} {self.host} {self.database} {self.user} '
                   fr'{self.password}')

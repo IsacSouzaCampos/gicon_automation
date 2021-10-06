@@ -22,6 +22,7 @@ def bd_insert(invoice: Invoice, service_type: int) -> list:
 
             commands.append(clear_command(bd.lctofisent(launch)))
             commands.append(clear_command(bd.lctofisentcfop(launch)))
+            commands.append(clear_command(bd.lctofisentvaloriss(launch)))
             commands.append(clear_command(bd.lctofisentretido(launch)))
     return commands
 

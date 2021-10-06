@@ -21,6 +21,7 @@ class Invoice:
         self.issuance_date = self.issuance_date[2] + '/' + self.issuance_date[1] + '/' + self.issuance_date[0]
         self.cst = d['cst']
         self.cfps = d['cfps']
+        self.full_cnae = self.gen_cnae(d['codigocnae'])
         self.aliquot = d['aliquota']
         self.gross_value = float(d['valortotalservicos'])
 
@@ -216,3 +217,13 @@ class Invoice:
             return int(cfps + '06')
 
         return int(cfps + '00')
+
+    @staticmethod
+    def gen_cnae(cnae):
+        with open(r'Support\cnae.csv', 'r') as fin:
+            for line in fin.readlines():
+                values = line.split(',')
+                if cnae == values[0]:
+                    v = values[1].replace('\n', '')
+                    return (cnae + v) if len(v) == 4 else (cnae + '0' + v)
+        return cnae
