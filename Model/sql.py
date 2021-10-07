@@ -179,8 +179,8 @@ class SQL:
                       f'                 ALIQPIS,               VALORPIS,                       BASECALCULOCOFINS, ' \
                       f'                 ALIQCOFINS,            VALORCOFINS,                    BASECALCULOCSLL, ' \
                       f'                 ALIQCSLL,              VALORCSLL,                      APURADOPISCOFINSCSLL, '\
-                      f'                 CONCILIADA,                     CODIGOUSUARIO,         DATAHORALCTOFIS, ' \
-                      f'                 ORIGEMDADO) ' \
+                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
+                      f'                 ORIGEMDADO,            CODIGOTABCTBFIS) ' \
                       f'VALUES(         {inv.taker.code},       {lctofisentretido_key},         {inv.provider.code}, ' \
                       f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
                       f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
@@ -197,13 +197,13 @@ class SQL:
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {0},                    {238},                          \'{now_txt}\', ' \
-                      f'                {2})'
+                      f'                {2},                    {838})'
 
         return command
 
     def lctofisentvaloriss(self, l: LCTOFISENTData):
         inv = l.invoice
-        iss_aliquot = float(inv.aliquot) * 100
+        iss_aliquot = str(float(inv.aliquot) * 100).replace('.', ',')
 
         lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
 
@@ -222,7 +222,7 @@ class SQL:
                       f'INSERT INTO LCTOFISENTVALORISS(' \
                       f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
                       f'VALUES(' \
-                      f'{inv.taker.code},       {lctofisent_key},           {131},                  {iss_aliquot})'
+                      f'{inv.taker.code},       {lctofisent_key},           {131},                  \'{iss_aliquot}\')'
 
         return command
 
