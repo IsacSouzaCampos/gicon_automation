@@ -45,14 +45,14 @@ def main_gui() -> tuple:
             if not values['Selecionar Pasta']:
                 sg.popup('Selecione uma pasta para a conferência!')
                 continue
-            if values[0]:
+            if values[0]:  # prestado
                 # service_type = 0
                 # folder_name = values['Selecionar Pasta'] or '.'
                 # xml_file_names = [f for f in os.listdir(folder_name) if '.xml' in f]
                 sg.popup('A conferência deste tipo de serviço ainda está em desenvolvimento.')
                 continue
                 # break
-            elif values[1]:
+            elif values[1]:  # tomado
                 # se a pasta não foi selecionada use a pasta atual `.`
                 service_type = 1
                 folder_name = values['Selecionar Pasta'] or '.'

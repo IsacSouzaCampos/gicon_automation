@@ -2,4 +2,4 @@ PySimpleGUI ~= 4.46.0
 openpyxl~=2.6.4
 fdb~=2.0.1
 execnet~=1.9.0
-numpy~=1.21.2
+pyperclip~=1.8.2

@@ -4,60 +4,48 @@ from Model.launch import LCTOFISENTData
 from Model.invoice import Invoice
 
 
-class SQL:
-    def __init__(self, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB', user='SYSDBA',
-                 password='masterkey'):
-        self.host = host
-        self.database = database
-        self.user = user
-        self.password = password
+class SQLCommands:
+    def __init__(self):
+        self.run = SQLRun()
 
-    def invoice_in_bd(self, invoice: Invoice) -> bool:
+    @staticmethod
+    def invoice_in_bd(invoice: Invoice, company_code, person_code) -> str:
         command = f'SELECT * FROM LCTOFISENT ' \
-                  f'WHERE CODIGOEMPRESA = {invoice.taker.code} and CODIGOPESSOA = {invoice.provider.code} ' \
-                  f'and NUMERONF = {invoice.serial_number} and ESPECIENF = \'NFSE\' and SERIENF = \'U\''
+                  f'WHERE CODIGOEMPRESA = ({company_code}) AND CODIGOPESSOA = ({person_code}) ' \
+                  f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
 
         # print(command)
-        self.run_command(command)
+        # self.run_command(command)
 
         # print(self.result())
-        return self.result() != ['']
+        # return self.result() != ['']
+        return command
 
-    def get_company_code(self, cnpj: str, _type: int) -> str:
+    @staticmethod
+    def get_company_code(cnpj: str, _type: int) -> str:
         """
         Retorna o código da empresa com base no seu nome.
 
         :param cnpj:  CNPJ da empresa.
         :type cnpj:   (str)
-        :param _type: Se a empresa em questão é cliente da empresa de contabilidade[0] ou não[1].
+        :param _type: Se a empresa em questão é o cliente da empresa de contabilidade[0] ou não[1].
         :type _type:  (int)
         """
 
         cnpj = f'{cnpj[:2]}.{cnpj[2:5]}.{cnpj[5:8]}/{cnpj[8:12]}-{cnpj[12:14]}'
-        command = f'SELECT CODIGOPESSOA, NOMEPESSOA FROM PESSOA WHERE INSCRFEDERAL = \'{cnpj}\''
+        if _type:
+            return f'SELECT CODIGOPESSOA FROM PESSOA WHERE INSCRFEDERAL = \'{cnpj}\''
+        return f'SELECT CODIGOCLIENTE FROM CLIENTE WHERE INSCRFEDERAL = \'{cnpj}\''
 
-        # print('command:', command)
-        self.run_command(command)
-        result = self.result()
-
-        if not _type:  # cliente
-            command = f'SELECT CODIGOEMPRESA FROM EMPRESA WHERE LOWER(NOMEEMPRESA) LIKE LOWER(\'%{result[1]}%\')'
-            self.run_command(command)
-            result = self.result()
-
-        return result[0]
-
-    def get_city_code(self, city):
-        command = f'SELECT CODIGOMUNIC FROM MUNICIPIO WHERE LOWER(NOMEMUNIC) LIKE LOWER(\'%{city}%\')'
-        self.run_command(command)
-        return self.result()[0]
+    # @staticmethod
+    # def get_city_code(self, city):
+    #     command = f'SELECT CODIGOMUNIC FROM MUNICIPIO WHERE LOWER(NOMEMUNIC) LIKE LOWER(\'%{city}%\')'
+    #     return command
 
     @staticmethod
     def lctofisent_key(company_code) -> str:
         command = f'SELECT MAX(CHAVELCTOFISENT) FROM LCTOFISENT WHERE CODIGOEMPRESA = {company_code}'
-        # self.run_command(command)
 
-        # return int(self.result()[0]) + 1
         return command
 
     @staticmethod
@@ -68,7 +56,7 @@ class SQL:
         # return int(self.result()[0]) + 1
         return command
 
-    def lctofisent(self, l: LCTOFISENTData) -> str:
+    def lctofisent(self, launch: LCTOFISENTData) -> str:
 
         # INSERT INTO LCTOFISENT(CODIGOEMPRESA, CHAVELCTOFISENT, CODIGOESTAB, CODIGOPESSOA, NUMERONF,
         # ESPECIENF, SERIENF, DATALCTOFIS, DATAEMISSAO, VALORCONTABIL, BASECALCULOIPI, VALORIPI, ISENTASIPI,
@@ -84,51 +72,59 @@ class SQL:
         # AND SERIENF = 'U') AND CODIGOEMPRESA = 421 AND CODIGOPESSOA = 25287
         # GROUP BY L.CODIGOEMPRESA, L.CODIGOPESSOA
 
-        import datetime
+        now = self.current_datetime()
 
-        diff = datetime.timedelta(hours=-3)
-        timezone = datetime.timezone(diff)
-        now = datetime.datetime.now().astimezone(timezone)
-
-        today = f'{now.year}-{now.month}-{now.day}'
-        now_txt = f'{today} {now.hour}:{now.minute}:{now.second}'
-
-        inv = l.invoice
+        inv = launch.invoice
+        if launch.type:  # tomado
+            company_cnpj = inv.taker.cnpj
+            person_cnpj = inv.provider.cnpj
+        else:  # prestado
+            person_cnpj = inv.taker.cnpj
+            company_cnpj = inv.provider.cnpj
 
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
-        lctofisent_key = f'(({self.lctofisent_key(inv.taker.code)}) + 1)'
+        lctofisent_key = f'(({self.lctofisent_key("CODEMPRESA")}) + 1)'
 
         command = str()
         if str(inv.service_nature)[-3:] == '308':
             command = f'INSERT INTO ' \
-                      f'LCTOFISENT(CODIGOEMPRESA,           CHAVELCTOFISENT,        CODIGOESTAB,         ' \
-                      f'           CODIGOPESSOA,            NUMERONF,               ESPECIENF, ' \
-                      f'           SERIENF,                 DATALCTOFIS,            DATAEMISSAO, ' \
-                      f'           VALORCONTABIL,           BASECALCULOIPI,         VALORIPI, ' \
-                      f'           ISENTASIPI,              OUTRASIPI,              BASECALCULOFUNRURAL, ' \
-                      f'           ALIQFUNRURAL,            VALORFUNRURAL,          CODIGOTIPODCTOSINTEGRA, ' \
-                      f'           CDMODELO,                VERSAONFE,              EMITENTENF, ' \
-                      f'           FINALIDADEOPERACAO,      MEIOPAGAMENTO,          MODALIDADEFRETE, ' \
-                      f'           CDSITUACAO,              CANCELADA,              CONCILIADA, ' \
-                      f'           CODIGOUSUARIO,           DATAHORALCTOFIS,        ORIGEMDADO) ' \
-                      f'VALUES(    {inv.taker.code},        {lctofisent_key},       {int(inv.taker.cnpj[-6:-2])}, ' \
-                      f'           {inv.provider.code},     {inv.serial_number},    \'NFSE\', ' \
-                      f'           \'U\',                   \'{issuance_date}\',      \'{issuance_date}\', ' \
-                      f'           {inv.gross_value},       {l.ipi.base},           {l.ipi.value}, ' \
-                      f'           {l.ipi.exemption},       {l.ipi.others},         {l.funrural.base}, ' \
-                      f'           {l.funrural.aliquot},    {l.funrural.value},     {99}, ' \
-                      f'           {inv.doc_type},          {4.00},                 \'{inv.issuer}\', ' \
-                      f'           {inv.operation_purpose}, {l.payment_method},     {l.freight_category}, ' \
-                      f'           {inv.invoice_situation}, {int(inv.is_canceled)}, {0}, ' \
-                      f'           {238},                   \'{now_txt}\',          {2})'
+                      f'LCTOFISENT(CODIGOEMPRESA,             CHAVELCTOFISENT,          CODIGOESTAB, ' \
+                      f'           CODIGOPESSOA,              NUMERONF,                 ESPECIENF, ' \
+                      f'           SERIENF,                   DATALCTOFIS,              DATAEMISSAO, ' \
+                      f'           VALORCONTABIL,             BASECALCULOIPI,           VALORIPI, ' \
+                      f'           ISENTASIPI,                OUTRASIPI,                BASECALCULOFUNRURAL, ' \
+                      f'           ALIQFUNRURAL,              VALORFUNRURAL,            CODIGOTIPODCTOSINTEGRA, ' \
+                      f'           CDMODELO,                  VERSAONFE,                EMITENTENF, ' \
+                      f'           FINALIDADEOPERACAO,        MEIOPAGAMENTO,            MODALIDADEFRETE, ' \
+                      f'           CDSITUACAO,                CANCELADA,                CONCILIADA, ' \
+                      f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO)\n' \
+                      f'SELECT     CODEMPRESA,                {lctofisent_key},         {int(inv.taker.cnpj[-6:-2])}, '\
+                      f'           CODPESSOA,                 {inv.serial_number},      \'NFSE\', ' \
+                      f'           \'U\',                     \'{issuance_date}\',      \'{issuance_date}\', ' \
+                      f'           {inv.gross_value},         {launch.ipi.base},        {launch.ipi.value}, ' \
+                      f'           {launch.ipi.exemption},    {launch.ipi.others},      {launch.funrural.base}, ' \
+                      f'           {launch.funrural.aliquot}, {launch.funrural.value},  {99}, ' \
+                      f'           {inv.doc_type},            {4.00},                   \'{inv.issuer}\', ' \
+                      f'           {inv.operation_purpose},   {launch.payment_method},  {launch.freight_category}, ' \
+                      f'           {inv.invoice_situation},   {int(inv.is_canceled)},   {0}, ' \
+                      f'           {238},                     ({now}),                  {2}\n' \
+                      f'FROM (\n' \
+                      f'    SELECT P.CODIGOPESSOA AS CODPESSOA, C.CODIGOEMPRESA AS CODEMPRESA ' \
+                      f'    FROM PESSOA P, CLIENTE C ' \
+                      f'    WHERE (P.INSCRFEDERAL = \'{person_cnpj}\' AND C.INSCRFEDERAL = \'{company_cnpj}\')' \
+                      f'\n)\n' \
+                      f'WHERE NOT EXISTS(SELECT * FROM LCTOFISENT WHERE NUMERONF = {inv.serial_number} AND ' \
+                      f'ESPECIENF = \'NFSE\' AND SERIENF = \'U\' AND CODIGOEMPRESA = CODEMPRESA AND ' \
+                      f'CODIGOPESSOA = CODPESSOA)\n' \
+                      f'GROUP BY CODEMPRESA, CODPESSOA'
 
         # print(command)
         return command
 
-    def lctofisentcfop(self, l: LCTOFISENTData) -> str:
-        inv = l.invoice
+    def lctofisentcfop(self, launch: LCTOFISENTData) -> str:
+        inv = launch.invoice
 
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
@@ -154,17 +150,10 @@ class SQL:
         # print(command)
         return command
 
-    def lctofisentretido(self, l: LCTOFISENTData):
-        import datetime
+    def lctofisentretido(self, launch: LCTOFISENTData):
+        now = self.current_datetime()
 
-        diff = datetime.timedelta(hours=-3)
-        timezone = datetime.timezone(diff)
-        now = datetime.datetime.now().astimezone(timezone)
-
-        today = f'{now.year}-{now.month}-{now.day}'
-        now_txt = f'{today} {now.hour}:{now.minute}:{now.second}'
-
-        inv = l.invoice
+        inv = launch.invoice
 
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
@@ -211,13 +200,13 @@ class SQL:
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {0},                    {0},                            {0}, ' \
-                      f'                {0},                    {238},                          \'{now_txt}\', ' \
+                      f'                {0},                    {238},                          \'{now}\', ' \
                       f'                {2},                    {838})'
 
         return command
 
-    def lctofisentvaloriss(self, l: LCTOFISENTData):
-        inv = l.invoice
+    def lctofisentvaloriss(self, launch: LCTOFISENTData):
+        inv = launch.invoice
         iss_aliquot = str(float(inv.aliquot) * 100).replace('.', ',')
 
         lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
@@ -241,7 +230,20 @@ class SQL:
 
         return command
 
-    def run_command(self, command) -> None:
+    @staticmethod
+    def current_datetime():
+        return 'SELECT CAST(\'NOW\' AS TIMESTAMP) FROM RDB$DATABASE'
+
+
+class SQLRun:
+    def __init__(self, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB', user='SYSDBA',
+                 password='masterkey'):
+        self.host = host
+        self.database = database
+        self.user = user
+        self.password = password
+
+    def run(self, command):
         os.system(fr'py -2 Model\sql_run.py {command.replace(" ", "_")} {self.host} {self.database} {self.user} '
                   fr'{self.password}')
 
