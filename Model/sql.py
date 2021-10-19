@@ -8,17 +8,19 @@ class SQLCommands:
     def __init__(self):
         self.run = SQLRun()
 
-    @staticmethod
-    def invoice_in_bd(invoice: Invoice, company_code, person_code) -> str:
-        command = f'SELECT * FROM LCTOFISENT ' \
-                  f'WHERE CODIGOEMPRESA = ({company_code}) AND CODIGOPESSOA = ({person_code}) ' \
+    def launched(self, invoice: Invoice) -> str:
+        if invoice.service_type:
+            company_code = self.get_company_code(invoice.taker.cnpj, 0)
+            person_code = self.get_company_code(invoice.provider.cnpj, 1)
+        else:
+            person_code = self.get_company_code(invoice.provider.cnpj, 0)
+            company_code = self.get_company_code(invoice.taker.cnpj, 1)
+
+        command = f'SELECT {invoice.taker.cnpj}, {invoice.provider.cnpj}, NUMERONF FROM LCTOFISENT ' \
+                  f'WHERE CODIGOEMPRESA = ({company_code}) AND ' \
+                  f'CODIGOPESSOA = ({person_code}) ' \
                   f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
 
-        # print(command)
-        # self.run_command(command)
-
-        # print(self.result())
-        # return self.result() != ['']
         return command
 
     @staticmethod
@@ -28,7 +30,7 @@ class SQLCommands:
 
         :param cnpj:  CNPJ da empresa.
         :type cnpj:   (str)
-        :param _type: Se a empresa em questão é o cliente da empresa de contabilidade[0] ou não[1].
+        :param _type: Se a empresa em questão é o cliente da gicon[0] ou não[1].
         :type _type:  (int)
         """
 
@@ -82,6 +84,11 @@ class SQLCommands:
             person_cnpj = inv.taker.cnpj
             company_cnpj = inv.provider.cnpj
 
+        company_cnpj = f'{company_cnpj[:2]}.{company_cnpj[2:5]}.{company_cnpj[5:8]}' \
+                       f'/{company_cnpj[8:12]}-{company_cnpj[12:]}'
+        person_cnpj = f'{person_cnpj[:2]}.{person_cnpj[2:5]}.{person_cnpj[5:8]}' \
+                      f'/{person_cnpj[8:12]}-{person_cnpj[12:]}'
+
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
@@ -111,13 +118,13 @@ class SQLCommands:
                       f'           {inv.invoice_situation},   {int(inv.is_canceled)},   {0}, ' \
                       f'           {238},                     ({now}),                  {2}\n' \
                       f'FROM (\n' \
-                      f'    SELECT P.CODIGOPESSOA AS CODPESSOA, C.CODIGOEMPRESA AS CODEMPRESA ' \
-                      f'    FROM PESSOA P, CLIENTE C ' \
-                      f'    WHERE (P.INSCRFEDERAL = \'{person_cnpj}\' AND C.INSCRFEDERAL = \'{company_cnpj}\')' \
+                      f'    SELECT C.CODIGOEMPRESA AS CODEMPRESA, P.CODIGOPESSOA AS CODPESSOA ' \
+                      f'    FROM CLIENTE C, PESSOA P ' \
+                      f'    WHERE (C.INSCRFEDERAL = \'{company_cnpj}\' AND P.INSCRFEDERAL = \'{person_cnpj}\')' \
                       f'\n)\n' \
-                      f'WHERE NOT EXISTS(SELECT * FROM LCTOFISENT WHERE NUMERONF = {inv.serial_number} AND ' \
-                      f'ESPECIENF = \'NFSE\' AND SERIENF = \'U\' AND CODIGOEMPRESA = CODEMPRESA AND ' \
-                      f'CODIGOPESSOA = CODPESSOA)\n' \
+                      f'WHERE NOT EXISTS(SELECT * FROM LCTOFISENT WHERE CODIGOEMPRESA = CODEMPRESA AND ' \
+                      f'CODIGOPESSOA = CODPESSOA AND NUMERONF = {inv.serial_number} AND ' \
+                      f'ESPECIENF = \'NFSE\' AND SERIENF = \'U\')\n' \
                       f'GROUP BY CODEMPRESA, CODPESSOA'
 
         # print(command)
@@ -243,12 +250,14 @@ class SQLRun:
         self.user = user
         self.password = password
 
-    def run(self, command):
-        os.system(fr'py -2 Model\sql_run.py {command.replace(" ", "_")} {self.host} {self.database} {self.user} '
+    def run(self, commands):
+        commands = [command.replace(' ', '_') for command in commands]
+        commands = ';'.join(commands)
+        os.system(fr'py -2 Model\sql_run.py {commands} {self.host} {self.database} {self.user} '
                   fr'{self.password}')
 
     @staticmethod
     def result() -> list:
         with open(fr'{SYS_PATH}\bd_results.bin', 'rb') as fin:
             arr = fin.read().decode('utf8')
-        return arr.split(';')
+        return arr.split()

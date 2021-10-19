@@ -3,10 +3,13 @@ import fdb
 from constants import SYS_PATH
 
 
-def run_command(command, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB',
+def run_command(commands, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB',
                 user='SYSDBA', password='masterkey'):
 
-    result = str()
+    # limpar o arquivo que conterá os resultados de consultas
+    open(SYS_PATH + r'\bd_results.bin', 'w').close()
+
+    results = list()
     try:
         con = fdb.connect(host=host, database=database, user=user, password=password)
         # print('conexão com BD aberta')
@@ -14,35 +17,32 @@ def run_command(command, host='10.0.4.92', database=r'C:\Questor\db_questor\Sara
         # Create a Cursor object that operates in the context of Connection con:
         cur = con.cursor()
 
-        # Execute the SELECT statement:
+        # Execute the SELECT statements:
+        for command in commands.split(';'):
+            cur.execute(command)
+            results.append(';'.join([';'.join([str(item) for item in row]) for row in cur]))
 
-        # if 'select' in command.lower():
-        # print('executando comando')
-        cur.execute(command)
-        # print('comando executado')
-
-        result = ';'.join([';'.join([str(item) for item in row]) for row in cur])
+        cur.close()
         con.close()
-        # print('conexão com BD fechada')
 
     except Exception as e:
         print('Erro na conexão com o BD:', e)
 
-    if 'select' in command.lower():
+    # if 'select' in command.lower():
         # print('escrevendo resultado em arquivo')
-        write_to_binary(result)
+    write_to_binary(results)
 
 
-def write_to_binary(result):
+def write_to_binary(results):
     """
     Escreve a tabela resultante do comando SQL em formato binário.
 
-    :param result: Tabela de resultado da consulta.
-    :type result:  (str)
+    :param results: Tabela de resultado da consulta.
+    :type results:  (list)
     """
 
-    byte_arr = bytearray(result, 'utf8')
-    with open(SYS_PATH + r'\bd_results.bin', 'wb') as fout:
+    byte_arr = bytearray('\n'.join(results), 'utf8')
+    with open(SYS_PATH + r'\bd_results.bin', 'w+b') as fout:
         fout.write(byte_arr)
 
 

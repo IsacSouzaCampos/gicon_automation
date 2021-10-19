@@ -1,5 +1,5 @@
 from View.short_inspection import *
-from View.inspection_lib import insertion_commands
+# from View.inspection_lib import insertion_commands
 import View.long_inspection as mii
 
 from Model.inspection_lib import *
@@ -8,7 +8,7 @@ from Model.invoice import Invoice
 import Model.excel as excel
 import Model.constants as constants
 
-import Control.sql as sql
+from Control.sql import SQLControl
 
 
 def inspect(folder: str, xml_files: list, service_type: int) -> bool:
@@ -80,11 +80,7 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     xlsx_file_name = folder.split('/')[-1] + '.xlsx'
     excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
 
-    launch_commands = list()
-    for invoice in invoices:
-        commands = sql.bd_insert(invoice, service_type)
-        launch_commands += commands
-
-    insertion_commands(launch_commands)
+    sql_control = SQLControl(invoices)
+    sql_control.run()
 
     return True
