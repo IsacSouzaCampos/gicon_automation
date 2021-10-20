@@ -23,30 +23,32 @@ class SQLControl:
         to_launch = InvoicesList([])
         for invoice in self.invoices:
             taker_cnpj = invoice.taker.cnpj
-            # remover os zeros iniciais pois a consulta SQL os remove
-            while taker_cnpj[0] == '0':
-                taker_cnpj = taker_cnpj[1:]
 
             s = f'{taker_cnpj};{invoice.provider.cnpj};{invoice.serial_number}'
-            if s not in results:
+            if s not in results and (invoice.iss_value != '' or invoice.csrf_value != '' or invoice.ir_value != ''):
                 to_launch.add_invoice(invoice)
+                print('invoice:', invoice.serial_number)
 
-        for invoice in to_launch:
-            print(f'{invoice.taker.cnpj};{invoice.provider.cnpj};{invoice.serial_number}')
-        # insertion_commands(launch_commands)
+        launch_keys = list()
+        commands = list()
+        for invoice, launch_key in zip(to_launch, launch_keys):
+            print('invoice:', invoice.serial_number)
+            commands.append(self.insert(invoice, launch_key))
 
-    def bd_insert(self, invoice: Invoice, service_type: int) -> list:
+        return commands
+
+    def insert(self, invoice: Invoice, launch_key) -> list:
         commands = SQLCommands()
 
         commands_list = list()
-        if service_type:  # = 1 / serviço tomado
+        if invoice.service_type:  # = 1 / serviço tomado
             print(f'Nota {invoice.serial_number}')
-            launch = LCTOFISENTData(service_type, invoice, IPI(), FunRural())
+            launch = LCTOFISENTData(invoice, launch_key, invoice.service_type, IPI(), FunRural())
 
             commands_list.append(self.clear_command(commands.lctofisent(launch)))
-            commands_list.append(self.clear_command(commands.lctofisentcfop(launch)))
-            commands_list.append(self.clear_command(commands.lctofisentvaloriss(launch)))
-            commands_list.append(self.clear_command(commands.lctofisentretido(launch)))
+            # commands_list.append(self.clear_command(commands.lctofisentcfop(launch)))
+            # commands_list.append(self.clear_command(commands.lctofisentvaloriss(launch)))
+            # commands_list.append(self.clear_command(commands.lctofisentretido(launch)))
         return commands_list
 
     @staticmethod

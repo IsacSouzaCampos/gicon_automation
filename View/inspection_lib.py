@@ -3,7 +3,13 @@ import pyperclip
 
 
 def insertion_commands(commands: list) -> None:
-    text = ';\n\n'.join([command for command in commands]) + ';'
+    # transforma a matriz commands em uma lista
+    commands_list = list()
+    for cmds in commands:
+        for cmd in cmds:
+            commands_list.append(cmd)
+
+    text = ';\n\n'.join([command for command in commands_list]) + ';'
     # layout = [[sg.Multiline(text, size=(100, 30))]]
     layout = [
         [sg.Text('Comandos SQL copiados para a Área de Transferência.')],

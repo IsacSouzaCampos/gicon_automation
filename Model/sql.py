@@ -16,7 +16,8 @@ class SQLCommands:
             person_code = self.get_company_code(invoice.provider.cnpj, 0)
             company_code = self.get_company_code(invoice.taker.cnpj, 1)
 
-        command = f'SELECT {invoice.taker.cnpj}, {invoice.provider.cnpj}, NUMERONF FROM LCTOFISENT ' \
+        command = f'SELECT \'{invoice.taker.cnpj}\', \'{invoice.provider.cnpj}\', NUMERONF ' \
+                  f'FROM LCTOFISENT ' \
                   f'WHERE CODIGOEMPRESA = ({company_code}) AND ' \
                   f'CODIGOPESSOA = ({person_code}) ' \
                   f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
@@ -46,7 +47,7 @@ class SQLCommands:
 
     @staticmethod
     def lctofisent_key(company_code) -> str:
-        command = f'SELECT MAX(CHAVELCTOFISENT) FROM LCTOFISENT WHERE CODIGOEMPRESA = {company_code}'
+        command = f'SELECT MAX(CHAVELCTOFISENT) + 1 FROM LCTOFISENT WHERE CODIGOEMPRESA = ({company_code})'
 
         return command
 
@@ -107,7 +108,7 @@ class SQLCommands:
                       f'           FINALIDADEOPERACAO,        MEIOPAGAMENTO,            MODALIDADEFRETE, ' \
                       f'           CDSITUACAO,                CANCELADA,                CONCILIADA, ' \
                       f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO)\n' \
-                      f'SELECT     CODEMPRESA,                {lctofisent_key},         {int(inv.taker.cnpj[-6:-2])}, '\
+                      f'SELECT     CODEMPRESA,                {int(launch.key)},        {int(inv.taker.cnpj[-6:-2])}, '\
                       f'           CODPESSOA,                 {inv.serial_number},      \'NFSE\', ' \
                       f'           \'U\',                     \'{issuance_date}\',      \'{issuance_date}\', ' \
                       f'           {inv.gross_value},         {launch.ipi.base},        {launch.ipi.value}, ' \
@@ -251,6 +252,9 @@ class SQLRun:
         self.password = password
 
     def run(self, commands):
+        if not commands:
+            return
+
         commands = [command.replace(' ', '_') for command in commands]
         commands = ';'.join(commands)
         os.system(fr'py -2 Model\sql_run.py {commands} {self.host} {self.database} {self.user} '

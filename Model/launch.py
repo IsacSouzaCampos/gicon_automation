@@ -1,8 +1,8 @@
 class LCTOFISENTData:
-    def __init__(self, _type, invoice, ipi, funrural, payment_method=99, freight_category=9):
-        self.type = _type
+    def __init__(self, invoice, key, _type, ipi, funrural, payment_method=99, freight_category=9):
         self.invoice = invoice
-        # self.lctofisent_key = lctofisent_key
+        self.type = _type
+        self.key = key
         # self.lctofisentretido_key = lctofisentretido_key
         self.ipi = ipi
         self.funrural = funrural

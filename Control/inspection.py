@@ -1,17 +1,12 @@
 from View.short_inspection import *
-# from View.inspection_lib import insertion_commands
 import View.long_inspection as mii
 
 from Model.inspection_lib import *
 from Model.invoices_list import InvoicesList
 from Model.invoice import Invoice
-import Model.excel as excel
-import Model.constants as constants
-
-from Control.sql import SQLControl
 
 
-def inspect(folder: str, xml_files: list, service_type: int) -> bool:
+def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
     """
     Cria um arquivo Excel contendo uma planilha com os dados referentes ao servico contido na nota
 
@@ -31,16 +26,13 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
         option = max_invoices_popup()
         if option == 0:  # se opcao == 0
             separate_xml_files(folder, xml_files)
-            return False
+            return False, InvoicesList([])
         elif option == 1:
             # invoices_amount_type = 1
             mii.temp_msg('Funcionalidade a ser atualizada!')
-            return False
+            return False, InvoicesList([])
         else:
-            return False
-
-    # lista que será passada como parâmetro para ser mostrada na tela pela GUI
-    # results = list()
+            return False, InvoicesList([])
 
     # inicia janela da barra de progresso da conferência
     loading_window = start_inspection_loading_window()
@@ -73,14 +65,4 @@ def inspect(folder: str, xml_files: list, service_type: int) -> bool:
     else:
         invoices = editable_table(invoices, companies_names, n_errors)
 
-    # retorna false caso a conferência tenha sido fechada sem lançamento
-    if invoices.empty():
-        return False
-
-    xlsx_file_name = folder.split('/')[-1] + '.xlsx'
-    excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
-
-    sql_control = SQLControl(invoices)
-    sql_control.run()
-
-    return True
+    return (True, invoices) if not invoices.empty() else (False, invoices)
