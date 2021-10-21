@@ -5,7 +5,7 @@ class InvoicesList:
     def __init__(self, invoices: list = list()):
         self.invoices = invoices
 
-    def invoice(self, index):
+    def index(self, index):
         return self.invoices[index]
 
     def add_invoice(self, invoice: Invoice):
