@@ -16,7 +16,7 @@ class SQLControl:
     def run(self):
         commands = list()
         for invoice in self.invoices:
-            commands.append(self.sql_commands.launched(invoice))
+            commands.append(self.sql_commands.is_launched(invoice))
         self.sql_run.run(commands)
         results = self.sql_run.result()
 
@@ -71,10 +71,12 @@ class SQLControl:
         if invoice.service_type:  # = 1 / serviço tomado
             launch = LCTOFISENTData(invoice, launch_key, invoice.service_type, IPI(), FunRural())
 
+            # commands_list.append(f'\n\n/* Tomador: {invoice.taker.name} - Prestador: {invoice.provider.name}'
+            #                      f' - Nota: {invoice.serial_number} */')
             commands_list.append(self.clear_command(commands.lctofisent(launch)))
-            # commands_list.append(self.clear_command(commands.lctofisentcfop(launch)))
-            # commands_list.append(self.clear_command(commands.lctofisentvaloriss(launch)))
-            # commands_list.append(self.clear_command(commands.lctofisentretido(launch)))
+            commands_list.append(self.clear_command(commands.lctofisentcfop(launch)))
+            commands_list.append(self.clear_command(commands.lctofisentvaloriss(launch)))
+            commands_list.append(self.clear_command(commands.lctofisentretido(launch)))
         return commands_list
 
     @staticmethod

@@ -8,7 +8,7 @@ class SQLCommands:
     def __init__(self):
         self.run = SQLRun()
 
-    def launched(self, invoice: Invoice) -> str:
+    def is_launched(self, invoice: Invoice) -> str:
         company_code = self.get_company_code(invoice.taker.cnpj, invoice.service_type)
 
         person_type = 0 if invoice.service_type else 1
@@ -21,6 +21,27 @@ class SQLCommands:
                   f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
 
         # print(command)
+        return command
+
+    @staticmethod
+    def get_companies_code(launch: LCTOFISENTData):
+        inv = launch.invoice
+        if launch.type:  # tomado
+            company_cnpj = inv.taker.cnpj
+            person_cnpj = inv.provider.cnpj
+        else:  # prestado
+            person_cnpj = inv.taker.cnpj
+            company_cnpj = inv.provider.cnpj
+
+        company_cnpj = f'{company_cnpj[:2]}.{company_cnpj[2:5]}.{company_cnpj[5:8]}' \
+                       f'/{company_cnpj[8:12]}-{company_cnpj[12:]}'
+        person_cnpj = f'{person_cnpj[:2]}.{person_cnpj[2:5]}.{person_cnpj[5:8]}' \
+                      f'/{person_cnpj[8:12]}-{person_cnpj[12:]}'
+
+        command = f'SELECT C.CODIGOEMPRESA AS CODEMPRESA, P.CODIGOPESSOA AS CODPESSOA ' \
+                  f'FROM CLIENTE C, PESSOA P ' \
+                  f'WHERE (C.INSCRFEDERAL = \'{company_cnpj}\' AND P.INSCRFEDERAL = \'{person_cnpj}\') '
+
         return command
 
     @staticmethod
@@ -47,10 +68,8 @@ class SQLCommands:
 
     @staticmethod
     def lctofisentretido_key(company_code) -> str:
-        command = f'SELECT MAX(CHAVELCTOFISENTRETIDO) FROM LCTOFISENTRETIDO WHERE CODIGOEMPRESA = {company_code}'
-        # self.run_command(command)
+        command = f'SELECT MAX(CHAVELCTOFISENTRETIDO) + 1 FROM LCTOFISENTRETIDO WHERE CODIGOEMPRESA = ({company_code})'
 
-        # return int(self.result()[0]) + 1
         return command
 
     def lctofisent(self, launch: LCTOFISENTData) -> str:
@@ -72,17 +91,6 @@ class SQLCommands:
         now = self.current_datetime()
 
         inv = launch.invoice
-        if launch.type:  # tomado
-            company_cnpj = inv.taker.cnpj
-            person_cnpj = inv.provider.cnpj
-        else:  # prestado
-            person_cnpj = inv.taker.cnpj
-            company_cnpj = inv.provider.cnpj
-
-        company_cnpj = f'{company_cnpj[:2]}.{company_cnpj[2:5]}.{company_cnpj[5:8]}' \
-                       f'/{company_cnpj[8:12]}-{company_cnpj[12:]}'
-        person_cnpj = f'{person_cnpj[:2]}.{person_cnpj[2:5]}.{person_cnpj[5:8]}' \
-                      f'/{person_cnpj[8:12]}-{person_cnpj[12:]}'
 
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
@@ -109,125 +117,129 @@ class SQLCommands:
                       f'           {inv.doc_type},            {4.00},                   \'{inv.issuer}\', ' \
                       f'           {inv.operation_purpose},   {launch.payment_method},  {launch.freight_category}, ' \
                       f'           {inv.invoice_situation},   {int(inv.is_canceled)},   {0}, ' \
-                      f'           {238},                     ({now}),                  {2}\n' \
+                      f'           {238},                     ({now}),                  {2} \n' \
                       f'FROM (\n' \
-                      f'    SELECT C.CODIGOEMPRESA AS CODEMPRESA, P.CODIGOPESSOA AS CODPESSOA ' \
-                      f'    FROM CLIENTE C, PESSOA P ' \
-                      f'    WHERE (C.INSCRFEDERAL = \'{company_cnpj}\' AND P.INSCRFEDERAL = \'{person_cnpj}\')' \
-                      f'\n)\n' \
-                      f'WHERE NOT EXISTS(SELECT * FROM LCTOFISENT WHERE CODIGOEMPRESA = CODEMPRESA AND ' \
-                      f'CODIGOPESSOA = CODPESSOA AND NUMERONF = {inv.serial_number} AND ' \
-                      f'ESPECIENF = \'NFSE\' AND SERIENF = \'U\')\n' \
-                      f'GROUP BY CODEMPRESA, CODPESSOA'
+                      f'    {self.get_companies_code(launch)}' \
+                      f'\n)'
 
         return command
 
-    # def lctofisentcfop(self, launch: LCTOFISENTData) -> str:
-    #     inv = launch.invoice
-    #
-    #     issuance_date = inv.issuance_date.split('/')
-    #     issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
-    #
-    #     tax_aliquot = float(inv.aliquot) * 100
-    #     tax_value = float(inv.gross_value) * float(inv.aliquot)
-    #     lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
-    #
-    #     command = str()
-    #     if str(inv.service_nature)[-3:] == '308':
-    #         command = f'INSERT INTO ' \
-    #                   f'LCTOFISENTCFOP(CODIGOEMPRESA,                CHAVELCTOFISENT,           CODIGOCFOP, ' \
-    #                   f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
-    #                   f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
-    #                   f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
-    #                   f'               VALOREXVALORADICIONAL) ' \
-    #                   f'VALUES(        {inv.taker.code},             {lctofisent_key},          {inv.service_nature}, '\
-    #                   f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
-    #                   f'               {int(inv.taker.cnpj[-6:-2])}, {inv.gross_value},         {inv.gross_value}, ' \
-    #                   f'               {tax_value},                  {0},                       {0}, ' \
-    #                   f'               {0})'
-    #
-    #     # print(command)
-    #     return command
+    def lctofisentcfop(self, launch: LCTOFISENTData) -> str:
+        inv = launch.invoice
 
-    # def lctofisentretido(self, launch: LCTOFISENTData):
-    #     now = self.current_datetime()
-    #
-    #     inv = launch.invoice
-    #
-    #     issuance_date = inv.issuance_date.split('/')
-    #     issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
-    #
-    #     taker_comp_num = int(inv.taker.cnpj[-6:-2])
-    #     issqn_value = float(inv.gross_value) * float(inv.aliquot)
-    #     issqn_aliquot = float(inv.aliquot) * 100
-    #
-    #     lctofisentretido_key = f'(({self.lctofisentretido_key(inv.taker.code)}) + 1)'
-    #     lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
-    #
-    #     command = str()
-    #     if str(inv.service_nature)[-3:] == '308':
-    #         command = f'INSERT INTO ' \
-    #                   f'LCTOFISENTRETIDO(CODIGOEMPRESA,         CHAVELCTOFISENTRETIDO,          CODIGOPESSOA, ' \
-    #                   f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
-    #                   f'                 DATALCTOFIS,           DATAEMISSAO,                    VALORCONTABIL, ' \
-    #                   f'                 CODIGOESTAB,           CHAVELCTOFISENT,                CODIGOCFOP, ' \
-    #                   f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
-    #                   f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
-    #                   f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
-    #                   f'                 APURADOIRPJ,' \
-    #                   f'                 BASECALCULOIRRF, ' \
-    #                   f'                 ALIQIRRF,              VALORIRRF,                      ' \
-    #                   f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
-    #                   f'                 BASECALCULOPIS, ' \
-    #                   f'                 ALIQPIS,               VALORPIS,                       BASECALCULOCOFINS, ' \
-    #                   f'                 ALIQCOFINS,            VALORCOFINS,                    BASECALCULOCSLL, ' \
-    #                   f'                 ALIQCSLL,              VALORCSLL,                      APURADOPISCOFINSCSLL, '\
-    #                   f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
-    #                   f'                 ORIGEMDADO,            CODIGOTABCTBFIS) ' \
-    #                   f'VALUES(         {inv.taker.code},       {lctofisentretido_key},         {inv.provider.code}, ' \
-    #                   f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
-    #                   f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-    #                   f'                {taker_comp_num},       {lctofisent_key},               {inv.service_nature}, '\
-    #                   f'                {0},                    {0},                            {0}, ' \
-    #                   f'                {inv.gross_value},      {issqn_aliquot},                {issqn_value}, ' \
-    #                   f'                {0},                    {0},                            {0},' \
-    #                   f'                {0},' \
-    #                   f'                {0}, ' \
-    #                   f'                {0},                    {0},                            ' \
-    #                   f'                {0},                    {0},                            {0},' \
-    #                   f'                {0}, ' \
-    #                   f'                {0},                    {0},                            {0}, ' \
-    #                   f'                {0},                    {0},                            {0}, ' \
-    #                   f'                {0},                    {0},                            {0}, ' \
-    #                   f'                {0},                    {238},                          \'{now}\', ' \
-    #                   f'                {2},                    {838})'
-    #
-    #     return command
+        issuance_date = inv.issuance_date.split('/')
+        issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
-    # def lctofisentvaloriss(self, launch: LCTOFISENTData):
-    #     inv = launch.invoice
-    #     iss_aliquot = str(float(inv.aliquot) * 100).replace('.', ',')
-    #
-    #     lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
-    #
-    #     command = str()
-    #     if str(inv.service_nature)[-3:] == '308':
-    #         command = f'INSERT INTO LCTOFISENTVALORISS(' \
-    #                   f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
-    #                   f'VALUES(' \
-    #                   f'{inv.taker.code},       {lctofisent_key},           {125},                  {inv.full_cnae});' \
-    #                   f'\n\n' \
-    #                   f'INSERT INTO LCTOFISENTVALORISS(' \
-    #                   f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
-    #                   f'VALUES(' \
-    #                   f'{inv.taker.code},       {lctofisent_key},           {126},                  {inv.cst});' \
-    #                   f'\n\n' \
-    #                   f'INSERT INTO LCTOFISENTVALORISS(' \
-    #                   f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
-    #                   f'VALUES(' \
-    #                   f'{inv.taker.code},       {lctofisent_key},           {131},                  \'{iss_aliquot}\')'
-    #
-    #     return command
+        tax_aliquot = float(inv.aliquot) * 100
+        tax_value = float(inv.gross_value) * float(inv.aliquot)
+        # lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
+
+        command = str()
+        if str(inv.service_nature)[-3:] == '308':
+            command = f'INSERT INTO ' \
+                      f'LCTOFISENTCFOP(CODIGOEMPRESA,                CHAVELCTOFISENT,           CODIGOCFOP, ' \
+                      f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
+                      f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
+                      f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
+                      f'               VALOREXVALORADICIONAL) \n' \
+                      f'SELECT         CODEMPRESA,                {launch.key},              {inv.service_nature}, '\
+                      f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
+                      f'               {int(inv.taker.cnpj[-6:-2])}, {inv.gross_value},         {inv.gross_value}, ' \
+                      f'               {tax_value},                  {0},                       {0}, ' \
+                      f'               {0} \n' \
+                      f'FROM (\n' \
+                      f'    {self.get_companies_code(launch)}' \
+                      f'\n)'
+
+        # print(command)
+        return command
+
+    def lctofisentretido(self, launch: LCTOFISENTData):
+        now = self.current_datetime()
+
+        inv = launch.invoice
+
+        issuance_date = inv.issuance_date.split('/')
+        issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
+
+        taker_comp_num = int(inv.taker.cnpj[-6:-2])
+        issqn_value = float(inv.gross_value) * float(inv.aliquot)
+        issqn_aliquot = float(inv.aliquot) * 100
+
+        company_code = self.get_company_code(inv.taker.cnpj, inv.service_type)
+
+        lctofisentretido_key = f'({self.lctofisentretido_key(company_code)})'
+        # lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
+
+        command = str()
+        if str(inv.service_nature)[-3:] == '308':
+            command = f'INSERT INTO ' \
+                      f'LCTOFISENTRETIDO(CODIGOEMPRESA,         CHAVELCTOFISENTRETIDO,          CODIGOPESSOA, ' \
+                      f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
+                      f'                 DATALCTOFIS,           DATAEMISSAO,                    VALORCONTABIL, ' \
+                      f'                 CODIGOESTAB,           CHAVELCTOFISENT,                CODIGOCFOP, ' \
+                      f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
+                      f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                      f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
+                      f'                 APURADOIRPJ,' \
+                      f'                 BASECALCULOIRRF, ' \
+                      f'                 ALIQIRRF,              VALORIRRF,                      ' \
+                      f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
+                      f'                 BASECALCULOPIS, ' \
+                      f'                 ALIQPIS,               VALORPIS,                       BASECALCULOCOFINS, ' \
+                      f'                 ALIQCOFINS,            VALORCOFINS,                    BASECALCULOCSLL, ' \
+                      f'                 ALIQCSLL,              VALORCSLL,                      APURADOPISCOFINSCSLL, '\
+                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
+                      f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
+                      f'SELECT          CODEMPRESA,             {lctofisentretido_key},         CODPESSOA, ' \
+                      f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
+                      f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
+                      f'                {taker_comp_num},       {launch.key},                   {inv.service_nature}, '\
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {inv.gross_value},      {issqn_aliquot},                {issqn_value}, ' \
+                      f'                {0},                    {0},                            {0},' \
+                      f'                {0},' \
+                      f'                {0}, ' \
+                      f'                {0},                    {0},                            ' \
+                      f'                {0},                    {0},                            {0},' \
+                      f'                {0}, ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {0},                    {238},                          ({now}), ' \
+                      f'                {2},                    {838} \n' \
+                      f'FROM (\n' \
+                      f'    {self.get_companies_code(launch)}' \
+                      f'\n)'
+
+        return command
+
+    def lctofisentvaloriss(self, launch: LCTOFISENTData):
+        inv = launch.invoice
+        iss_aliquot = str(float(inv.aliquot) * 100).replace('.', ',')
+
+        taker_code = self.get_company_code(inv.taker.cnpj, inv.service_type)
+
+        # lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
+
+        command = str()
+        if str(inv.service_nature)[-3:] == '308':
+            command = f'INSERT INTO LCTOFISENTVALORISS(' \
+                      f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
+                      f'VALUES(' \
+                      f'({taker_code}),         {launch.key},               {125},                  {inv.full_cnae});' \
+                      f'\n\n' \
+                      f'INSERT INTO LCTOFISENTVALORISS(' \
+                      f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
+                      f'VALUES(' \
+                      f'({taker_code}),         {launch.key},               {126},                  {inv.cst});' \
+                      f'\n\n' \
+                      f'INSERT INTO LCTOFISENTVALORISS(' \
+                      f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
+                      f'VALUES(' \
+                      f'({taker_code}),         {launch.key},               {131},                  \'{iss_aliquot}\')'
+
+        return command
 
     @staticmethod
     def current_datetime():

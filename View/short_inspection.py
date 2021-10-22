@@ -305,7 +305,7 @@ def service_details(invoices: InvoicesList, header: list, row: list, row_index: 
 
     table_header = [sg.Text(h, size=header_size, justification='center') for h in header]
 
-    invoice = invoices.invoice(row_index)
+    invoice = invoices.index(row_index)
 
     provider_name_layout = [[sg.Text(invoice.provider.name, size=(text_width, 1), text_color=txt_color)]]
     taker_name_layout = [[sg.Text(invoice.taker.name, size=(text_width, 1), text_color=txt_color)]]
