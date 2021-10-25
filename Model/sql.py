@@ -66,9 +66,9 @@ class SQLCommands:
 
         return command
 
-    @staticmethod
-    def lctofisentretido_key(company_code) -> str:
-        command = f'SELECT MAX(CHAVELCTOFISENTRETIDO) + 1 FROM LCTOFISENTRETIDO WHERE CODIGOEMPRESA = ({company_code})'
+    def lctofisentretido_key(self, company_cnpj, _type) -> str:
+        command = f'SELECT MAX(CHAVELCTOFISENTRETIDO) + 1 FROM LCTOFISENTRETIDO WHERE CODIGOEMPRESA = ' \
+                  f'({self.get_company_code(company_cnpj, _type)})'
 
         return command
 
@@ -154,7 +154,7 @@ class SQLCommands:
         # print(command)
         return command
 
-    def lctofisentretido(self, launch: LCTOFISENTData):
+    def lctofisentretido(self, launch: LCTOFISENTData, withheld_key):
         now = self.current_datetime()
 
         inv = launch.invoice
@@ -165,11 +165,6 @@ class SQLCommands:
         taker_comp_num = int(inv.taker.cnpj[-6:-2])
         issqn_value = float(inv.gross_value) * float(inv.aliquot)
         issqn_aliquot = float(inv.aliquot) * 100
-
-        company_code = self.get_company_code(inv.taker.cnpj, inv.service_type)
-
-        lctofisentretido_key = f'({self.lctofisentretido_key(company_code)})'
-        # lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
 
         command = str()
         if str(inv.service_nature)[-3:] == '308':
@@ -191,7 +186,7 @@ class SQLCommands:
                       f'                 ALIQCSLL,              VALORCSLL,                      APURADOPISCOFINSCSLL, '\
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
-                      f'SELECT          CODEMPRESA,             {lctofisentretido_key},         CODPESSOA, ' \
+                      f'SELECT          CODEMPRESA,             {withheld_key},                 CODPESSOA, ' \
                       f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
                       f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
                       f'                {taker_comp_num},       {launch.key},                   {inv.service_nature}, '\

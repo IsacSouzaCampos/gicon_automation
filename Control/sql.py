@@ -29,10 +29,11 @@ class SQLControl:
                 to_launch.add_invoice(invoice)
 
         launch_keys = self.get_launch_keys(to_launch)
+        withheld_keys = self.get_launch_withheld_key(to_launch)
         commands = list()
-        for invoice, launch_key in zip(to_launch, launch_keys):
+        for invoice, launch_key, withheld_key in zip(to_launch, launch_keys, withheld_keys):
             # print('invoice:', invoice.serial_number)
-            commands.append(self.insert(invoice, launch_key))
+            commands.append(self.insert(invoice, launch_key, withheld_key))
 
         return commands
 
@@ -45,6 +46,7 @@ class SQLControl:
         # for lkc in launch_keys_commands:
         #     print(lkc)
 
+        # print('keys commands:', launch_keys_commands)
         self.sql_run.run(launch_keys_commands)
 
         try:
@@ -69,7 +71,38 @@ class SQLControl:
 
         return launch_keys
 
-    def insert(self, invoice: Invoice, launch_key) -> list:
+    def get_launch_withheld_key(self, to_launch: InvoicesList) -> list:
+        withheld_keys_commands = list()
+        for i in range(len(to_launch)):
+            inv = to_launch.index(i)
+            withheld_keys_commands.append(self.sql_commands.lctofisentretido_key(inv.taker.cnpj, inv.service_type))
+
+        # print('withheld keys commands:', withheld_keys_commands)
+        self.sql_run.run(withheld_keys_commands)
+
+        try:
+            withheld_keys = list(map(int, self.sql_run.result()))
+        except Exception as e:
+            print(f'Error: {e}')
+            return []  # retorna uma lista vazia caso todas as notas já estejam lançadas
+
+        # corrige as chaves nos casos em que o serviço entre duas empresas se repete na lista
+        withheld_keys_dict = dict()
+        for i in range(len(to_launch)):
+            inv = to_launch.index(i)
+            inv_id = f'{inv.taker.cnpj}{inv.provider.cnpj}'
+            if inv_id not in withheld_keys_dict:
+                withheld_keys_dict[inv_id] = 0
+            else:
+                withheld_keys_dict[inv_id] += 1
+            withheld_keys[i] += withheld_keys_dict[inv_id]
+
+        # for lk in launch_keys:
+        #     print(type(lk), lk)
+
+        return withheld_keys
+
+    def insert(self, invoice: Invoice, launch_key, withheld_key) -> list:
         commands = SQLCommands()
 
         commands_list = list()
@@ -81,7 +114,7 @@ class SQLControl:
             commands_list.append(self.clear_command(commands.lctofisent(launch)))
             commands_list.append(self.clear_command(commands.lctofisentcfop(launch)))
             commands_list.append(self.clear_command(commands.lctofisentvaloriss(launch)))
-            commands_list.append(self.clear_command(commands.lctofisentretido(launch)))
+            commands_list.append(self.clear_command(commands.lctofisentretido(launch, withheld_key)))
         return commands_list
 
     @staticmethod
