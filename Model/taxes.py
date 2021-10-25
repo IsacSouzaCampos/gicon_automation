@@ -5,11 +5,15 @@ from Model.inspection_lib import clear_string
 
 
 class Taxes:
-    def __init__(self, data: dict):
+    def __init__(self, taker, provider, service_description, aditional_data, cfps, cst, gross_value, data: dict):
+        self.taker = taker
+        self.provider = provider
+        self.service_description = service_description
+        self.aditional_data = aditional_data
+        self.cfps = cfps
+        self.cst = cst
+        self.gross_value = gross_value
         self.data = data
-
-        self.service_description = self.data['descricaoservico']
-        self.aditional_data = self.data['dadosadicionais']
 
         self.iss = self.ISS(self)
         self.irrf = self.IRRF(self)
@@ -123,8 +127,9 @@ class Taxes:
 
         return -1
 
-    def tax_percentage(self, tax_value: float) -> float:
-        return round((tax_value / self.invoice.gross_value) * 100, 2)
+    @staticmethod
+    def tax_percentage(tax_value: float, gross_value: float) -> float:
+        return round((tax_value / gross_value) * 100, 2)
 
     @staticmethod
     def to_float(tax_value):
@@ -153,11 +158,11 @@ class Taxes:
             """Verifica se há retencao de ISS com base no CFPS e CST"""
 
             iss_withheld = False
-            if self.outer.data.lower() in ['florianopolis', 'florianópolis']:
-                if self.outer.invoice.xml_data['cst'] in ['2', '4', '6', '10']:
+            if self.outer.provider.city.lower() in ['florianopolis', 'florianópolis']:
+                if self.outer.cst in ['2', '4', '6', '10']:
                     iss_withheld = True
 
-            elif self.outer.invoice.cfps in ['9205', '9206'] and self.outer.invoice.cst in ['0', '1']:
+            elif self.outer.cfps in ['9205', '9206'] and self.outer.cst in ['0', '1']:
                 iss_withheld = True
 
             return iss_withheld
@@ -168,7 +173,8 @@ class Taxes:
             self.outer = outer
             self.is_withheld = outer.is_fed_tax_withheld(0)
             self.value = self.extract_value() if self.is_withheld else ''
-            self.percentage = outer.tax_percentage(self.value) if type(self.value) == float else 0
+            gross_value = self.outer.gross_value
+            self.percentage = outer.tax_percentage(self.value, gross_value) if type(self.value) == float else 0
 
         def extract_value(self):
             try:
@@ -208,8 +214,8 @@ class Taxes:
         def extract_value(self):
             """Retorna o valor do CSRF."""
 
-            service_description = self.outer.data.service_description
-            aditional_data = self.outer.data.aditional_data
+            service_description = self.outer.service_description
+            aditional_data = self.outer.aditional_data
 
             if self.pis.value < 0 and self.cofins.value < 0 and self.csll.value < 0:
                 value = self.outer.extract_tax_value(service_description, aditional_data, 4)
@@ -242,11 +248,11 @@ class Taxes:
                 self.value = self.extract_value()
 
             def extract_value(self):
-                value = self.outest.extract_tax_value(self.outest.invoice.service_description,
-                                                      self.outest.invoice.aditional_data, 1)
+                value = self.outest.extract_tax_value(self.outest.service_description,
+                                                      self.outest.aditional_data, 1)
                 if value < 0:
-                    value = self.outest.extract_tax_from_percentage(self.outest.invoice.service_description,
-                                                                    self.outest.invoice.aditional_data,
+                    value = self.outest.extract_tax_from_percentage(self.outest.service_description,
+                                                                    self.outest.aditional_data,
                                                                     float(self.outest.gross_value), 1)
                 return value
 
@@ -257,12 +263,12 @@ class Taxes:
                 self.value = self.extract_value()
 
             def extract_value(self):
-                value = self.outest.extract_tax_value(self.outest.invoice.aditional_data,
-                                                      self.outest.invoice.aditional_data, 2)
+                value = self.outest.extract_tax_value(self.outest.aditional_data,
+                                                      self.outest.aditional_data, 2)
                 if value < 0:
-                    value = self.outest.extract_tax_from_percentage(self.outest.invoice.service_description,
-                                                                    self.outest.invoice.aditional_data,
-                                                                    float(self.outest.invoice.gross_value), 2)
+                    value = self.outest.extract_tax_from_percentage(self.outest.service_description,
+                                                                    self.outest.aditional_data,
+                                                                    float(self.outest.gross_value), 2)
                 return value
 
         class CSLL:
@@ -272,10 +278,10 @@ class Taxes:
                 self.value = self.extract_value()
 
             def extract_value(self):
-                value = self.outest.extract_tax_value(self.outest.invoice.aditional_data,
-                                                      self.outest.invoice.aditional_data, 3)
+                value = self.outest.extract_tax_value(self.outest.aditional_data,
+                                                      self.outest.aditional_data, 3)
                 if value < 0:
-                    value = self.outest.extract_tax_from_percentage(self.outest.invoice.service_description,
-                                                                    self.outest.invoice.aditional_data,
+                    value = self.outest.extract_tax_from_percentage(self.outest.service_description,
+                                                                    self.outest.aditional_data,
                                                                     float(self.outest.gross_value), 3)
                 return value

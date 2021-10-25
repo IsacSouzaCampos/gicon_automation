@@ -28,8 +28,9 @@ class InvoicesList:
     def get_gui_table(self) -> list:
         table = list()
         for invoice in self.invoices:
-            table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.iss_value,
-                          invoice.ir_value, invoice.csrf_value, invoice.net_value, invoice.service_nature])
+            table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
+                          invoice.taxes.irrf.value, invoice.taxes.csrf.value, invoice.net_value,
+                          invoice.service_nature])
         return table
 
     def update_invoice(self, index: int, invoice_data: list) -> None:
@@ -52,7 +53,8 @@ class InvoicesList:
 
         n_errors = 0
         for invoice in self.invoices:
-            values = [invoice.gross_value, invoice.iss_value, invoice.ir_value, invoice.csrf_value, invoice.net_value]
+            values = [invoice.gross_value, invoice.taxes.iss.value, invoice.taxes.irrf.value, invoice.taxes.csrf.value,
+                      invoice.net_value]
             for value in values:
                 try:
                     if value not in ['-', '']:

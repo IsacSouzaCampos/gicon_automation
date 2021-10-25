@@ -42,7 +42,8 @@ class Invoice:
         else:
             self.aditional_data = ''
 
-        self.taxes = Taxes(self.xml_data)
+        self.taxes = Taxes(self.taker, self.provider, self.service_description, self.aditional_data, self.cfps,
+                           self.cst, self.gross_value, self.xml_data)
 
         # print('IR(%):', self.ir_percentage, '- CSRF(%):', self.csrf_percentage)
 

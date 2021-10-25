@@ -46,7 +46,15 @@ class SQLControl:
         #     print(lkc)
 
         self.sql_run.run(launch_keys_commands)
-        launch_keys = list(map(int, self.sql_run.result()))
+        result = self.sql_run.result()
+        print(result)
+        if not result:
+            return []
+        try:
+            launch_keys = list(map(int, self.sql_run.result()))
+        except Exception as e:
+            print(f'Error: {e}')
+            return []  # retorna uma lista vazia caso todas as notas já estejam lançadas
 
         # corrige as chaves nos casos em que o serviço entre duas empresas se repete na lista
         launch_keys_dict = dict()
