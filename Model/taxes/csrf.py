@@ -19,6 +19,14 @@ class CSRF:
         gross_value = self.outer.gross_value
         self.percentage = self.outer.tax_percentage(self.value, gross_value) if type(self.value) == float else 0
 
+        if (self.pis.value + self.cofins.value + self.csll.value) <= 0 and self.percentage == 4.65:
+            self.pis.value = round(self.outer.gross_value * 0.0065, 2)
+            self.cofins.value = round(self.outer.gross_value * 0.03, 2)
+            self.csll.value = round(self.outer.gross_value * 0.01, 2)
+            self.value = self.pis.value + self.cofins.value + self.csll.value
+            # print(f'nota {self.outer.data["numeroserie"]}')
+            # print('pis:', self.pis.value, 'cofins:', self.cofins.value, 'csll:', self.csll.value, 'csrf:', self.value)
+
     def extract_value(self):
         """Retorna o valor do CSRF."""
 
