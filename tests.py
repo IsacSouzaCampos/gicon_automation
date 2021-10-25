@@ -1,6 +1,8 @@
 from Control.inspection import inspect
 from Control.sql import SQLControl
 
+import View.short_inspection as gui_inspection
+
 import Model.excel as excel
 import Model.constants as constants
 
@@ -19,7 +21,8 @@ def test():
     # folder = 'C:/Users/Fiscal_20/Documents/gicon_automation/xml(s)/08'
     # folder = 'C:/Users/Fiscal_20/Documents/gicon_automation/xml(s)/0524239_janeiro_xmls (20)'
     # folder = 'C:/Users/Fiscal_20/Documents/gicon_automation/xml(s)/ibagy_agosto'
-    folder = r'C:\Users\Fiscal_20\Documents\gicon_automation\xml(s)\teste_bd'
+    # folder = r'C:\Users\Fiscal_20\Documents\gicon_automation\xml(s)\teste_bd'
+    folder = r'C:\Users\Fiscal_20\Documents\gicon_automation\xml(s)\notas_problematicas'
 
     # ***Possui notas canceladas e uma quantidade um pouco maior***
     # folder = 'C:/Users/Fiscal_20/Documents/gicon_automation/xml(s)/0524239_janeiro_xmls (20)'
@@ -27,6 +30,9 @@ def test():
     xml_files = [file for file in os.listdir(folder) if '.xml' in file]
 
     is_finished, invoices = inspect(folder, xml_files, service_type)
+    while not is_finished:
+        folder, xml_files, service_type = gui_inspection.main_gui()
+        is_finished, invoices = inspect(folder, xml_files, service_type)
 
     xlsx_file_name = folder.split('/')[-1] + '.xlsx'
     excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
