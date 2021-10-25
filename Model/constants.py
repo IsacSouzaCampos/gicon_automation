@@ -59,5 +59,3 @@ CSRF_KEYWORDS = ['csrf4,65%', 'csrf4.65%', 'csrfr$',
                  'retencoesdetributosfederais']
 
 ALL_KEYWORDS = [IR_KEYWORDS, PIS_KEYWORDS, COFINS_KEYWORDS, CSLL_KEYWORDS, CSRF_KEYWORDS]
-
-

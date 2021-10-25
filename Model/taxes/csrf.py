@@ -9,11 +9,15 @@ class CSRF:
         self.cofins = self.COFINS(self.outer)
         self.csll = self.CSLL(self.outer)
 
+        # print('nota:', self.outer.data["numeroserie"], 'pis:', self.pis.value, 'cofins:', self.cofins.value, 'csll:',
+        #       self.csll.value)
+
         self.is_withheld = self.outer.is_fed_tax_withheld(1)
         self.value = self.extract_value() if self.is_withheld else ''
         if self.value != '' and self.value < 0:
             self.csrf_value = TAX_EXTRACTION_ERROR
-        self.percentage = self.outer.tax_percentage(self.value) if type(self.value) == float else 0
+        gross_value = self.outer.gross_value
+        self.percentage = self.outer.tax_percentage(self.value, gross_value) if type(self.value) == float else 0
 
     def extract_value(self):
         """Retorna o valor do CSRF."""

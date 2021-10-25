@@ -26,7 +26,7 @@ class IRRF:
             if ir_value != '' and ir_value < 0:
                 ir_value = TAX_EXTRACTION_ERROR
         except Exception as e:
-            print(self.outer.invoice.serial_number, 'Erro na extração do IR', e)
+            print(self.outer.data['numeroserie'], 'Erro na extração do IR', e)
             ir_value = TAX_EXTRACTION_ERROR
 
         return ir_value

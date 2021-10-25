@@ -1,5 +1,5 @@
 import os
-from Model.constants import ALL_KEYWORDS
+# from Model.constants import ALL_KEYWORDS
 
 
 def separate_xml_files(folder, xml_files):
@@ -58,7 +58,7 @@ def clear_string(s: str) -> str:
 
     law_terms = ['leidatransparencia', 'lei12.741/2012']
     for law_term in law_terms:
-        if s.count(law_term) > -1:
+        if s.count(law_term) > 0:
             before = s[: s.find(law_term) + 1]
             after = s[s.find(law_term) + len(law_term): len(s)]
             after = after[after.find(law_term) + len(law_term): len(after)]

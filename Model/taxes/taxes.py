@@ -52,6 +52,7 @@ class Taxes:
 
         for text in [service_description, aditional_data]:
             clean_value = clear_string(text)
+
             for tax_kw in keywords:
                 if tax_kw in clean_value:
                     splitted_string = clean_value.split(tax_kw)
