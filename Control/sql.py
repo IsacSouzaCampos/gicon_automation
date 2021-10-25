@@ -25,7 +25,8 @@ class SQLControl:
             taker_cnpj = invoice.taker.cnpj
 
             s = f'{taker_cnpj};{invoice.provider.cnpj};{invoice.serial_number}'
-            if s not in results and (invoice.iss_value != '' or invoice.csrf_value != '' or invoice.ir_value != ''):
+            if s not in results and (invoice.taxes.iss.value != '' or invoice.taxes.csrf.value != '' or
+                                     invoice.taxes.ir.value != ''):
                 to_launch.add_invoice(invoice)
 
         launch_keys = self.get_launch_keys(to_launch)
@@ -109,8 +110,6 @@ class SQLControl:
         if invoice.service_type:  # = 1 / serviço tomado
             launch = LCTOFISENTData(invoice, launch_key, invoice.service_type, IPI(), FunRural())
 
-            # commands_list.append(f'\n\n/* Tomador: {invoice.taker.name} - Prestador: {invoice.provider.name}'
-            #                      f' - Nota: {invoice.serial_number} */')
             commands_list.append(self.clear_command(commands.lctofisent(launch)))
             commands_list.append(self.clear_command(commands.lctofisentcfop(launch)))
             commands_list.append(self.clear_command(commands.lctofisentvaloriss(launch)))
