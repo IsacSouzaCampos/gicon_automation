@@ -1,0 +1,152 @@
+# from Model.invoice import Invoice
+
+from Model.constants import *
+from Model.inspection_lib import clear_string
+
+from Model.taxes.iss import ISS
+from Model.taxes.irrf import IRRF
+from Model.taxes.csrf import CSRF
+
+
+class Taxes:
+    def __init__(self, taker, provider, service_description, aditional_data, cfps, cst, gross_value, data: dict):
+        self.taker = taker
+        self.provider = provider
+        self.service_description = service_description
+        self.aditional_data = aditional_data
+        self.cfps = cfps
+        self.cst = cst
+        self.gross_value = gross_value
+        self.data = data
+
+        self.iss = ISS(self)
+        self.irrf = IRRF(self)
+        self.csrf = CSRF(self)
+
+    def is_fed_tax_withheld(self, tax_type):
+        """Verifica se há retenção de imposto federal com base em palavras chave"""
+
+        if tax_type not in [0, 1]:  # 0 = IR / 1 = CSRF
+            raise Exception('Imposto não reconhecido')
+
+        keywords = IR_KEYWORDS if tax_type == 0 else (PIS_KEYWORDS + CSRF_KEYWORDS + COFINS_KEYWORDS + CSLL_KEYWORDS)
+
+        for text in [self.service_description, self.aditional_data]:
+            clean_value = clear_string(text)
+
+            # if 'leidatransparencia' in clean_value or 'lei12.741/2012' in clean_value:
+            #     if 'retencao' not in clean_value and 'retencoes' not in clean_value:
+            #         return False
+
+            for kw in keywords:
+                if kw in clean_value:
+                    return True
+
+        return False
+
+    def extract_tax_value(self, service_description, aditional_data, tax_type):
+        """Encontra e extrai o valor do imposto federal solicitado"""
+
+        # 0 = IR / 1 = PIS / 2 = COFINS / 3 = CSLL / 4 = CSRF
+        keywords = ALL_KEYWORDS[tax_type]
+
+        for text in [service_description, aditional_data]:
+            clean_value = clear_string(text)
+            for tax_kw in keywords:
+                if tax_kw in clean_value:
+                    splitted_string = clean_value.split(tax_kw)
+
+                    for s in splitted_string[1:]:
+                        # aux serve para que o algoritmo saiba quando o valor realmente começou a ser lido
+                        aux = False
+                        tax_value = str()
+
+                        i = 0
+                        while i < len(s):
+                            c = s[i]
+                            if (i + 1) >= len(s):
+                                # não encontrou valor referente ao imposto em análise
+                                if c.isnumeric():
+                                    tax_value += c
+                                if not tax_value:
+                                    return -1
+                                return self.to_float(tax_value)
+
+                            next_c = s[i + 1]
+                            if c.isnumeric() or c in [',', '.']:
+                                tax_value += c
+
+                                # reinicia a variável tax_value caso o valor extraído até aqui tenha
+                                # sido o de porcentagem da cobrança
+                                if next_c == '%':
+                                    tax_value = ''
+                                    aux = False
+                                    i += 1
+                                    continue
+
+                                if not next_c.isnumeric() and next_c not in [',', '.'] and aux:
+                                    return self.to_float(tax_value)
+
+                            if next_c.isnumeric() and not aux:
+                                aux = True
+                            i += 1
+        return -1
+
+    def extract_tax_from_percentage(self, service_description, aditional_data, gross_value, tax_type):
+        """Encontra e extrai o valor do imposto federal solicitado com base no seu percentual"""
+
+        # 0 = IR / 1 = PIS / 2 = COFINS / 3 = CSLL / 4 = CSRF
+        keywords = ALL_KEYWORDS[tax_type]
+
+        for text in [service_description, aditional_data]:
+            clean_value = clear_string(text)
+            for tax_kw in keywords:
+                if tax_kw in clean_value:
+                    splitted_string = clean_value.split(tax_kw)
+
+                    for s in splitted_string[1:]:
+                        tax_value = str()
+
+                        i = 0
+                        s_len = len(s)
+                        while i < s_len:
+                            c = s[i]
+                            if (i + 1) >= s_len and c != '%':
+                                break
+
+                            next_c = s[i + 1]
+                            if c.isnumeric() or c in [',', '.']:
+                                tax_value += c
+
+                                # reinicia a variável tax_value caso o valor extraído até aqui tenha
+                                # sido o de porcentagem da cobrança
+                                if next_c == '%':
+                                    percentage = tax_value
+                                    percentage = self.to_float(percentage)
+                                    tax_value = round(float((percentage / 100) * gross_value), 2)
+
+                                    return tax_value
+
+                            i += 1
+
+        return -1
+
+    @staticmethod
+    def tax_percentage(tax_value: float, gross_value: float) -> float:
+        return round((tax_value / gross_value) * 100, 2)
+
+    @staticmethod
+    def to_float(tax_value):
+        """Converte a string tax_value extraída da nota para o formato float"""
+        if not tax_value[-1].isnumeric():
+            tax_value = tax_value[:-1]
+        if not tax_value[0].isnumeric():
+            tax_value = tax_value[1:]
+
+        dot = tax_value.find('.')
+        comma = tax_value.find(',')
+        if dot > 0 and comma > 0:
+            if dot < comma:
+                return round(float(tax_value.replace('.', '').replace(',', '.')), 2)
+        else:
+            return round(float(tax_value.replace(',', '.')), 2)

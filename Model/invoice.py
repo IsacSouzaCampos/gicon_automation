@@ -3,7 +3,7 @@ import xml.etree.ElementTree
 from Model.company import Company
 # from Model.inspection_lib import extract_tax_from_percentage
 
-from Model.taxes import Taxes
+from Model.taxes.taxes import Taxes
 
 
 class Invoice:

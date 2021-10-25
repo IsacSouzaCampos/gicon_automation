@@ -46,10 +46,7 @@ class SQLControl:
         #     print(lkc)
 
         self.sql_run.run(launch_keys_commands)
-        result = self.sql_run.result()
-        print(result)
-        if not result:
-            return []
+
         try:
             launch_keys = list(map(int, self.sql_run.result()))
         except Exception as e:
