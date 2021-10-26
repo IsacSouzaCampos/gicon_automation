@@ -157,7 +157,8 @@ def editable_table(invoices: InvoicesList, companies: list = None, n_errors: int
     # print('invoices type:', type(invoices))
     # input()
 
-    input_rows = [[sg.Input(v if v != 0 else '', size=(15, 1), pad=(0, 0), justification='center') for j, v in enumerate(row[:8])] +
+    input_rows = [[sg.Input(v if v != 0 else '', size=(15, 1), pad=(0, 0), justification='center')
+                   for j, v in enumerate(row[:8])] +
                   [sg.Button('...', pad=(0, 0), key='detail_' + str(i))] for i, row in enumerate(table)]
 
     frame = [
@@ -362,7 +363,7 @@ def service_details(invoices: InvoicesList, header: list, row: list, row_index: 
         new_row = set_row_types(header, new_row)
 
         invoices.update_invoice(row_index, new_row)
-        inv = invoices.index(row_index)
+        # inv = invoices.index(row_index)
         # print('invoice:', inv.serial_number, 'ir:', inv.taxes.irrf.value, 'csrf:', inv.taxes.csrf.value)
         window.close()
 
