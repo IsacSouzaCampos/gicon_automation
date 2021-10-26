@@ -157,7 +157,7 @@ def editable_table(invoices: InvoicesList, companies: list = None, n_errors: int
     # print('invoices type:', type(invoices))
     # input()
 
-    input_rows = [[sg.Input(v, size=(15, 1), pad=(0, 0), justification='center') for j, v in enumerate(row[:8])] +
+    input_rows = [[sg.Input(v if v != 0 else '', size=(15, 1), pad=(0, 0), justification='center') for j, v in enumerate(row[:8])] +
                   [sg.Button('...', pad=(0, 0), key='detail_' + str(i))] for i, row in enumerate(table)]
 
     frame = [
@@ -221,6 +221,7 @@ def editable_table(invoices: InvoicesList, companies: list = None, n_errors: int
             invoices, changed = service_details(invoices, header, selected_row, index)
             if changed:
                 table = invoices.get_gui_table()
+                # print('row:', table[index])
                 update_table(window, table[index], range(start, end))
             n_errors = update_errors(invoices, window) if n_errors is not None else None
 
@@ -354,12 +355,15 @@ def service_details(invoices: InvoicesList, header: list, row: list, row_index: 
                 break
 
         new_row = [values[key] for key in values]
+        # print('new row:', new_row)
 
         # atualizar linha com os formatos corretos dos valores
         # gross_value, iss, ir, csrf, net_value
         new_row = set_row_types(header, new_row)
 
         invoices.update_invoice(row_index, new_row)
+        inv = invoices.index(row_index)
+        # print('invoice:', inv.serial_number, 'ir:', inv.taxes.irrf.value, 'csrf:', inv.taxes.csrf.value)
         window.close()
 
     return invoices, True

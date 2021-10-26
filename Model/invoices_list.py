@@ -34,14 +34,17 @@ class InvoicesList:
         return table
 
     def update_invoice(self, index: int, invoice_data: list) -> None:
+        # print('new row*:', invoice_data)
         self.invoices[index].serial_number = invoice_data[0]
         self.invoices[index].issuance_date = invoice_data[1]
         self.invoices[index].gross_value = invoice_data[2]
-        self.invoices[index].iss_value = invoice_data[3]
-        self.invoices[index].ir_value = invoice_data[4]
-        self.invoices[index].csrf_value = invoice_data[5]
+        self.invoices[index].taxes.iss.value = invoice_data[3]
+        self.invoices[index].taxes.irrf.value = invoice_data[4]
+        self.invoices[index].taxes.csrf.value = invoice_data[5]
         self.invoices[index].net_value = invoice_data[6]
         self.invoices[index].service_nature = invoice_data[7]
+
+        # print(self.invoices[index].taxes.irrf.value)
 
     def number_of_errors(self) -> int:
         """
