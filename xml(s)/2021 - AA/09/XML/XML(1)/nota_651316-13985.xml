@@ -1,0 +1,88 @@
+<?xml version="1.0" encoding="UTF-8"?><xmlNfpse>
+    <numeroAEDF>651316</numeroAEDF>
+    <numeroSerie>13985</numeroSerie>
+    <codigoVerificacao>12DFB37389E8D847</codigoVerificacao>
+    <dataEmissao>2021-09-08T00:00:00-03:00</dataEmissao>
+    <dataProcessamento>2021-09-08T17:47:41.676-03:00</dataProcessamento>
+    <cfps>9201</cfps>
+    <statusNFPSe>0</statusNFPSe>
+    <baseCalculo>1450.00</baseCalculo>
+    <valorISSQN>29.00</valorISSQN>
+    <valorTotalServicos>1450.00</valorTotalServicos>
+    <valorISSQNSubstituicao>0</valorISSQNSubstituicao>
+    <dadosAdicionais>VALOR APROX DO TRIB FED-R$195,03(13,45%); EST-R$ 0,00 (0,00%);MUN-R$30,16(2,08%)=R$225,19(15,53%), COM BASE NA LEI No 12.741/2012 E NO DECRETO 8.264/2014 - FONTE: IBPT / FORMA PGTO: CARTAO DEBITO+CARTAO CREDITO</dadosAdicionais>
+    <cnpjPrestador>01289542000199</cnpjPrestador>
+    <inscricaoMunicipalPrestador>0909882</inscricaoMunicipalPrestador>
+    <razaoSocialPrestador>AA - ANESTESIOLOGISTAS ASSOCIADOS LTDA</razaoSocialPrestador>
+    <logradouroPrestador>AVN  TROMPOWSKI, 291, SALA 1303</logradouroPrestador>
+    <bairroPrestador>CENTRO</bairroPrestador>
+    <nomeMunicipioPrestador>FLORIANOPOLIS</nomeMunicipioPrestador>
+    <codigoPostalPrestador>88015300</codigoPostalPrestador>
+    <ufPrestador>SC</ufPrestador>
+    <emailPrestador>deptolegal.adcon@gmail.com</emailPrestador>
+    <telefonePrestador>4832228690</telefonePrestador>
+    <identificacao>20621_1</identificacao>
+    <identificacaoTomador>10617842906</identificacaoTomador>
+    <razaoSocialTomador>ANA PAULA GOEDERT WINCKLER</razaoSocialTomador>
+    <logradouroTomador>Rua Santo Inacio de Loyola</logradouroTomador>
+    <numeroEnderecoTomador>168</numeroEnderecoTomador>
+    <complementoEnderecoTomador>AP 701</complementoEnderecoTomador>
+    <bairroTomador>Centro</bairroTomador>
+    <codigoMunicipioTomador>4205407</codigoMunicipioTomador>
+    <codigoPostalTomador>88015330</codigoPostalTomador>
+    <ufTomador>SC</ufTomador>
+    <paisTomador>1058</paisTomador>
+    <emailTomador>anapaulagwinckler@hotmail.com</emailTomador>
+    <telefoneTomador>48984116111</telefoneTomador>
+    <itensServico>
+        <itemServico>
+            <aliquota>0.02</aliquota>
+            <baseCalculo>1450.00</baseCalculo>
+            <codigoCNAE>8610101</codigoCNAE>
+            <cst>0</cst>
+            <descricaoCNAE>ATIVIDADES DE ATENDIMENTO HOSPITALAR, EXCETO PRONTO-SOCORRO E UNIDADES PARA ATENDIMENTO A URGENCIAS</descricaoCNAE>
+            <descricaoServico>PROCEDIMENTO CIRURGICO DE ANESTESIA REALIZADO NO HOSPITAL DA PLASTICA DE SANTA CATARINA</descricaoServico>
+            <idCNAE>9144</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>1450.00</valorTotal>
+            <valorUnitario>1450.00</valorUnitario>
+        </itemServico>
+    </itensServico>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="Sign-1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="RefSignProp-1" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SigProperties-1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>YJRKrbwCkjEaBdVBHnax9mnrkU/h3wOsWab7NE+yVMs=</ds:DigestValue></ds:Reference><ds:Reference Id="RefElement-1" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/TR/1999/REC-xpath-19991116"><ds:XPath>not(ancestor-or-self::ds:Signature)</ds:XPath></ds:Transform><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>1U9Gq60NnpdF24ESKKl3L6z3/aMvwJzmBngRLcSRTys=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValueID-1">nJ37ZcFZjCjkRxXvCDNe6sOyFi1g0SKGHMLtBren6KKoXnZH+Sd4NzwIAIo6EC8qQqvFOnKreccF
+UdzRgXrTku5ShNvz7yB4oCJcZqWpJWhaIQEpFxQq7FbsBY+k+Kk4j8C6/TZSneIL8CDLgm3gNfgo
+NQF8Cg1h79bHoe50E7RKzltbcXXHYXAhz7HtsLhfimltVgtYtIDOsuJ8CQdX+krzd9HvluQszMA0
+O0V5IVf6gntr3JZzcAL1KmqpDq+57biorzzJWJxhLVNQHZzq2oW7rOQlEvBgbSQTbkaJ1osoE5zz
+Bhl8XjpesGV/byMIGd4aYMDY/aXyN6uQc7YkAA==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509SubjectName>CN=MUNICIPIO DE FLORIANOPOLIS:82892282000143,OU=RFB e-CNPJ A1,OU=ARCIASC,OU=Secretaria da Receita Federal do Brasil - RFB,OU=83043745000165,OU=videoconferencia,O=ICP-Brasil,L=FLORIANOPOLIS,ST=SC,C=BR</ds:X509SubjectName><ds:X509Certificate>MIIHdDCCBVygAwIBAgINAMLRNL0jbgu7HoZmHjANBgkqhkiG9w0BAQsFADCBiTELMAkGA1UEBhMC
+QlIxEzARBgNVBAoMCklDUC1CcmFzaWwxNjA0BgNVBAsMLVNlY3JldGFyaWEgZGEgUmVjZWl0YSBG
+ZWRlcmFsIGRvIEJyYXNpbCAtIFJGQjEtMCsGA1UEAwwkQXV0b3JpZGFkZSBDZXJ0aWZpY2Fkb3Jh
+IFNFUlBST1JGQnY1MB4XDTIxMDgyNzE5MzczOVoXDTIyMDgyNzE5MzczOVowggERMQswCQYDVQQG
+EwJCUjELMAkGA1UECAwCU0MxFjAUBgNVBAcMDUZMT1JJQU5PUE9MSVMxEzARBgNVBAoMCklDUC1C
+cmFzaWwxGTAXBgNVBAsMEHZpZGVvY29uZmVyZW5jaWExFzAVBgNVBAsMDjgzMDQzNzQ1MDAwMTY1
+MTYwNAYDVQQLDC1TZWNyZXRhcmlhIGRhIFJlY2VpdGEgRmVkZXJhbCBkbyBCcmFzaWwgLSBSRkIx
+EDAOBgNVBAsMB0FSQ0lBU0MxFjAUBgNVBAsMDVJGQiBlLUNOUEogQTExMjAwBgNVBAMMKU1VTklD
+SVBJTyBERSBGTE9SSUFOT1BPTElTOjgyODkyMjgyMDAwMTQzMIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEAtXT4AcCvyiNvef4ZafSuUeGl2ejE8LQK27lTztImqI/nL5cOj0E777PVVRSY
+WZEoyyPLqMMVAfHptHyQF1j5kdrphB/YjyKoiyeyzOJs0E9/p0tZAOD/WpNjun33kIidR1zNeWzY
+VCvydfHqNdOGGpL4jL3ZcyEMAv9wKa8NwZBcJpzi9SVXQXsdpaUrTO8+sb6Oj/N9kYYBaVHGMuoA
+ZW0N6wBqupUArokEqnbvM6iV0nhuxGr15vPDtlTMrtGCoz+QQ44cZ5nQL9p4AXberv+Z2adNXrw4
+ZY0gtQh6fhIcNEQn0DAfKfp6nqj4BePXkZaXROzfzVIdGjWudP6KWQIDAQABo4ICTjCCAkowHwYD
+VR0jBBgwFoAUFIAtnX6aRcDxWz8Z1UCwby9l4OkwgYgGA1UdHwSBgDB+MDygOqA4hjZodHRwOi8v
+cmVwb3NpdG9yaW8uc2VycHJvLmdvdi5ici9sY3IvYWNzZXJwcm9yZmJ2NS5jcmwwPqA8oDqGOGh0
+dHA6Ly9jZXJ0aWZpY2Fkb3MyLnNlcnByby5nb3YuYnIvbGNyL2Fjc2VycHJvcmZidjUuY3JsMFYG
+CCsGAQUFBwEBBEowSDBGBggrBgEFBQcwAoY6aHR0cDovL3JlcG9zaXRvcmlvLnNlcnByby5nb3Yu
+YnIvY2FkZWlhcy9hY3NlcnByb3JmYnY1LnA3YjCBtwYDVR0RBIGvMIGsoDgGBWBMAQMEoC8ELTA5
+MTAxOTcyODIzMzQxOTY5OTEwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMKAgBgVgTAEDAqAXBBVH
+RUFOIE1BUlFVRVMgTE9VUkVJUk+gGQYFYEwBAwOgEAQOODI4OTIyODIwMDAxNDOgFwYFYEwBAweg
+DgQMMDAwMDAwMDAwMDAwgRpnZWFubG91cmVpcm9AcG1mLnNjLmdvdi5icjAOBgNVHQ8BAf8EBAMC
+BeAwHQYDVR0lBBYwFAYIKwYBBQUHAwQGCCsGAQUFBwMCMFsGA1UdIARUMFIwUAYGYEwBAgEKMEYw
+RAYIKwYBBQUHAgEWOGh0dHA6Ly9yZXBvc2l0b3Jpby5zZXJwcm8uZ292LmJyL2RvY3MvZHBjYWNz
+ZXJwcm9yZmIucGRmMA0GCSqGSIb3DQEBCwUAA4ICAQCyc/yyZ/bE1hOXjslkrmdY74lehrUo6+zH
+hIyhFzZ1ITIr1kU3CjKYztpiMnNa6Zg2+ZWjuiFXrvV2tN17+HX+Jv5NwPsV9afwso5+F9W24KF9
+JlI+7OeZiiLWEw1HPPt2YDJpskR+jQQ7sam+cOXyZm1zZJsb3wbbT2OANBINC8pkckt6S0mHyv/f
+riUhNjoBd3ZvrJQOm7oNjTAWuFWNr2gPBbS/6Xhv32bcl0amC2Xv4riy+YBaY6pnSzKb6tkHDcF0
+17AFhvPZY9Qpnsec3x5SE/YAbEGOp6+wrv5D8/kICgBQXw6HXMw7J6arG7Vc5kNtT+q9yXPEJKS4
+YZqNMJcj7IuEooxp7kpe3whlkTcOztnPGtdxPGC+jLBsPhqtJ75R9Jm90mlQB47Oyuf2FOiq1vH2
+QYkkbi8n9dWV4cQOlCm5nVY4EGYsyAXxXv+reLNBw1aRQFLkVcAzu6UTRInsVq+77ZqGl+OHMog7
+IQTsnC0rduE1eFzAcUuItoI6Bes6BCFk2xlawS/10B9d/i6hOPDT0446AnwlsCDMlhcq0BD28Up3
+mbTYXGKRTiQpqA/gNbRxxY208pelIPkrnoE/cthItFdxj7x2zMjv5v/unO0CDEb3QUU+UzoGDWMS
+OSadyXk3e84BiYLqyC/0+mglWQU+PsT3fvbsGK75rw==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties Id="QualProperties-1" Target="#Sign-1"><xades:SignedProperties Id="SigProperties-1"><xades:SignedSignatureProperties><xades:SigningTime>2021-09-08T17:47:41.865-03:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>AtKLiNj4+unI4AFPJxeKtMTHz6XH5joQy7+YUch+1gs=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=Autoridade Certificadora SERPRORFBv5,OU=Secretaria da Receita Federal do Brasil - RFB,O=ICP-Brasil,C=BR</ds:X509IssuerName><ds:X509SerialNumber>60293006453685130919842047518</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate><xades:SignaturePolicyIdentifier><xades:SignaturePolicyId><xades:SigPolicyId><xades:Identifier Qualifier="OIDAsURN">urn:oid:2.16.76.1.7.1.6.2.4</xades:Identifier></xades:SigPolicyId><xades:SigPolicyHash><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>V1oxev3+Z5tia7oVifHtePiXskTb6LP9K1QE2u1zoV4=</ds:DigestValue></xades:SigPolicyHash><xades:SigPolicyQualifiers><xades:SigPolicyQualifier><xades:SPURI>http://politicas.icpbrasil.gov.br/PA_AD_RB_v2_4.xml</xades:SPURI></xades:SigPolicyQualifier></xades:SigPolicyQualifiers></xades:SignaturePolicyId></xades:SignaturePolicyIdentifier></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#RefElement-1"><xades:MimeType>text/xml</xades:MimeType></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></xmlNfpse>
