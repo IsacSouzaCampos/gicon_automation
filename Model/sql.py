@@ -130,8 +130,8 @@ class SQLCommands:
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
-        tax_aliquot = float(inv.aliquot) * 100
-        tax_value = float(inv.gross_value) * float(inv.aliquot)
+        tax_aliquot = float(inv.taxes.iss.aliquot) * 100
+        tax_value = float(inv.gross_value) * float(inv.taxes.iss.aliquot)
         # lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
 
         command = str()
@@ -142,7 +142,7 @@ class SQLCommands:
                       f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
                       f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
                       f'               VALOREXVALORADICIONAL) \n' \
-                      f'SELECT         CODEMPRESA,                {launch.key},              {inv.service_nature}, '\
+                      f'SELECT         CODEMPRESA,                   {launch.key},              {inv.service_nature}, '\
                       f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
                       f'               {int(inv.taker.cnpj[-6:-2])}, {inv.gross_value},         {inv.gross_value}, ' \
                       f'               {tax_value},                  {0},                       {0}, ' \
@@ -163,55 +163,78 @@ class SQLCommands:
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
         taker_comp_num = int(inv.taker.cnpj[-6:-2])
-        issqn_value = float(inv.gross_value) * float(inv.aliquot)
-        issqn_aliquot = float(inv.aliquot) * 100
 
-        command = str()
-        if str(inv.service_nature)[-3:] == '308':
-            command = f'INSERT INTO ' \
-                      f'LCTOFISENTRETIDO(CODIGOEMPRESA,         CHAVELCTOFISENTRETIDO,          CODIGOPESSOA, ' \
-                      f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
-                      f'                 DATALCTOFIS,           DATAEMISSAO,                    VALORCONTABIL, ' \
-                      f'                 CODIGOESTAB,           CHAVELCTOFISENT,                CODIGOCFOP, ' \
-                      f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
-                      f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
-                      f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
-                      f'                 APURADOIRPJ,' \
-                      f'                 BASECALCULOIRRF, ' \
-                      f'                 ALIQIRRF,              VALORIRRF,                      ' \
-                      f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
-                      f'                 BASECALCULOPIS, ' \
-                      f'                 ALIQPIS,               VALORPIS,                       BASECALCULOCOFINS, ' \
-                      f'                 ALIQCOFINS,            VALORCOFINS,                    BASECALCULOCSLL, ' \
-                      f'                 ALIQCSLL,              VALORCSLL,                      APURADOPISCOFINSCSLL, '\
-                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
-                      f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
-                      f'SELECT          CODEMPRESA,             {withheld_key},                 CODPESSOA, ' \
-                      f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
-                      f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-                      f'                {taker_comp_num},       {launch.key},                   {inv.service_nature}, '\
-                      f'                {0},                    {0},                            {0}, ' \
-                      f'                {inv.gross_value},      {issqn_aliquot},                {issqn_value}, ' \
-                      f'                {0},                    {0},                            {0},' \
-                      f'                {0},' \
-                      f'                {0}, ' \
-                      f'                {0},                    {0},                            ' \
-                      f'                {0},                    {0},                            {0},' \
-                      f'                {0}, ' \
-                      f'                {0},                    {0},                            {0}, ' \
-                      f'                {0},                    {0},                            {0}, ' \
-                      f'                {0},                    {0},                            {0}, ' \
-                      f'                {0},                    {238},                          ({now}), ' \
-                      f'                {2},                    {838} \n' \
-                      f'FROM (\n' \
-                      f'    {self.get_companies_code(launch)}' \
-                      f'\n)'
+        iss = inv.taxes.iss
+        irrf = inv.taxes.irrf
+        csrf = inv.taxes.csrf
+        pis = csrf.pis
+        cofins = csrf.cofins
+        csll = csrf.csll
+
+        # if str(inv.service_nature)[-3:] == '308':
+        #     issqn_v = round(float(inv.gross_value) * float(inv.taxes.iss.aliquot), 2)
+        #     issqn_al = round(float(inv.taxes.iss.aliquot) * 100, 2)
+        # elif str(inv.service_nature)[-3:] == '306':
+        #     pis_v = round(, 2)
+
+        command = f'INSERT INTO ' \
+                  f'LCTOFISENTRETIDO(CODIGOEMPRESA,         CHAVELCTOFISENTRETIDO,          CODIGOPESSOA, ' \
+                  f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
+                  f'                 DATALCTOFIS,           DATAEMISSAO,                    VALORCONTABIL, ' \
+                  f'                 CODIGOESTAB,           CHAVELCTOFISENT,                CODIGOCFOP, ' \
+                  f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
+                  f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                  f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
+                  f'                 APURADOIRPJ,' \
+                  f'                 BASECALCULOIRRF, ' \
+                  f'                 ALIQIRRF,              VALORIRRF,                      CODIGOIMPOSTOIRRF, ' \
+                  f'                 VARIACAOIMPOSTOIRRF, ' \
+                  f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
+                  f'                 BASECALCULOPIS, ' \
+                  f'                 ALIQPIS,               VALORPIS,                       CODIGOIMPOSTOPIS, ' \
+                  f'                 VARIACAOIMPOSTOPIS, ' \
+                  f'                 BASECALCULOCOFINS, ' \
+                  f'                 ALIQCOFINS,            VALORCOFINS,                    CODIGOIMPOSTOCOFINS, ' \
+                  f'                 VARIACAOIMPOSTOCOFINS, ' \
+                  f'                 BASECALCULOCSLL, ' \
+                  f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
+                  f'                 VARIACAOIMPOSTOCSLL, ' \
+                  f'                 APURADOPISCOFINSCSLL,  DATAPGTOPISCOFINSCSLL, '\
+                  f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
+                  f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
+                  f'SELECT          CODEMPRESA,             {withheld_key},                 CODPESSOA, ' \
+                  f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
+                  f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
+                  f'                {taker_comp_num},       {launch.key},                   {inv.service_nature}, '\
+                  f'                {0},                    {0},                            {0}, ' \
+                  f'                {iss.calc_basis},       {iss.aliquot * 100},            {iss.value}, ' \
+                  f'                {0},                    {0},                            {0}, ' \
+                  f'                {0}, ' \
+                  f'                {irrf.calc_basis}, ' \
+                  f'                {irrf.aliquot},         {irrf.value},                   {irrf.code}, ' \
+                  f'                {irrf.variation}, ' \
+                  f'                {0},                    {csrf.value},                   {1}, ' \
+                  f'                {pis.calc_basis}, ' \
+                  f'                {pis.aliquot},          {pis.value},                    {csrf.code}, ' \
+                  f'                {csrf.variation}, ' \
+                  f'                {cofins.calc_basis}, ' \
+                  f'                {cofins.aliquot},       {cofins.value},                 {csrf.code}, ' \
+                  f'                {csrf.variation}, ' \
+                  f'                {csll.calc_basis}, ' \
+                  f'                {csll.aliquot},         {csll.value},                   {csrf.code}, ' \
+                  f'                {csrf.variation}, ' \
+                  f'                {0},                    \'{issuance_date}\', ' \
+                  f'                {0},                    {238},                          ({now}), ' \
+                  f'                {2},                    {838} \n' \
+                  f'FROM (\n' \
+                  f'    {self.get_companies_code(launch)}' \
+                  f'\n)'
 
         return command
 
     def lctofisentvaloriss(self, launch: LCTOFISENTData):
         inv = launch.invoice
-        iss_aliquot = str(float(inv.aliquot) * 100).replace('.', ',')
+        iss_aliquot = str(float(inv.taxes.iss.aliquot) * 100).replace('.', ',')
 
         taker_code = self.get_company_code(inv.taker.cnpj, inv.service_type)
 

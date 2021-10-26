@@ -3,7 +3,9 @@ class ISS:
         self.outer = outer
 
         self.is_withheld = self.is_withheld()
-        self.value = outer.data['valorissqn'] if self.is_withheld else ''
+        self.value = self.outer.data['valorissqn'] if self.is_withheld else ''
+        self.aliquot = self.outer.data['aliquota'] if self.is_withheld else 0
+        self.calc_basis = self.outer.gross_value if self.is_withheld else 0
 
     def is_withheld(self):
         """Verifica se há retencao de ISS com base no CFPS e CST"""

@@ -13,19 +13,28 @@ class CSRF:
         #       self.csll.value)
 
         self.is_withheld = self.outer.is_fed_tax_withheld(1)
-        self.value = self.extract_value() if self.is_withheld else ''
+        self.value = self.extract_value() if self.is_withheld else 0
         if self.value != '' and self.value < 0:
             self.csrf_value = TAX_EXTRACTION_ERROR
         gross_value = self.outer.gross_value
-        self.percentage = self.outer.tax_percentage(self.value, gross_value) if type(self.value) == float else 0
+        self.aliquot = self.outer.tax_percentage(self.value, gross_value) if type(self.value) == float else 0
 
-        if (self.pis.value + self.cofins.value + self.csll.value) <= 0 and self.percentage == 4.65:
-            self.pis.value = round(self.outer.gross_value * 0.0065, 2)
-            self.cofins.value = round(self.outer.gross_value * 0.03, 2)
-            self.csll.value = round(self.outer.gross_value * 0.01, 2)
+        if (self.pis.value + self.cofins.value + self.csll.value) <= 0 and self.aliquot == 4.65:
+            self.pis.aliquot = 0.0065
+            self.pis.value = round(self.outer.gross_value * self.pis.aliquot, 2)
+
+            self.cofins.aliquot = 0.03
+            self.cofins.value = round(self.outer.gross_value * self.cofins.aliquot, 2)
+
+            self.csll.aliquot = 0.01
+            self.csll.value = round(self.outer.gross_value * self.csll.aliquot, 2)
+
             self.value = self.pis.value + self.cofins.value + self.csll.value
             # print(f'nota {self.outer.data["numeroserie"]}')
             # print('pis:', self.pis.value, 'cofins:', self.cofins.value, 'csll:', self.csll.value, 'csrf:', self.value)
+
+        self.code = 5952 if type(self.value) == float else 'NULL'
+        self.variation = 7 if type(self.value) == float else 'NULL'
 
     def extract_value(self):
         """Retorna o valor do CSRF."""
@@ -60,8 +69,10 @@ class CSRF:
     class PIS:
         def __init__(self, outest):
             self.outest = outest
+            self.aliquot = 0
 
             self.value = self.extract_value()
+            self.calc_basis = self.outest.gross_value if self.value > 0 else 0
 
         def extract_value(self):
             value = self.outest.extract_tax_value(self.outest.service_description,
@@ -70,13 +81,15 @@ class CSRF:
                 value = self.outest.extract_tax_from_percentage(self.outest.service_description,
                                                                 self.outest.aditional_data,
                                                                 float(self.outest.gross_value), 1)
-            return value
+            return value if value > 0 else 0
 
     class COFINS:
         def __init__(self, outest):
             self.outest = outest
+            self.aliquot = 0
 
             self.value = self.extract_value()
+            self.calc_basis = self.outest.gross_value if self.value > 0 else 0
 
         def extract_value(self):
             value = self.outest.extract_tax_value(self.outest.aditional_data,
@@ -85,13 +98,15 @@ class CSRF:
                 value = self.outest.extract_tax_from_percentage(self.outest.service_description,
                                                                 self.outest.aditional_data,
                                                                 float(self.outest.gross_value), 2)
-            return value
+            return value if value > 0 else 0
 
     class CSLL:
         def __init__(self, outest):
             self.outest = outest
+            self.aliquot = 0
 
             self.value = self.extract_value()
+            self.calc_basis = self.outest.gross_value if self.value > 0 else 0
 
         def extract_value(self):
             value = self.outest.extract_tax_value(self.outest.aditional_data,
@@ -100,4 +115,4 @@ class CSRF:
                 value = self.outest.extract_tax_from_percentage(self.outest.service_description,
                                                                 self.outest.aditional_data,
                                                                 float(self.outest.gross_value), 3)
-            return value
+            return value if value > 0 else 0

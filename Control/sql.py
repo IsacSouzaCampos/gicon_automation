@@ -26,7 +26,7 @@ class SQLControl:
 
             s = f'{taker_cnpj};{invoice.provider.cnpj};{invoice.serial_number}'
             if s not in results and (invoice.taxes.iss.value != '' or invoice.taxes.csrf.value != '' or
-                                     invoice.taxes.ir.value != ''):
+                                     invoice.taxes.irrf.value != ''):
                 to_launch.add_invoice(invoice)
 
         launch_keys = self.get_launch_keys(to_launch)

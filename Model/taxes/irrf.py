@@ -6,9 +6,12 @@ class IRRF:
         # 0 = IR / 1 = CSRF
         self.outer = outer
         self.is_withheld = outer.is_fed_tax_withheld(0)
-        self.value = self.extract_value() if self.is_withheld else ''
+        self.value = self.extract_value() if self.is_withheld else 0
         gross_value = self.outer.gross_value
-        self.percentage = outer.tax_percentage(self.value, gross_value) if type(self.value) == float else 0
+        self.aliquot = outer.tax_percentage(self.value, gross_value) if type(self.value) == float else 0
+        self.calc_basis = self.outer.gross_value if self.is_withheld else 0
+        self.code = 1708 if self.is_withheld else 'NULL'
+        self.variation = 6 if self.is_withheld else 'NULL'
 
     def extract_value(self):
         try:

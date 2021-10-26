@@ -23,7 +23,6 @@ class Invoice:
         self.cst = self.xml_data['cst']
         self.cfps = self.xml_data['cfps']
         self.full_cnae = self.gen_cnae(self.xml_data['codigocnae'])
-        self.aliquot = self.xml_data['aliquota']
         self.gross_value = float(self.xml_data['valortotalservicos'])
 
         if service_type:
