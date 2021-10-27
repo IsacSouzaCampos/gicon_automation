@@ -1,4 +1,5 @@
 from View.short_inspection import *
+from View.short_inspection import Loading
 import View.long_inspection as mii
 
 from Model.inspection_lib import *
@@ -23,7 +24,9 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
     invoices_amount_type = 0
     # testa se o número de notas está dentro do limite de conferências por vez
     if len(xml_files) > MAX_INVOICES:
-        option = max_invoices_popup()
+        from View.short_inspection import PopUp
+        pop_up = PopUp
+        option = pop_up.max_invoices()
         if option == 0:  # se opcao == 0
             separate_xml_files(folder, xml_files)
             return False, InvoicesList([])
@@ -35,7 +38,9 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
             return False, InvoicesList([])
 
     # inicia janela da barra de progresso da conferência
-    loading_window = start_inspection_loading_window()
+    load_insp = Loading()
+    load_insp.total_size = len(xml_files)
+    load_insp.inspection()
 
     # insere os dados de cada um dos arquivos xml a serem analisados em results
     companies_cnpjs = list()
@@ -53,16 +58,17 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
             companies_names.append(company_name)
             companies_cnpjs.append(company_cnpj)
 
-        update_loading_window(loading_window, invoice.serial_number, i, len(xml_files))
+        load_insp.update(invoice.serial_number, i)
 
-    loading_window.close()
+    load_insp.close()
 
     n_errors = invoices.number_of_errors()
 
+    rslt_tb = ResultTable(invoices, companies_names, n_errors)
     if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
         # results = mii.show_results_table(invoices, n_errors)
         pass
     else:
-        invoices = editable_table(invoices, companies_names, n_errors)
+        rslt_tb.show()
 
-    return (True, invoices) if not invoices.empty() else (False, invoices)
+    return (True, invoices) if not rslt_tb.invoices.empty() else (False, invoices)
