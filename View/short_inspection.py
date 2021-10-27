@@ -151,7 +151,7 @@ class ResultTable:
         self.companies = companies
         self.n_errors = n_errors
 
-    def show(self) -> InvoicesList:
+    def show(self):
         header = ['Nº nota', 'Emissão', 'Valor Bruto', 'ISS', 'IR', 'CSRF', 'Valor Líquido', 'Natureza']
         n_columns = len(header)
 
@@ -208,7 +208,9 @@ class ResultTable:
 
             if event == sg.WINDOW_CLOSED or event is None:
                 # exit()  # REMOVER APÓS TERMINAR TESTES
-                return InvoicesList([])
+                # return InvoicesList([])
+                self.invoices = InvoicesList([])
+                break
 
             if 'detail_' in event:
                 # prepara para informações necessárias para obtenção de lista com os
@@ -283,7 +285,7 @@ class ResultTable:
         final_table = [self.set_row_types(header, row) for row in final_table]
         [self.invoices.update_invoice(i, row) for i, row in enumerate(final_table)]
         # invoices.print_list()
-        return self.invoices if not self.invoices.empty() else InvoicesList([])
+        # return self.invoices if not self.invoices.empty() else InvoicesList([])
 
     def service_details(self, invoices: InvoicesList, header: list, row: list, row_index: int) -> tuple:
         """
@@ -446,5 +448,4 @@ class ResultTable:
         :rtype:           (list)
         """
 
-        table = [[values[(j * n_columns) + i] for i in range(n_columns)] for j in range(n_rows)]
-        return table
+        return [[values[(j * n_columns) + i] for i in range(n_columns)] for j in range(n_rows)] if values else []
