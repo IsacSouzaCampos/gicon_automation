@@ -1,7 +1,7 @@
 from Control.inspection import inspect
 from Control.sql import SQLControl
 
-import View.short_inspection as gui_inspection
+import View.inspection as gui_inspection
 
 import Model.excel as excel
 import Model.constants as constants

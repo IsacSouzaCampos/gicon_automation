@@ -1,7 +1,7 @@
 import Control.inspection as inspection
 from Control.sql import SQLControl
 
-from View.short_inspection import MainGUI
+from View.inspection import MainGUI
 
 import Model.initiate as initiate
 import Model.excel as excel

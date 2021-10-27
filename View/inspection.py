@@ -552,7 +552,7 @@ class ResultTable:
 
     def update(self, table: list, selected_row: int = None, row: list = None) -> list and int:
         """Atualiza tabela de conferência com os dados no formato adequado."""
-        if not selected_row:  # se selected_row = None, a atualização vem de outra tela
+        if selected_row is None:  # se selected_row = None, a atualização vem de outra tela
             self.window.Element('table').Update(values=table)
             self.n_errors = self.invoices.number_of_errors()
             self.window.Element('-ERRORS-').Update(value=f'{self.n_errors} {const.ERROR_LINK_TEXT}')

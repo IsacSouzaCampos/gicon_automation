@@ -1,8 +1,6 @@
-from View.short_inspection import *
-from View.short_inspection import Loading
-import View.long_inspection as mii
+from View.inspection import *
+from View.inspection import Loading
 
-from Model.inspection_lib import *
 from Model.invoices_list import InvoicesList
 from Model.invoice import Invoice
 
@@ -21,21 +19,21 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
     :rtype:              (bool)
     """
 
-    invoices_amount_type = 0
-    # testa se o número de notas está dentro do limite de conferências por vez
-    if len(xml_files) > MAX_INVOICES:
-        from View.short_inspection import PopUp
-        pop_up = PopUp
-        option = pop_up.max_invoices()
-        if option == 0:  # se opcao == 0
-            separate_xml_files(folder, xml_files)
-            return False, InvoicesList([])
-        elif option == 1:
-            # invoices_amount_type = 1
-            mii.temp_msg('Funcionalidade a ser atualizada!')
-            return False, InvoicesList([])
-        else:
-            return False, InvoicesList([])
+    # invoices_amount_type = 0
+    # # testa se o número de notas está dentro do limite de conferências por vez
+    # if len(xml_files) > const.MAX_INVOICES:
+    #     from View.short_inspection import PopUp
+    #     pop_up = PopUp
+    #     option = pop_up.max_invoices()
+    #     if option == 0:  # se opcao == 0
+    #         separate_xml_files(folder, xml_files)
+    #         return False, InvoicesList([])
+    #     elif option == 1:
+    #         # invoices_amount_type = 1
+    #         mii.temp_msg('Funcionalidade a ser atualizada!')
+    #         return False, InvoicesList([])
+    #     else:
+    #         return False, InvoicesList([])
 
     # inicia janela da barra de progresso da conferência
     load_insp = Loading()
@@ -62,13 +60,13 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
 
     load_insp.close()
 
-    n_errors = invoices.number_of_errors()
+    res_tb = ResultTable(invoices, companies_names, invoices.number_of_errors())
+    # is_finished = bool()
+    # invoices = InvoicesList([])
+    # if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
+    #     # results = mii.show_results_table(invoices, n_errors)
+    #     pass
+    # else:
+    is_finished, invoices = res_tb.show()
 
-    rslt_tb = ResultTable(invoices, companies_names, n_errors)
-    if invoices_amount_type:  # se invoices_amount_type diferente de 0 / muito grande
-        # results = mii.show_results_table(invoices, n_errors)
-        pass
-    else:
-        rslt_tb.show()
-
-    return (True, invoices) if not rslt_tb.invoices.empty() else (False, invoices)
+    return is_finished, invoices

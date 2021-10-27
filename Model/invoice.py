@@ -66,8 +66,10 @@ class Invoice:
         :rtype:  (list)
         """
 
+        irrf_value = '' if not self.taxes.irrf.value else self.taxes.irrf.value
+        csrf_value = '' if not self.taxes.csrf.value else self.taxes.csrf.value
         row = list([self.serial_number, self.issuance_date, self.gross_value, self.taxes.iss.value,
-                    self.taxes.irrf.value, self.taxes.csrf.value, self.net_value, self.service_nature,
+                    irrf_value, csrf_value, self.net_value, self.service_nature,
                     self.service_description, self.aditional_data, self.provider.cnpj, self.provider.name,
                     self.taker.cnpj, self.taker.name])
 

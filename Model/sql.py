@@ -171,11 +171,11 @@ class SQLCommands:
         cofins = csrf.cofins
         csll = csrf.csll
 
-        # if str(inv.service_nature)[-3:] == '308':
-        #     issqn_v = round(float(inv.gross_value) * float(inv.taxes.iss.aliquot), 2)
-        #     issqn_al = round(float(inv.taxes.iss.aliquot) * 100, 2)
-        # elif str(inv.service_nature)[-3:] == '306':
-        #     pis_v = round(, 2)
+        irrf_value = 0 if not irrf.value else irrf.value
+        csrf_value = 0 if not csrf.value else csrf.value
+        pis_value = 0 if not pis.value else pis.value
+        cofins_value = 0 if not cofins.value else cofins.value
+        csll_value = 0 if not csll.value else csll.value
 
         command = f'INSERT INTO ' \
                   f'LCTOFISENTRETIDO(CODIGOEMPRESA,         CHAVELCTOFISENTRETIDO,          CODIGOPESSOA, ' \
@@ -207,21 +207,21 @@ class SQLCommands:
                   f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
                   f'                {taker_comp_num},       {launch.key},                   {inv.service_nature}, '\
                   f'                {0},                    {0},                            {0}, ' \
-                  f'                {iss.calc_basis},       {iss.aliquot * 100},            {iss.value}, ' \
+                  f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss.value}, ' \
                   f'                {0},                    {0},                            {0}, ' \
                   f'                {0}, ' \
                   f'                {irrf.calc_basis}, ' \
-                  f'                {irrf.aliquot},         {irrf.value},                   {irrf.code}, ' \
+                  f'                {irrf.aliquot},         {irrf_value},                   {irrf.code}, ' \
                   f'                {irrf.variation}, ' \
-                  f'                {0},                    {csrf.value},                   {1}, ' \
+                  f'                {0},                    {csrf_value},                   {1}, ' \
                   f'                {pis.calc_basis}, ' \
-                  f'                {pis.aliquot},          {pis.value},                    {csrf.code}, ' \
+                  f'                {pis.aliquot},          {pis_value},                    {csrf.code}, ' \
                   f'                {csrf.variation}, ' \
                   f'                {cofins.calc_basis}, ' \
-                  f'                {cofins.aliquot},       {cofins.value},                 {csrf.code}, ' \
+                  f'                {cofins.aliquot},       {cofins_value},                 {csrf.code}, ' \
                   f'                {csrf.variation}, ' \
                   f'                {csll.calc_basis}, ' \
-                  f'                {csll.aliquot},         {csll.value},                   {csrf.code}, ' \
+                  f'                {csll.aliquot},         {csll_value},                   {csrf.code}, ' \
                   f'                {csrf.variation}, ' \
                   f'                {0},                    \'{issuance_date}\', ' \
                   f'                {0},                    {238},                          ({now}), ' \

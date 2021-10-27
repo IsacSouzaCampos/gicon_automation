@@ -23,7 +23,7 @@ class IRRF:
                 ir_value = value
             else:
                 ir_value = self.outer.extract_tax_from_percentage(service_description, aditional_data,
-                                                                  float(self.outer.invoice.gross_value), 0)
+                                                                  float(self.outer.gross_value), 0)
 
             # self.ir_value = self.get_ir_value() if is_ir_withheld else ''
             if ir_value != '' and ir_value < 0:
