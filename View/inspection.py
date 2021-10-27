@@ -1,7 +1,8 @@
 import PySimpleGUI as sg
-from Model.constants import MAX_INVOICES, ERROR_LINK_TEXT, TAX_EXTRACTION_ERROR
-from Model.invoices_list import InvoicesList
 import os
+
+import Model.constants as const
+from Model.invoices_list import InvoicesList
 
 
 class MainGUI:
@@ -113,19 +114,20 @@ class PopUp:
         :rtype:  (int)
         """
         layout = [
-            [sg.Text(f'Número limite de notas excedido ({MAX_INVOICES}). Com um número assim, a edição das'
+            [sg.Text(f'Número limite de notas excedido ({const.MAX_INVOICES}). Com um número assim, a edição das'
                      ' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
-                     f'Gostaria que as notas fossem separadas em subgrupos de {MAX_INVOICES} ou conferir '
+                     f'Gostaria que as notas fossem separadas em subgrupos de {const.MAX_INVOICES} ou conferir '
                      'com uma interface gráfica mais simplificada?', size=(50, 5))],
 
-            [sg.Button('Conferir com interface simplificada'), sg.Button(f'Criar subgrupos de {MAX_INVOICES} notas')]
+            [sg.Button('Conferir com interface simplificada'), sg.Button(f'Criar subgrupos de '
+                                                                         f'{const.MAX_INVOICES} notas')]
         ]
 
         window = sg.Window('Limite de Notas Excedido', layout)
         event, values = window.read()
         window.close()
 
-        if event == f'Criar subgrupos de {MAX_INVOICES} notas':
+        if event == f'Criar subgrupos de {const.MAX_INVOICES} notas':
             return 0
         elif event == 'Conferir com interface simplificada':
             return 1
@@ -133,8 +135,8 @@ class PopUp:
             return 2
 
 
-class ResultTable:
-    def __init__(self, invoices: InvoicesList, companies: list = None, n_errors: int = None):
+class EditableResultTable:
+    def __init__(self, invoices: InvoicesList, companies: list = None, n_errors: int = None, window: sg.Window = None):
         """
         Cria tabela de resultados editável.
 
@@ -150,8 +152,9 @@ class ResultTable:
         self.invoices = invoices
         self.companies = companies
         self.n_errors = n_errors
+        self.window = window
 
-    def show(self):
+    def show(self) -> list:
         header = ['Nº nota', 'Emissão', 'Valor Bruto', 'ISS', 'IR', 'CSRF', 'Valor Líquido', 'Natureza']
         n_columns = len(header)
 
@@ -177,9 +180,9 @@ class ResultTable:
 
         errors_link = []
         if self.n_errors is not None:
-            errors_link = [sg.Text(str(self.n_errors) + ' ' + ERROR_LINK_TEXT, text_color='blue', enable_events=True,
-                                   key='-ERRORS-')
-                           if self.n_errors > 0 else sg.Text(str(self.n_errors) + ' ' + ERROR_LINK_TEXT,
+            errors_link = [sg.Text(str(self.n_errors) + ' ' + const.ERROR_LINK_TEXT, text_color='blue',
+                                   enable_events=True, key='-ERRORS-')
+                           if self.n_errors > 0 else sg.Text(str(self.n_errors) + ' ' + const.ERROR_LINK_TEXT,
                                                              text_color='blue', key='-ERRORS-')]
 
         # o botão que aparece ao final da tela será escolhido de acordo com o valor de n_errors
@@ -201,10 +204,10 @@ class ResultTable:
             button
         ]
 
-        window = sg.Window('Resultados da Conferênca', layout, finalize=True)
+        self.window = sg.Window('Resultados da Conferênca', layout, finalize=True)
 
         while True:
-            event, values = window.read()
+            event, values = self.window.read()
 
             if event == sg.WINDOW_CLOSED or event is None:
                 # exit()  # REMOVER APÓS TERMINAR TESTES
@@ -235,18 +238,20 @@ class ResultTable:
                 if changed:
                     table = invoices.get_gui_table()
                     # print('row:', table[index])
-                    self.update(window, table[index], range(start, end))
-                self.n_errors = self.update_errors(invoices, window) if self.n_errors is not None else None
+                    self.update(table[index], range(start, end))
+                self.n_errors = self.update_errors() if self.n_errors is not None else None
 
             if event == '-ERRORS-':
                 if not self.n_errors:
                     continue
 
-                errors_indexes = [i for i, row in enumerate(table) if TAX_EXTRACTION_ERROR in row]
+                errors_indexes = [i for i, row in enumerate(table) if const.TAX_EXTRACTION_ERROR in row]
                 errors_list = [self.invoices.index(i) for i in errors_indexes]
 
                 errors_inv_list = InvoicesList(errors_list)
-                resulting_table = errors_inv_list.get_gui_table()
+                errors_gui = EditableResultTable(errors_inv_list)
+                err_values = errors_gui.show()
+                resulting_table = errors_gui.get_table_values(err_values, int(len(err_values)/len(header)), len(header))
 
                 if not resulting_table:
                     continue
@@ -261,7 +266,7 @@ class ResultTable:
                         end = start + n_columns
                         r = range(start, end)
 
-                        self.update(window, row, r)
+                        self.update(row, r)
                         new_table.append(row)
                         self.invoices.update_invoice(i, row)
                         i += 1
@@ -269,7 +274,7 @@ class ResultTable:
                         new_table.append(row)
                 table = new_table
 
-                self.n_errors = self.update_errors(self.invoices, window) if self.n_errors is not None else None
+                self.n_errors = self.update_errors() if self.n_errors is not None else None
 
             if event == 'Atualizar':
                 break
@@ -278,14 +283,14 @@ class ResultTable:
                 if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
                     break
 
-        window.close()
+        self.window.close()
 
         # atualiza tabela com os valores contidos atualmente na tabela de edição
         final_table = self.get_table_values(values, len(table), len(header))
         final_table = [self.set_row_types(header, row) for row in final_table]
         [self.invoices.update_invoice(i, row) for i, row in enumerate(final_table)]
         # invoices.print_list()
-        # return self.invoices if not self.invoices.empty() else InvoicesList([])
+        return values
 
     def service_details(self, invoices: InvoicesList, header: list, row: list, row_index: int) -> tuple:
         """
@@ -379,26 +384,21 @@ class ResultTable:
 
         return invoices, True
 
-    @staticmethod
-    def update(window: sg.Window, row: list, r: range) -> None:
+    def update(self, row: list, r: range) -> None:
         """
         Atualiza uma determinada linha na tabela da GUI.
 
-        :param window: Janela a ser atualizada.
-        :type window:  (sg.Window)
         :param row:    Valores da linha a ser atualizada.
         :type row:     (list)
         :param r:      Faixa de posições a serem atualizadas.
         :type r:       (range)
         """
 
-        [window.Element(n).Update(row[i]) for i, n in enumerate(r)]
+        [self.window.Element(n).Update(row[i]) for i, n in enumerate(r)]
 
-    @staticmethod
-    def update_errors(invoices, window):
-        n_errors = invoices.number_of_errors()
-        window.Element('-ERRORS-').Update(str(n_errors) + ' ' + ERROR_LINK_TEXT)
-        return n_errors
+    def update_errors(self):
+        n_errors = self.invoices.number_of_errors()
+        self.window.Element('-ERRORS-').Update(str(n_errors) + ' ' + const.ERROR_LINK_TEXT)
 
     @staticmethod
     def set_row_types(header: list, row: list) -> list:
@@ -434,12 +434,12 @@ class ResultTable:
         return row
 
     @staticmethod
-    def get_table_values(values: dict, n_rows: int, n_columns: int) -> list:
+    def get_table_values(values: list, n_rows: int, n_columns: int) -> list:
         """
         Retorna o uma lista com os valores contidos atualmente na tabela editável.
 
         :param values:    Números dos inputs da tabela editável e seus respectivos valores.
-        :type values:     (dict)
+        :type values:     (list)
         :param n_rows:    Número de linhas da tabela editável.
         :type n_rows:     (int)
         :param n_columns: Número de colunas da tabela editável.
@@ -449,3 +449,120 @@ class ResultTable:
         """
 
         return [[values[(j * n_columns) + i] for i in range(n_columns)] for j in range(n_rows)] if values else []
+
+
+class ResultTable:
+    def __init__(self, invoices: InvoicesList, companies: list = None, n_errors: int = None):
+        self.invoices = invoices
+        self.companies = companies
+        self.n_errors = n_errors
+        self.window = None
+
+    def show(self):
+        """Mostra tabela de resultados simplificada por conta do número grande de notas conferidas."""
+
+        inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in const.HEADER2]
+        inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in const.HEADER2]
+
+        inspection_data_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
+        inspection_data_cols = [[sg.Column(inspection_data_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
+
+        errors_link = [
+            sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
+            if self.n_errors > 0 else sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
+                                              key='-ERRORS-')]
+
+        table = list()
+        for invoice in self.invoices:
+            irrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
+            csrf_value = '' if not invoice.taxes.csrf.value else invoice.taxes.csrf.value
+            table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
+                          irrf_value, csrf_value, invoice.net_value, invoice.service_nature])
+
+        layout = [
+            [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
+            [sg.Button('Editar'), sg.Button('Atualizar')],
+            inspection_data_cols,
+            errors_link,
+            [sg.Text()],
+            [sg.Button('Lançar')]
+        ]
+
+        self.window = sg.Window('Resultados da Conferência', layout)
+
+        selected_row = -1
+        while True:
+            event, values = self.window.read()
+            if event == sg.WINDOW_CLOSED:
+                self.window.close()
+                return False, InvoicesList([])
+            if event == 'Editar':
+                try:
+                    selected_row = values['table'][0]
+                    self.edit_row(const.HEADER2, table[selected_row])
+                except Exception as e:
+                    print(e)
+            if event == 'Atualizar':
+                row = [values[const.HEADER2[i]] for i in range(len(const.HEADER2))]
+                table = self.update(table, selected_row, row)
+                self.window.Element('-ERRORS-').Update(f'{self.n_errors} {const.ERROR_LINK_TEXT}')
+                self.update(table)
+
+            if event == '-ERRORS-':
+                if not self.n_errors:
+                    continue
+
+                errors_indexes = [i for i, row in enumerate(table) if const.TAX_EXTRACTION_ERROR in row]
+                errors_list = [self.invoices.index(i) for i in errors_indexes]
+
+                errors_inv_list = InvoicesList(errors_list)
+                errors_gui = EditableResultTable(errors_inv_list)
+                err_values = errors_gui.show()
+
+                resulting_table = None
+                if err_values:
+                    n_rows = int(len(err_values) / len(const.HEADER2))
+                    n_columns = len(const.HEADER2)
+                    resulting_table = errors_gui.get_table_values(err_values, n_rows, n_columns)
+
+                if resulting_table is None:
+                    continue
+
+                new_table = list()
+                i = 0
+                for index, row in enumerate(table):
+                    if index in errors_indexes:
+                        new_table.append(resulting_table[i])
+                        i += 1
+                    else:
+                        new_table.append(row)
+                table = new_table
+                self.update(table)
+
+            if event == 'Lançar':
+                if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
+                    break
+
+        self.window.close()
+        return True, self.invoices
+
+    def edit_row(self, header: list, row: list) -> None:
+        """Atualiza campos de edição de dados."""
+        [self.window.Element(header[i]).Update(row[i]) for i in range(len(header))]
+
+    def update(self, table: list, selected_row: int = None, row: list = None) -> list and int:
+        """Atualiza tabela de conferência com os dados no formato adequado."""
+        if not selected_row:  # se selected_row = None, a atualização vem de outra tela
+            self.window.Element('table').Update(values=table)
+            self.n_errors = self.invoices.number_of_errors()
+            self.window.Element('-ERRORS-').Update(value=f'{self.n_errors} {const.ERROR_LINK_TEXT}')
+            return table
+
+        row = row[:2] + [row[i] if row[i] in ['', '-'] else round(float(row[i].replace(',', '.')), 2)
+                         for i in range(2, 7)] + [int(row[7])]
+        table = [table[i] if i != selected_row else row for i in range(len(table))]
+        self.window.Element('table').Update(values=table)
+
+        self.invoices.update_invoice(selected_row, row)
+        self.n_errors = self.invoices.number_of_errors()
+        return table
