@@ -25,11 +25,11 @@ class Invoice:
         self.full_cnae = self.gen_cnae(self.xml_data['codigocnae'])
         self.gross_value = float(self.xml_data['valortotalservicos'])
 
-        if service_type:
-            self.provider = Company(self.xml_data['cnpjprestador'], self.xml_data['razaosocialprestador'],
-                                    self.xml_data['nomemunicipioprestador'])
-            self.taker = Company(self.xml_data['identificacaotomador'],
-                                 self.xml_data['razaosocialtomador'], 'Florianópolis')
+        # if service_type:
+        self.provider = Company(self.xml_data['cnpjprestador'], self.xml_data['razaosocialprestador'],
+                                self.xml_data['nomemunicipioprestador'])
+        self.taker = Company(self.xml_data['identificacaotomador'],
+                             self.xml_data['razaosocialtomador'], 'Florianópolis')
 
         if 'descricaoservico' in self.xml_data and self.xml_data['descricaoservico'] is not None:
             self.service_description = self.xml_data['descricaoservico']

@@ -53,7 +53,7 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
         company_cnpj = invoice.provider.cnpj if service_type else invoice.taker.cnpj
         company_name = invoice.provider.name if service_type else invoice.taker.name
         if company_cnpj not in companies_cnpjs:
-            companies_names.append(company_name)
+            companies_names.append(company_name.title())
             companies_cnpjs.append(company_cnpj)
 
         load_insp.update(invoice.serial_number, i)

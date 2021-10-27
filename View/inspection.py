@@ -49,12 +49,12 @@ class MainGUI:
                     sg.popup('Selecione uma pasta para a conferência!')
                     continue
                 if values[0]:  # prestado
-                    # service_type = 0
-                    # folder_name = values['Selecionar Pasta'] or '.'
-                    # xml_file_names = [f for f in os.listdir(folder_name) if '.xml' in f]
-                    sg.popup('A conferência deste tipo de serviço ainda está em desenvolvimento.')
-                    continue
-                    # break
+                    service_type = 0
+                    folder_name = values['Selecionar Pasta'] or '.'
+                    xml_file_names = [f for f in os.listdir(folder_name) if '.xml' in f]
+                    # sg.popup('A conferência deste tipo de serviço ainda está em desenvolvimento.')
+                    # continue
+                    break
                 elif values[1]:  # tomado
                     # se a pasta não foi selecionada use a pasta atual `.`
                     service_type = 1
@@ -480,6 +480,8 @@ class ResultTable:
                           irrf_value, csrf_value, invoice.net_value, invoice.service_nature])
 
         layout = [
+            [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
+             sg.Button('Limpar Filtro', disabled=True)],
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
             [sg.Button('Editar'), sg.Button('Atualizar')],
             inspection_data_cols,
