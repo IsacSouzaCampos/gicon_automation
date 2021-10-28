@@ -28,8 +28,11 @@ class InvoicesList:
     def get_gui_table(self) -> list:
         table = list()
         for invoice in self.invoices:
+            irrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
+            csrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
+
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
-                          invoice.taxes.irrf.value, invoice.taxes.csrf.value, invoice.net_value,
+                          irrf_value, csrf_value, invoice.net_value,
                           invoice.service_nature])
         return table
 
@@ -66,6 +69,14 @@ class InvoicesList:
                     print(e)
                     n_errors += 1
         return n_errors
+
+    def cnpj_filter(self, cnpj, service_type):
+        result = InvoicesList([])
+        if service_type:  # se tomado
+            [result.add_invoice(inv) for inv in self.invoices if cnpj in inv.provider.cnpj]
+        else:
+            [result.add_invoice(inv) for inv in self.invoices if cnpj in inv.taker.cnpj]
+        return result
 
     def __iter__(self):
         return InvoicesListIterator(self)

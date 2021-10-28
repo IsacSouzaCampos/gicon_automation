@@ -6,31 +6,34 @@ from Model.invoices_list import InvoicesList
 
 
 class MainGUI:
-    @staticmethod
-    def show() -> tuple:
+    def __init__(self, folder: str = '', xml_files: list = None, service_type: int = None):
+        self.folder = folder
+        self.xml_files = xml_files
+        self.service_type = service_type
+
+    def show(self):
         """
         Gera interface onde será informado o tipo do serviço (tomado, prestado) e a
         localização da pasta que contém os arquivos XML a serem conferidos.
 
-        :return: Tupla contendo o nome da pasta escolhida, arquivos xml nela contidos e o tipo de serviço selecionado.
-        :rtype:  (tuple)
+        # :return: Tupla contendo o nome da pasta escolhida, arquivos xml nela contidos e o tipo de serviço selecionado.
+        # :rtype:  (tuple)
         """
 
         sg.theme('default1')
 
-        folder_name = str()
-        xml_file_names = list()
-        service_type = int()
-
-        service_type_layout = [[sg.Radio('Prestado', 'radio1', default=False)],
-                               [sg.Radio('Tomado', 'radio1', default=False)]]
+        radio = [False, False]
+        if self.service_type is not None:
+            radio[self.service_type] = True
+        service_type_layout = [[sg.Radio('Prestado', 'radio1', default=radio[0])],
+                               [sg.Radio('Tomado', 'radio1', default=radio[1])]]
 
         service_type_col = [[sg.Column(service_type_layout, size=(425, 70))]]
 
         layout = [
             [sg.Frame('Tipo de Serviço', service_type_col)],
             [sg.Text('Selecione a pasta que contém as notas a serem conferidas:')],
-            [sg.Input(), sg.FolderBrowse('Selecionar Pasta')],
+            [sg.Input(self.folder), sg.FolderBrowse('Selecionar Pasta')],
             [sg.Submit('Conferir'), sg.Cancel('Cancelar')],
         ]
 
@@ -45,27 +48,27 @@ class MainGUI:
                 exit()
 
             if event == 'Conferir':
-                if not values['Selecionar Pasta']:
+                if not values['Selecionar Pasta'] and not self.folder:
                     sg.popup('Selecione uma pasta para a conferência!')
                     continue
                 if values[0]:  # prestado
-                    service_type = 0
-                    folder_name = values['Selecionar Pasta'] or '.'
-                    xml_file_names = [f for f in os.listdir(folder_name) if '.xml' in f]
+                    self.service_type = 0
+                    self.folder = values['Selecionar Pasta'] or self.folder
+                    self.xml_files = [f for f in os.listdir(self.folder) if '.xml' in f]
                     # sg.popup('A conferência deste tipo de serviço ainda está em desenvolvimento.')
                     # continue
                     break
                 elif values[1]:  # tomado
                     # se a pasta não foi selecionada use a pasta atual `.`
-                    service_type = 1
-                    folder_name = values['Selecionar Pasta'] or '.'
-                    xml_file_names = [f for f in os.listdir(folder_name) if '.xml' in f]
+                    self.service_type = 1
+                    self.folder = values['Selecionar Pasta'] or '.'
+                    self.xml_files = [f for f in os.listdir(self.folder) if '.xml' in f]
                     break
                 else:
                     sg.popup('Selecione o tipo de conferência a ser feita!')
 
         window.close()
-        return folder_name, xml_file_names, service_type
+        # return folder_name, xml_file_names, service_type
 
 
 class Loading:
@@ -133,6 +136,10 @@ class PopUp:
             return 1
         else:
             return 2
+
+    @staticmethod
+    def msg(msg):
+        sg.popup(msg)
 
 
 class EditableResultTable:
@@ -480,8 +487,12 @@ class ResultTable:
                           irrf_value, csrf_value, invoice.net_value, invoice.service_nature])
 
         layout = [
-            [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
-             sg.Button('Limpar Filtro', disabled=True)],
+            # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
+            #  sg.Button('Limpar Filtro', disabled=True)],
+            [sg.Text('CNPJ/CPF'), sg.Input(size=(20, 1), key='-INPUT_FILTER-'), sg.Button('Filtrar'),
+             sg.Button('Limpar Filtro', disabled=True), sg.Text('Natureza', pad=((98, 0), (0, 0))),
+             sg.Input(size=(15, 1), key='-NATURE-'),
+             sg.Button('Atualizar Natureza')],
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
             [sg.Button('Editar'), sg.Button('Atualizar')],
             inspection_data_cols,
@@ -492,18 +503,36 @@ class ResultTable:
 
         self.window = sg.Window('Resultados da Conferência', layout)
 
+        temp_inv_lst = InvoicesList([])
+        temp_lst = list()
         selected_row = -1
         while True:
             event, values = self.window.read()
             if event == sg.WINDOW_CLOSED:
                 self.window.close()
                 return False, InvoicesList([])
+            if event == 'Filtrar':
+                temp_inv_lst = self.invoices.cnpj_filter(values['-INPUT_FILTER-'], self.invoices.index(0).service_type)
+                temp_lst = temp_inv_lst.get_gui_table()
+                self.window['table'].Update(temp_lst)
+                self.window['Limpar Filtro'].Update(disabled=False)
+                continue
+            if event == 'Limpar Filtro':
+                self.window['table'].Update(self.invoices.get_gui_table())
+                self.window['Limpar Filtro'].Update(disabled=True)
+                continue
             if event == 'Editar':
                 try:
                     selected_row = values['table'][0]
                     self.edit_row(const.HEADER2, table[selected_row])
                 except Exception as e:
                     print(e)
+            if event == 'Atualizar Natureza':
+                nature = values['Natureza']
+                for i in range(len(temp_inv_lst)):
+                    temp_inv_lst.index(i).set_nature(nature)
+                self.window['table'].Update(temp_inv_lst.get_gui_table())
+                continue
             if event == 'Atualizar':
                 row = [values[const.HEADER2[i]] for i in range(len(const.HEADER2))]
                 table = self.update(table, selected_row, row)

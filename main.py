@@ -13,15 +13,16 @@ def main():
     initiate.init()
 
     main_gui = MainGUI()
-    folder, xml_files, service_type = main_gui.show()
+    # folder, xml_files, service_type = main_gui.show()
+    main_gui.show()
 
-    is_finished, invoices = inspection.inspect(folder, xml_files, service_type)
+    is_finished, invoices = inspection.inspect(main_gui.folder, main_gui.xml_files, main_gui.service_type)
     while not is_finished:
-        folder, xml_files, service_type = main_gui.show()
-        is_finished, invoices = inspection.inspect(folder, xml_files, service_type)
+        main_gui.show()
+        is_finished, invoices = inspection.inspect(main_gui.folder, main_gui.xml_files, main_gui.service_type)
 
-    xlsx_file_name = folder.split('/')[-1] + '.xlsx'
-    excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, xml_files)
+    xlsx_file_name = main_gui.folder.split('/')[-1] + '.xlsx'
+    excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, main_gui.xml_files)
 
     sql_control = SQLControl(invoices)
     commands = sql_control.run()

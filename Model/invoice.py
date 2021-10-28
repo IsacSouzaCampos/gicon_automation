@@ -125,3 +125,10 @@ class Invoice:
                     v = values[1].replace('\n', '')
                     return (cnae + v) if len(v) == 4 else (cnae + '0' + v)
         return cnae
+
+    def set_nature(self, nature: str):
+        # if len(nature) != 7:
+        #     print('natureza deve possuir 7 caracteres')
+        #     return -1
+        self.service_nature = nature
+        return 0
