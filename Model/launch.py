@@ -1,4 +1,4 @@
-class LCTOFISENTData:
+class LCTOFISData:
     def __init__(self, invoice, key, _type, ipi, funrural, payment_method=99, freight_category=9):
         self.invoice = invoice
         self.type = _type

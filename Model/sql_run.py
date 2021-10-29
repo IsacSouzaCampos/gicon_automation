@@ -3,11 +3,15 @@ import fdb
 from constants import SYS_PATH
 
 
-def run_command(commands, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB',
+def run_command(host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB',
                 user='SYSDBA', password='masterkey'):
 
     # limpar o arquivo que conterá os resultados de consultas
     open(SYS_PATH + r'\bd_results.bin', 'w').close()
+
+    # carregar os comands em memória
+    with open(SYS_PATH + r'\commands.bin', 'r') as fin:
+        commands = fin.read()
 
     results = list()
     try:
@@ -48,5 +52,5 @@ def write_to_binary(results):
 
 if __name__ == '__main__':
     import sys
-    run_command(str(sys.argv[1].replace('_', ' ')), str(sys.argv[2]), str(sys.argv[3]), str(sys.argv[4]),
-                str(sys.argv[5]))
+    run_command(str(sys.argv[1]), str(sys.argv[2]), str(sys.argv[3]),
+                str(sys.argv[4]))

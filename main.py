@@ -24,7 +24,7 @@ def main():
     xlsx_file_name = main_gui.folder.split('/')[-1] + '.xlsx'
     excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, main_gui.xml_files)
 
-    sql_control = SQLControl(invoices)
+    sql_control = SQLControl(invoices, main_gui.service_type)
     commands = sql_control.run()
 
     insertion_commands(commands)

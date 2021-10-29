@@ -34,7 +34,7 @@ def create_xlsx(header: list, invoices: InvoicesList, file_name: str, xml_files:
             row.append('CANCELADA')
         else:
             row = row[:header.index('Natureza') + 1]
-        print('row:', row)
+        # print('row:', row)
         sheet1.append(row)
 
     upload_sheet_content(sheet1, xml_files)

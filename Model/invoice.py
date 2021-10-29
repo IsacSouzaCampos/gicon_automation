@@ -52,8 +52,8 @@ class Invoice:
                 self.net_value -= tax
 
         self.net_value = round(self.net_value, 2)
-        self.nature= self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
-                                                  self.taxes.csrf.is_withheld, self.service_type)
+        self.nature = self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
+                                          self.taxes.csrf.is_withheld, self.service_type)
 
         self.is_canceled = 'datacancelamento' in self.xml_data and self.xml_data['datacancelamento'] is not None
         self.invoice_situation = 2 if self.is_canceled else 0
@@ -70,8 +70,8 @@ class Invoice:
         csrf_value = '' if not self.taxes.csrf.value else self.taxes.csrf.value
         row = list([self.serial_number, self.issuance_date, self.gross_value, self.taxes.iss.value,
                     irrf_value, csrf_value, self.net_value, self.nature,
-                    self.service_description, self.aditional_data, self.provider.cnpj, self.provider.name,
-                    self.taker.cnpj, self.taker.name])
+                    self.service_description, self.aditional_data, self.provider.fed_id, self.provider.name,
+                    self.taker.fed_id, self.taker.name])
 
         if self.is_canceled:
             row = row[:2] + ['-' for _ in range(len(row) - 2)]

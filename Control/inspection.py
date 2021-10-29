@@ -36,11 +36,11 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
         invoices.add_invoice(invoice)  # implementar esta lista no código ao invés da lista de dados anterior
 
         # dados da empresa que está trocando serviço com o nosso cliente
-        company_cnpj = invoice.provider.cnpj if service_type else invoice.taker.cnpj
+        company_id = invoice.provider.fed_id if service_type else invoice.taker.fed_id
         company_name = invoice.provider.name if service_type else invoice.taker.name
-        if company_cnpj not in companies_cnpjs:
+        if company_id not in companies_cnpjs:
             companies_names.append(company_name.title())
-            companies_cnpjs.append(company_cnpj)
+            companies_cnpjs.append(company_id)
 
         load_insp.update(invoice.serial_number, i)
     load_insp.close()
