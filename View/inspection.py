@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 import os
-import re
+# import re
 
 import Model.constants as const
 from Model.invoices_list import InvoicesList
@@ -61,8 +61,11 @@ class MainGUI:
                     break
                 elif values[1]:  # tomado
                     # se a pasta não foi selecionada use a pasta atual `.`
+                    if not values['Selecionar Pasta'] and not self.folder:
+                        sg.popup('Selecione uma pasta para a conferência!')
+                        continue
                     self.service_type = 1
-                    self.folder = values['Selecionar Pasta'] or '.'
+                    self.folder = values['Selecionar Pasta'] or self.folder
                     self.xml_files = [f for f in os.listdir(self.folder) if '.xml' in f]
                     break
                 else:
@@ -516,7 +519,9 @@ class ResultTable:
 
         self.window = sg.Window('Resultados da Conferência', layout)
 
-        temp_inv_lst = InvoicesList([])
+        temp_invs_lst = InvoicesList([])
+        temp_table = list()
+        temp_table_idxs = list()
         selected_row = -1
         while True:
             event, values = self.window.read()
@@ -540,32 +545,55 @@ class ResultTable:
             if event == 'Filtrar':
                 # _filter = values['-IN_FIL1-'] + values['-IN_FIL2-'] + values['-IN_FIL3-'] + \
                 #          values['-IN_FIL4-'] + values['-IN_FIL5-']
-
-                temp_inv_lst = self.invoices.cnpj_filter(values['-INPUT_FILTER-'], self.invoices.index(0).service_type)
-                temp_lst = temp_inv_lst.get_gui_table()
-                self.window['table'].Update(temp_lst)
+                _filter = values['-INPUT_FILTER-']
+                temp_table_idxs, temp_invs_lst = self.invoices.cnpj_filter(_filter, self.invoices.index(0).service_type)
+                temp_table = temp_invs_lst.get_gui_table()
+                self.window['table'].Update(temp_table)
                 self.window['Limpar Filtro'].Update(disabled=False)
                 continue
 
             if event == 'Limpar Filtro':
                 self.window['table'].Update(self.invoices.get_gui_table())
                 self.window['Limpar Filtro'].Update(disabled=True)
+                temp_invs_lst = InvoicesList([])
+                temp_table = []
                 continue
 
             if event == 'Editar':
                 try:
                     selected_row = values['table'][0]
-                    self.edit_row(const.HEADER2, table[selected_row])
+                    if not len(temp_table):
+                        self.edit_row(const.HEADER2, table[selected_row])
+                    else:
+                        self.edit_row(const.HEADER2, temp_table[selected_row])
                 except Exception as e:
                     print(e)
 
             if event == 'Atualizar Natureza':
-                lst = temp_inv_lst if temp_inv_lst else self.invoices
+                invs_lst = temp_invs_lst if temp_table else self.invoices
                 nature = values['-NATURE-']
-                for i in range(len(lst)):
-                    if lst.index(i).set_nature(nature) < 0:
-                        continue
-                self.window['table'].Update(lst.get_gui_table())
+
+                if len(nature) != 7:
+                    PopUp.msg('Natureza deve possuir 7 caracteres.')
+                    continue
+                try:
+                    nature = int(nature)
+                except Exception as e:
+                    print(e)
+                    PopUp.msg('Formato de natureza errado.')
+                    continue
+
+                for i in range(len(invs_lst)):
+                    invs_lst.index(i).set_nature(nature)
+
+                if temp_table:
+                    temp_table = invs_lst.get_gui_table()
+                    self.update(temp_table)
+                    self.invoices.update(temp_table_idxs, temp_table)
+                    table = self.invoices.get_gui_table()
+                else:
+                    table = invs_lst.get_gui_table()
+                    self.update(table)
                 continue
 
             if event == 'Atualizar':

@@ -29,12 +29,16 @@ class InvoicesList:
         table = list()
         for invoice in self.invoices:
             irrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
-            csrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
+            csrf_value = '' if not invoice.taxes.csrf.value else invoice.taxes.csrf.value
 
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
                           irrf_value, csrf_value, invoice.net_value,
                           invoice.nature])
         return table
+
+    def update(self, indexes: list, invoice_data_lst: list):
+        for i, idx in enumerate(indexes):
+            self.update_invoice(idx, invoice_data_lst[i])
 
     def update_invoice(self, index: int, invoice_data: list) -> None:
         # print('new row*:', invoice_data)
@@ -71,12 +75,21 @@ class InvoicesList:
         return n_errors
 
     def cnpj_filter(self, cnpj, service_type):
-        result = InvoicesList([])
+        res_invs = InvoicesList([])
+        indexes = list()
+
         if service_type:  # se tomado
-            [result.add_invoice(inv) for inv in self.invoices if cnpj in inv.provider.cnpj]
+            for index, invoice in enumerate(self.invoices):
+                if cnpj in invoice.provider.cnpj:
+                    indexes.append(index)
+                    res_invs.add_invoice(invoice)
         else:
-            [result.add_invoice(inv) for inv in self.invoices if cnpj in inv.taker.cnpj]
-        return result
+            for index, invoice in enumerate(self.invoices):
+                if cnpj in invoice.taker.cnpj:
+                    indexes.append(index)
+                    res_invs.add_invoice(invoice)
+
+        return indexes, res_invs
 
     def __iter__(self):
         return InvoicesListIterator(self)

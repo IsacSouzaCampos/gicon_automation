@@ -127,8 +127,4 @@ class Invoice:
         return cnae
 
     def set_nature(self, nature: str):
-        if len(nature) != 7:
-            print('natureza deve possuir 7 caracteres')
-            return -1
         self.nature = int(nature)
-        return 0
