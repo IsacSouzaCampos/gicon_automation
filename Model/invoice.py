@@ -52,7 +52,7 @@ class Invoice:
                 self.net_value -= tax
 
         self.net_value = round(self.net_value, 2)
-        self.service_nature = self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
+        self.nature= self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
                                                   self.taxes.csrf.is_withheld, self.service_type)
 
         self.is_canceled = 'datacancelamento' in self.xml_data and self.xml_data['datacancelamento'] is not None
@@ -69,7 +69,7 @@ class Invoice:
         irrf_value = '' if not self.taxes.irrf.value else self.taxes.irrf.value
         csrf_value = '' if not self.taxes.csrf.value else self.taxes.csrf.value
         row = list([self.serial_number, self.issuance_date, self.gross_value, self.taxes.iss.value,
-                    irrf_value, csrf_value, self.net_value, self.service_nature,
+                    irrf_value, csrf_value, self.net_value, self.nature,
                     self.service_description, self.aditional_data, self.provider.cnpj, self.provider.name,
                     self.taker.cnpj, self.taker.name])
 
@@ -127,8 +127,8 @@ class Invoice:
         return cnae
 
     def set_nature(self, nature: str):
-        # if len(nature) != 7:
-        #     print('natureza deve possuir 7 caracteres')
-        #     return -1
-        self.service_nature = nature
+        if len(nature) != 7:
+            print('natureza deve possuir 7 caracteres')
+            return -1
+        self.nature = int(nature)
         return 0

@@ -96,7 +96,7 @@ class SQLCommands:
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
         command = str()
-        if str(inv.service_nature)[-3:] == '308':
+        if str(inv.nature)[-3:] == '308':
             command = f'INSERT INTO ' \
                       f'LCTOFISENT(CODIGOEMPRESA,             CHAVELCTOFISENT,          CODIGOESTAB, ' \
                       f'           CODIGOPESSOA,              NUMERONF,                 ESPECIENF, ' \
@@ -135,14 +135,14 @@ class SQLCommands:
         # lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
 
         command = str()
-        if str(inv.service_nature)[-3:] == '308':
+        if str(inv.nature)[-3:] == '308':
             command = f'INSERT INTO ' \
                       f'LCTOFISENTCFOP(CODIGOEMPRESA,                CHAVELCTOFISENT,           CODIGOCFOP, ' \
                       f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
                       f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
                       f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
                       f'               VALOREXVALORADICIONAL) \n' \
-                      f'SELECT         CODEMPRESA,                   {launch.key},              {inv.service_nature}, '\
+                      f'SELECT         CODEMPRESA,                   {launch.key},              {inv.nature}, '\
                       f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
                       f'               {int(inv.taker.cnpj[-6:-2])}, {inv.gross_value},         {inv.gross_value}, ' \
                       f'               {tax_value},                  {0},                       {0}, ' \
@@ -205,7 +205,7 @@ class SQLCommands:
                   f'SELECT          CODEMPRESA,             {withheld_key},                 CODPESSOA, ' \
                   f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
                   f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-                  f'                {taker_comp_num},       {launch.key},                   {inv.service_nature}, '\
+                  f'                {taker_comp_num},       {launch.key},                   {inv.nature}, '\
                   f'                {0},                    {0},                            {0}, ' \
                   f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss.value}, ' \
                   f'                {0},                    {0},                            {0}, ' \
@@ -241,7 +241,7 @@ class SQLCommands:
         # lctofisent_key = f'({self.lctofisent_key(inv.taker.code)})'
 
         command = str()
-        if str(inv.service_nature)[-3:] == '308':
+        if str(inv.nature)[-3:] == '308':
             command = f'INSERT INTO LCTOFISENTVALORISS(' \
                       f'CODIGOEMPRESA,          CHAVELCTOFISENT,            CODIGOCAMPO,            VALOR) ' \
                       f'VALUES(' \

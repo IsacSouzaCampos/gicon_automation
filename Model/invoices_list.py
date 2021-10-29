@@ -23,7 +23,7 @@ class InvoicesList:
             print(invoice.ir_value, end='\t')
             print(invoice.csrf_value, end='\t')
             print(invoice.net_value, end='\t')
-            print(invoice.service_nature)
+            print(invoice.nature)
 
     def get_gui_table(self) -> list:
         table = list()
@@ -33,7 +33,7 @@ class InvoicesList:
 
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
                           irrf_value, csrf_value, invoice.net_value,
-                          invoice.service_nature])
+                          invoice.nature])
         return table
 
     def update_invoice(self, index: int, invoice_data: list) -> None:
@@ -45,7 +45,7 @@ class InvoicesList:
         self.invoices[index].taxes.irrf.value = invoice_data[4]
         self.invoices[index].taxes.csrf.value = invoice_data[5]
         self.invoices[index].net_value = invoice_data[6]
-        self.invoices[index].service_nature = invoice_data[7]
+        self.invoices[index].nature = invoice_data[7]
 
         # print(self.invoices[index].taxes.irrf.value)
 

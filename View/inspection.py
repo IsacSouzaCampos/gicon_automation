@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 import os
+import re
 
 import Model.constants as const
 from Model.invoices_list import InvoicesList
@@ -484,15 +485,27 @@ class ResultTable:
             irrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
             csrf_value = '' if not invoice.taxes.csrf.value else invoice.taxes.csrf.value
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
-                          irrf_value, csrf_value, invoice.net_value, invoice.service_nature])
+                          irrf_value, csrf_value, invoice.net_value, invoice.nature])
 
         layout = [
             # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
             #  sg.Button('Limpar Filtro', disabled=True)],
-            [sg.Text('CNPJ/CPF'), sg.Input(size=(20, 1), key='-INPUT_FILTER-'), sg.Button('Filtrar'),
+            [
+             # sg.Text('CNPJ/CPF'),
+             # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL1-'),
+             # sg.Text('.', pad=(0, 0)),
+             # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL2-'),
+             # sg.Text('.', pad=(0, 0)),
+             # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL3-'),
+             # sg.Text('/', pad=(0, 0)),
+             # sg.Input(size=(4, 1), change_submits=True, do_not_clear=True, key='-IN_FIL4-'),
+             # sg.Text('-', pad=(0, 0)),
+             # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL5-'),
+             sg.Text('CNPJ/CPF'), sg.Input(size=(20, 1), key='-INPUT_FILTER-'), sg.Button('Filtrar'),
              sg.Button('Limpar Filtro', disabled=True), sg.Text('Natureza', pad=((98, 0), (0, 0))),
              sg.Input(size=(15, 1), key='-NATURE-'),
              sg.Button('Atualizar Natureza')],
+
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
             [sg.Button('Editar'), sg.Button('Atualizar')],
             inspection_data_cols,
@@ -504,40 +517,63 @@ class ResultTable:
         self.window = sg.Window('Resultados da Conferência', layout)
 
         temp_inv_lst = InvoicesList([])
-        temp_lst = list()
         selected_row = -1
         while True:
             event, values = self.window.read()
             if event == sg.WINDOW_CLOSED:
                 self.window.close()
                 return False, InvoicesList([])
+
+            # if event in ['-IN_FIL1-', '-IN_FIL2-', '-IN_FIL3-', '-IN_FIL4-', '-IN_FIL5-']:
+            #     self.window[event].Update(re.sub("[^0-9]", "", values[event]))
+            # if event == '-IN_FIL1-' and len(self.window[event].Get()) == 2:
+            #     self.window['-IN_FIL2-'].SetFocus()
+            # if event == '-IN_FIL2-' and len(self.window[event].Get()) == 3:
+            #     self.window['-IN_FIL3-'].SetFocus()
+            # if event == '-IN_FIL3-' and len(self.window[event].Get()) == 3:
+            #     self.window['-IN_FIL4-'].SetFocus()
+            # if event == '-IN_FIL4-' and len(self.window[event].Get()) == 4:
+            #     self.window['-IN_FIL5-'].SetFocus()
+            # if event == '-IN_FIL5-' and len(self.window[event].Get()) == 2:
+            #     self.window['Filtrar'].SetFocus()
+
             if event == 'Filtrar':
+                # _filter = values['-IN_FIL1-'] + values['-IN_FIL2-'] + values['-IN_FIL3-'] + \
+                #          values['-IN_FIL4-'] + values['-IN_FIL5-']
+
                 temp_inv_lst = self.invoices.cnpj_filter(values['-INPUT_FILTER-'], self.invoices.index(0).service_type)
                 temp_lst = temp_inv_lst.get_gui_table()
                 self.window['table'].Update(temp_lst)
                 self.window['Limpar Filtro'].Update(disabled=False)
                 continue
+
             if event == 'Limpar Filtro':
                 self.window['table'].Update(self.invoices.get_gui_table())
                 self.window['Limpar Filtro'].Update(disabled=True)
                 continue
+
             if event == 'Editar':
                 try:
                     selected_row = values['table'][0]
                     self.edit_row(const.HEADER2, table[selected_row])
                 except Exception as e:
                     print(e)
+
             if event == 'Atualizar Natureza':
-                nature = values['Natureza']
-                for i in range(len(temp_inv_lst)):
-                    temp_inv_lst.index(i).set_nature(nature)
-                self.window['table'].Update(temp_inv_lst.get_gui_table())
+                lst = temp_inv_lst if temp_inv_lst else self.invoices
+                nature = values['-NATURE-']
+                for i in range(len(lst)):
+                    if lst.index(i).set_nature(nature) < 0:
+                        continue
+                self.window['table'].Update(lst.get_gui_table())
                 continue
+
             if event == 'Atualizar':
                 row = [values[const.HEADER2[i]] for i in range(len(const.HEADER2))]
                 table = self.update(table, selected_row, row)
                 self.window.Element('-ERRORS-').Update(f'{self.n_errors} {const.ERROR_LINK_TEXT}')
                 self.update(table)
+                continue
 
             if event == '-ERRORS-':
                 if not self.n_errors:
@@ -569,6 +605,7 @@ class ResultTable:
                         new_table.append(row)
                 table = new_table
                 self.update(table)
+                continue
 
             if event == 'Lançar':
                 if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
