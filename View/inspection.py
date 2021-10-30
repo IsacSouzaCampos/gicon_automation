@@ -490,31 +490,35 @@ class ResultTable:
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
                           irrf_value, csrf_value, invoice.net_value, invoice.nature])
 
+        _filter = [[sg.Text('CNPJ/CPF'), sg.Input(size=(20, 1), key='-INPUT_FILTER-'), sg.Button('Filtrar'),
+                   sg.Button('Limpar Filtro', disabled=True), sg.Text('Natureza', pad=((98, 0), (0, 0))),
+                   sg.Input(size=(14, 1), key='-NATURE-'),
+                   sg.Button('Atualizar Naturezas')],
+                   [sg.Radio('CNPJ', 'radio1'), sg.Radio('CPF', 'radio1')],
+                   [sg.Checkbox('ISS'), sg.Checkbox('IRRF'), sg.Checkbox('CSRF')]]
+
         layout = [
             # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
             #  sg.Button('Limpar Filtro', disabled=True)],
-            [
-             # sg.Text('CNPJ/CPF'),
-             # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL1-'),
-             # sg.Text('.', pad=(0, 0)),
-             # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL2-'),
-             # sg.Text('.', pad=(0, 0)),
-             # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL3-'),
-             # sg.Text('/', pad=(0, 0)),
-             # sg.Input(size=(4, 1), change_submits=True, do_not_clear=True, key='-IN_FIL4-'),
-             # sg.Text('-', pad=(0, 0)),
-             # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL5-'),
-             sg.Text('CNPJ/CPF'), sg.Input(size=(20, 1), key='-INPUT_FILTER-'), sg.Button('Filtrar'),
-             sg.Button('Limpar Filtro', disabled=True), sg.Text('Natureza', pad=((98, 0), (0, 0))),
-             sg.Input(size=(15, 1), key='-NATURE-'),
-             sg.Button('Atualizar Natureza')],
+            # [sg.Text('CNPJ/CPF'),
+            # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL1-'),
+            # sg.Text('.', pad=(0, 0)),
+            # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL2-'),
+            # sg.Text('.', pad=(0, 0)),
+            # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL3-'),
+            # sg.Text('/', pad=(0, 0)),
+            # sg.Input(size=(4, 1), change_submits=True, do_not_clear=True, key='-IN_FIL4-'),
+            # sg.Text('-', pad=(0, 0)),
+            # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL5-')],
+
+            [sg.Frame('Filtro', _filter, key='-FILTER_FRAME-')],
 
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
             [sg.Button('Editar'), sg.Button('Atualizar')],
             inspection_data_cols,
             errors_link,
             [sg.Text()],
-            [sg.Button('Lançar')]
+            [sg.Button('Lançar')],
         ]
 
         self.window = sg.Window('Resultados da Conferência', layout)
@@ -546,7 +550,7 @@ class ResultTable:
                 # _filter = values['-IN_FIL1-'] + values['-IN_FIL2-'] + values['-IN_FIL3-'] + \
                 #          values['-IN_FIL4-'] + values['-IN_FIL5-']
                 _filter = values['-INPUT_FILTER-']
-                temp_table_idxs, temp_invs_lst = self.invoices.cnpj_filter(_filter, self.invoices.index(0).service_type)
+                temp_table_idxs, temp_invs_lst = self.invoices.filter(_filter, self.invoices.index(0).service_type)
                 temp_table = temp_invs_lst.get_gui_table()
                 self.window['table'].Update(temp_table)
                 self.window['Limpar Filtro'].Update(disabled=False)
@@ -569,7 +573,7 @@ class ResultTable:
                 except Exception as e:
                     print(e)
 
-            if event == 'Atualizar Natureza':
+            if event == 'Atualizar Naturezas':
                 invs_lst = temp_invs_lst if temp_table else self.invoices
                 nature = values['-NATURE-']
 

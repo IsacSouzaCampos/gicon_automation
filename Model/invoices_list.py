@@ -74,13 +74,14 @@ class InvoicesList:
                     n_errors += 1
         return n_errors
 
-    def cnpj_filter(self, fed_id, service_type):
+    def filter(self, fed_id, service_type):
+        # fed_id = fed_id.replace('.', '').replace('/', '').replace('-', '')
         res_invs = InvoicesList([])
         indexes = list()
 
         if service_type:  # se tomado
             for index, invoice in enumerate(self.invoices):
-                if fed_id in invoice.provider.cnpj:
+                if fed_id in invoice.provider.fed_id:
                     indexes.append(index)
                     res_invs.add_invoice(invoice)
         else:
