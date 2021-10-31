@@ -4,6 +4,7 @@ import os
 
 import Model.constants as const
 from Model.invoices_list import InvoicesList
+from Model.filter import Filter
 
 
 class MainGUI:
@@ -490,12 +491,15 @@ class ResultTable:
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
                           irrf_value, csrf_value, invoice.net_value, invoice.nature])
 
-        _filter = [[sg.Text('CNPJ/CPF'), sg.Input(size=(20, 1), key='-INPUT_FILTER-'), sg.Button('Filtrar'),
+        _filter = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-'), sg.Button('Filtrar'),
                    sg.Button('Limpar Filtro', disabled=True), sg.Text('Natureza', pad=((98, 0), (0, 0))),
                    sg.Input(size=(14, 1), key='-NATURE-'),
                    sg.Button('Atualizar Naturezas')],
-                   [sg.Radio('CNPJ', 'radio1'), sg.Radio('CPF', 'radio1')],
-                   [sg.Checkbox('ISS'), sg.Checkbox('IRRF'), sg.Checkbox('CSRF')]]
+                   [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
+                    sg.Radio('Ambos', 'radio1')],
+                   [sg.Checkbox('ISS', key='-ISS_FILTER-'),
+                    sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
+                    sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))]]
 
         layout = [
             # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
@@ -514,7 +518,7 @@ class ResultTable:
             [sg.Frame('Filtro', _filter, key='-FILTER_FRAME-')],
 
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
-            [sg.Button('Editar'), sg.Button('Atualizar')],
+            [sg.Button('Editar'), sg.Button('Atualizar', disabled=True)],
             inspection_data_cols,
             errors_link,
             [sg.Text()],
@@ -549,29 +553,19 @@ class ResultTable:
             if event == 'Filtrar':
                 # _filter = values['-IN_FIL1-'] + values['-IN_FIL2-'] + values['-IN_FIL3-'] + \
                 #          values['-IN_FIL4-'] + values['-IN_FIL5-']
-                _filter = values['-INPUT_FILTER-']
-                temp_table_idxs, temp_invs_lst = self.invoices.filter(_filter, self.invoices.index(0).service_type)
+                # _filter = values['-INPUT_FILTER-']
+                # temp_table_idxs, temp_invs_lst = self.invoices.filter(_filter, self.invoices.index(0).service_type)
+                selected_fed_id = None
+                if values['-RAD11-']:
+                    selected_fed_id = 0
+                elif values['-RAD12-']:
+                    selected_fed_id = 1
+                temp_table_idxs, temp_invs_lst = Filter(self.invoices, values['-FED_ID_FILTER-'], selected_fed_id,
+                                                        values['-ISS_FILTER-'], values['-IRRF_FILTER-'],
+                                                        values['-CSRF_FILTER-']).run()
                 temp_table = temp_invs_lst.get_gui_table()
                 self.window['table'].Update(temp_table)
                 self.window['Limpar Filtro'].Update(disabled=False)
-                continue
-
-            if event == 'Limpar Filtro':
-                self.window['table'].Update(self.invoices.get_gui_table())
-                self.window['Limpar Filtro'].Update(disabled=True)
-                temp_invs_lst = InvoicesList([])
-                temp_table = []
-                continue
-
-            if event == 'Editar':
-                try:
-                    selected_row = values['table'][0]
-                    if not len(temp_table):
-                        self.edit_row(const.HEADER2, table[selected_row])
-                    else:
-                        self.edit_row(const.HEADER2, temp_table[selected_row])
-                except Exception as e:
-                    print(e)
 
             if event == 'Atualizar Naturezas':
                 invs_lst = temp_invs_lst if temp_table else self.invoices
@@ -598,14 +592,31 @@ class ResultTable:
                 else:
                     table = invs_lst.get_gui_table()
                     self.update(table)
-                continue
+                self.window['-NATURE-'].Update('')
+
+            if event == 'Limpar Filtro':
+                self.window['table'].Update(self.invoices.get_gui_table())
+                self.window['Limpar Filtro'].Update(disabled=True)
+                temp_invs_lst = InvoicesList([])
+                temp_table = []
+
+            if event == 'Editar':
+                try:
+                    selected_row = values['table'][0]
+                    if not len(temp_table):
+                        self.edit_row(const.HEADER2, table[selected_row])
+                    else:
+                        self.edit_row(const.HEADER2, temp_table[selected_row])
+                    self.window['Atualizar'].Update(disabled=False)
+                except Exception as e:
+                    print(e)
 
             if event == 'Atualizar':
                 row = [values[const.HEADER2[i]] for i in range(len(const.HEADER2))]
                 table = self.update(table, selected_row, row)
                 self.window.Element('-ERRORS-').Update(f'{self.n_errors} {const.ERROR_LINK_TEXT}')
                 self.update(table)
-                continue
+                self.window['Atualizar'].Update(disabled=True)
 
             if event == '-ERRORS-':
                 if not self.n_errors:
@@ -637,7 +648,6 @@ class ResultTable:
                         new_table.append(row)
                 table = new_table
                 self.update(table)
-                continue
 
             if event == 'Lançar':
                 if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
@@ -660,9 +670,9 @@ class ResultTable:
 
         row = row[:2] + [row[i] if row[i] in ['', '-'] else round(float(row[i].replace(',', '.')), 2)
                          for i in range(2, 7)] + [int(row[7])]
-        table = [table[i] if i != selected_row else row for i in range(len(table))]
-        self.window.Element('table').Update(values=table)
 
         self.invoices.update_invoice(selected_row, row)
+        table = self.invoices.get_gui_table()
+        self.window.Element('table').Update(values=table)
         self.n_errors = self.invoices.number_of_errors()
         return table

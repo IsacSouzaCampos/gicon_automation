@@ -46,12 +46,9 @@ class Invoice:
 
         # print('IR(%):', self.ir_percentage, '- CSRF(%):', self.csrf_percentage)
 
-        self.net_value = self.gross_value
-        for tax in [self.taxes.iss.value, self.taxes.irrf.value, self.taxes.csrf.value]:
-            if type(tax) != str:
-                self.net_value -= tax
+        self.net_value = 0
+        self.set_net_value()
 
-        self.net_value = round(self.net_value, 2)
         self.nature = self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
                                           self.taxes.csrf.is_withheld, self.service_type)
 
@@ -128,3 +125,10 @@ class Invoice:
 
     def set_nature(self, nature: str):
         self.nature = int(nature)
+
+    def set_net_value(self):
+        self.net_value = self.gross_value
+        for tax in [self.taxes.iss.value, self.taxes.irrf.value, self.taxes.csrf.value]:
+            if type(tax) != str:
+                self.net_value -= tax
+        self.net_value = round(self.net_value, 2)

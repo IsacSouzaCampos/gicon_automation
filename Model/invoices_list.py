@@ -48,7 +48,7 @@ class InvoicesList:
         self.invoices[index].taxes.iss.value = invoice_data[3]
         self.invoices[index].taxes.irrf.value = invoice_data[4]
         self.invoices[index].taxes.csrf.value = invoice_data[5]
-        self.invoices[index].net_value = invoice_data[6]
+        self.invoices[index].set_net_value()
         self.invoices[index].nature = invoice_data[7]
 
         # print(self.invoices[index].taxes.irrf.value)
@@ -75,7 +75,8 @@ class InvoicesList:
         return n_errors
 
     def filter(self, fed_id, service_type):
-        # fed_id = fed_id.replace('.', '').replace('/', '').replace('-', '')
+        fed_id = fed_id.replace('.', '').replace('/', '').replace('-', '')
+
         res_invs = InvoicesList([])
         indexes = list()
 
