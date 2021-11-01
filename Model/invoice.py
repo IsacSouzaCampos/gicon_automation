@@ -54,6 +54,7 @@ class Invoice:
 
         self.is_canceled = 'datacancelamento' in self.xml_data and self.xml_data['datacancelamento'] is not None
         self.invoice_situation = 2 if self.is_canceled else 0
+        self.to_launch = self.taxes.iss.is_withheld or self.taxes.irrf.is_withheld or self.taxes.csrf.is_withheld
 
     def data_list(self) -> list:
         """

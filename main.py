@@ -6,6 +6,8 @@ from View.inspection import MainGUI
 import Model.initiate as initiate
 import Model.excel as excel
 import Model.constants as constants
+from Model.invoices_list import InvoicesList
+
 from View.inspection_lib import insertion_commands
 
 
@@ -24,7 +26,14 @@ def main():
     xlsx_file_name = main_gui.folder.split('/')[-1] + '.xlsx'
     excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, main_gui.xml_files)
 
-    sql_control = SQLControl(invoices, main_gui.service_type)
+    # seleciona apenas notas com retenção
+    to_launch = InvoicesList([])
+    for i in range(len(invoices)):
+        invoice = invoices.index(i)
+        if invoice.to_launch:
+            to_launch.add_invoice(invoice)
+
+    sql_control = SQLControl(to_launch, main_gui.service_type)
     commands = sql_control.run()
 
     insertion_commands(commands)

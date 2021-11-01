@@ -11,10 +11,10 @@ class SQLCommands:
         self.run = SQLRun()
 
     def is_launched(self, invoice: Invoice) -> str:
-        company_code = self.get_company_code(invoice.taker.fed_id)
+        company_code = self.get_company_code(invoice.taker.fed_id, self.service_type)
 
         # person_type = 0 if invoice.service_type else 1
-        person_code = self.get_company_code(invoice.provider.fed_id)
+        person_code = self.get_company_code(invoice.provider.fed_id, 0 if self.service_type else 1)
 
         command = f'SELECT \'{invoice.taker.fed_id}\', \'{invoice.provider.fed_id}\', NUMERONF ' \
                   f'FROM LCTOFIS{self.type_str} ' \
@@ -25,62 +25,62 @@ class SQLCommands:
         # print(command)
         return command
 
-    @staticmethod
-    def get_companies_code(launch: LCTOFISData):
-        inv = launch.invoice
-        if launch.type:  # tomado
-            company_id = inv.taker.fed_id
-            person_id = inv.provider.fed_id
-        else:  # prestado
-            person_id = inv.taker.fed_id
-            company_id = inv.provider.fed_id
+    # @staticmethod
+    # def get_companies_code(launch: LCTOFISData):
+    #     inv = launch.invoice
+    #     if launch.type:  # tomado
+    #         company_id = inv.taker.fed_id
+    #         person_id = inv.provider.fed_id
+    #     else:  # prestado
+    #         person_id = inv.taker.fed_id
+    #         company_id = inv.provider.fed_id
+    #
+    #     if len(company_id) == 14:  # CNPJ
+    #         company_id = f'{company_id[:2]}.{company_id[2:5]}.{company_id[5:8]}' \
+    #                      f'/{company_id[8:12]}-{company_id[12:]}'
+    #     elif len(company_id) == 11:  # CPF
+    #         company_id = f'{company_id[:3]}.{company_id[3:6]}.{company_id[6:9]}-{company_id[9:]}'
+    #
+    #     if len(person_id) == 14:  # CNPJ
+    #         person_id = f'{person_id[:2]}.{person_id[2:5]}.{person_id[5:8]}' \
+    #                     f'/{person_id[8:12]}-{person_id[12:]}'
+    #     elif len(person_id) == 11:  # CPF
+    #         person_id = f'{person_id[:3]}.{person_id[3:6]}.{person_id[6:9]}-{person_id[9:]}'
+    #
+    #     command = f'SELECT C.CODIGOEMPRESA AS CODEMPRESA, P.CODIGOPESSOA AS CODPESSOA ' \
+    #               f'FROM CLIENTE C, PESSOA P ' \
+    #               f'WHERE (C.INSCRFEDERAL = \'{company_id}\' AND P.INSCRFEDERAL = \'{person_id}\') '
+    #
+    #     return command
 
-        if len(company_id) == 14:  # CNPJ
-            company_id = f'{company_id[:2]}.{company_id[2:5]}.{company_id[5:8]}' \
-                         f'/{company_id[8:12]}-{company_id[12:]}'
-        elif len(company_id) == 11:  # CPF
-            company_id = f'{company_id[:3]}.{company_id[3:6]}.{company_id[6:9]}-{company_id[9:]}'
-
-        if len(person_id) == 14:  # CNPJ
-            person_id = f'{person_id[:2]}.{person_id[2:5]}.{person_id[5:8]}' \
-                        f'/{person_id[8:12]}-{person_id[12:]}'
-        elif len(person_id) == 11:  # CPF
-            person_id = f'{person_id[:3]}.{person_id[3:6]}.{person_id[6:9]}-{person_id[9:]}'
-
-        command = f'SELECT C.CODIGOEMPRESA AS CODEMPRESA, P.CODIGOPESSOA AS CODPESSOA ' \
-                  f'FROM CLIENTE C, PESSOA P ' \
-                  f'WHERE (C.INSCRFEDERAL = \'{company_id}\' AND P.INSCRFEDERAL = \'{person_id}\') '
-
-        return command
-
-    @staticmethod
-    def get_company_code(fed_id: str) -> str:
+    def get_company_code(self, fed_id: str, company_type) -> str:
         """
         Retorna o código da empresa com base no seu nome.
 
-        :param fed_id:  CPF/CNPJ da empresa/pessoa.
-        :type fed_id:   (str)
+        :param fed_id:       CPF/CNPJ da empresa/pessoa.
+        :type fed_id:        (str)
+        :param company_type: Se a empresa a ser selecionada é a tomadora ou prestadora do serviço
+        :type company_type:  (int)
         """
 
-        if len(fed_id) == 14:
-            fed_id = f'{fed_id[:2]}.{fed_id[2:5]}.{fed_id[5:8]}/{fed_id[8:12]}-{fed_id[12:]}'
-        elif len(fed_id) == 11:
-            fed_id = f'{fed_id[:3]}.{fed_id[3:6]}.{fed_id[6:9]}-{fed_id[9:]}'
+        fed_id = self.format_fed_id(fed_id)
 
-        return f'SELECT CODIGOEMPRESA FROM CLIENTE WHERE INSCRFEDERAL = \'{fed_id}\''
+        client_command = f'SELECT CODIGOEMPRESA FROM CLIENTE WHERE INSCRFEDERAL = \'{fed_id}\''
+        person_command = f'SELECT CODIGOPESSOA FROM PESSOA WHERE INSCRFEDERAL = \'{fed_id}\''
+        return client_command if self.service_type == company_type else person_command
 
     def lctofis_key(self, company_id) -> str:
         command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + 1 FROM LCTOFIS{self.type_str} WHERE CODIGOEMPRESA = ' \
-                  f'({self.get_company_code(company_id)})'
+                  f'({self.get_company_code(company_id, self.service_type)})'
         return command
 
     def lctofisretido_key(self, company_id) -> str:
         if self.service_type:
             command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}RETIDO) + 1 FROM LCTOFIS{self.type_str}RETIDO ' \
-                      f'WHERE CODIGOEMPRESA = ({self.get_company_code(company_id)})'
+                      f'WHERE CODIGOEMPRESA = ({self.get_company_code(company_id, self.service_type)})'
         else:
             command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + 1 FROM LCTOFIS{self.type_str}RETIDO ' \
-                      f'WHERE CODIGOEMPRESA = ({self.get_company_code(company_id)})'
+                      f'WHERE CODIGOEMPRESA = ({self.get_company_code(company_id, self.service_type)})'
 
         return command
 
@@ -93,7 +93,11 @@ class SQLCommands:
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
         ts = self.type_str
-        taker_id = inv.taker.fed_id
+
+        client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
+        client_code = self.get_company_code(client_id, self.service_type)
+        person_id = inv.provider.fed_id if not self.service_type else inv.taker.fed_id
+        person_code = self.get_company_code(person_id, 0 if self.service_type else 1)
         # if str(inv.nature)[-3:] == '308':
         command = f'INSERT INTO ' \
                   f'LCTOFIS{ts}(CODIGOEMPRESA,            CHAVELCTOFIS{ts},         CODIGOESTAB, ' \
@@ -105,9 +109,9 @@ class SQLCommands:
                   f'           CDMODELO,                  VERSAONFE,                EMITENTENF, ' \
                   f'           FINALIDADEOPERACAO,        MEIOPAGAMENTO,            MODALIDADEFRETE, ' \
                   f'           CDSITUACAO,                CANCELADA,                CONCILIADA, ' \
-                  f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO)\n' \
-                  f'SELECT     CODEMPRESA,                {launch.key},             {int(taker_id[-6:-2])}, '\
-                  f'           CODPESSOA,                 {inv.serial_number},      \'NFSE\', ' \
+                  f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO) ' \
+                  f'VALUES     (({client_code}),          {launch.key},             {int(client_id[-6:-2])}, '\
+                  f'           ({person_code}),           {inv.serial_number},      \'NFSE\', ' \
                   f'           \'U\',                     \'{issuance_date}\',      \'{issuance_date}\', ' \
                   f'           {inv.gross_value},         {launch.ipi.base},        {launch.ipi.value}, ' \
                   f'           {launch.ipi.exemption},    {launch.ipi.others},      {launch.funrural.base}, ' \
@@ -115,10 +119,7 @@ class SQLCommands:
                   f'           {inv.doc_type},            {4.00},                   \'{inv.issuer}\', ' \
                   f'           {inv.operation_purpose},   {launch.payment_method},  {launch.freight_category}, ' \
                   f'           {inv.invoice_situation},   {int(inv.is_canceled)},   {0}, ' \
-                  f'           {238},                     ({now}),                  {2} \n' \
-                  f'FROM (\n' \
-                  f'    {self.get_companies_code(launch)}' \
-                  f'\n)'
+                  f'           {238},                     ({now}),                  {2})'
 
         return command
 
@@ -133,21 +134,19 @@ class SQLCommands:
 
         ts = self.type_str
         # if str(inv.nature)[-3:] == '308':
-        taker_id = inv.taker.fed_id
+        client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
+        client_code = self.get_company_code(client_id, self.service_type)
         command = f'INSERT INTO ' \
                   f'LCTOFIS{ts}CFOP(CODIGOEMPRESA,               CHAVELCTOFIS{ts},          CODIGOCFOP, ' \
                   f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
                   f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
                   f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
-                  f'               VALOREXVALORADICIONAL) \n' \
-                  f'SELECT         CODEMPRESA,                   {launch.key},              {inv.nature}, '\
+                  f'               VALOREXVALORADICIONAL) ' \
+                  f'VALUES         (({client_code}),             {launch.key},              {inv.nature}, '\
                   f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
-                  f'               {int(taker_id[-6:-2])},       {inv.gross_value},         {inv.gross_value}, ' \
+                  f'               {int(client_id[-6:-2])},      {inv.gross_value},         {inv.gross_value}, ' \
                   f'               {tax_value},                  {0},                       {0}, ' \
-                  f'               {0} \n' \
-                  f'FROM (\n' \
-                  f'    {self.get_companies_code(launch)}' \
-                  f'\n)'
+                  f'               {0})'
 
         # print(command)
         return command
@@ -176,6 +175,10 @@ class SQLCommands:
         csll_value = 0 if not csll.value else csll.value
 
         ts = self.type_str
+        client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
+        client_code = self.get_company_code(client_id, self.service_type)
+        person_id = inv.provider.fed_id if not self.service_type else inv.taker.fed_id
+        person_code = self.get_company_code(person_id, 0 if self.service_type else 1)
         command = f'INSERT INTO ' \
                   f'LCTOFIS{ts}RETIDO(CODIGOEMPRESA,        CHAVELCTOFIS{ts}RETIDO,         CODIGOPESSOA, ' \
                   f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
@@ -200,8 +203,8 @@ class SQLCommands:
                   f'                 VARIACAOIMPOSTOCSLL, ' \
                   f'                 APURADOPISCOFINSCSLL,  DATAPGTOPISCOFINSCSLL, '\
                   f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
-                  f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
-                  f'SELECT          CODEMPRESA,             {withheld_key},                 CODPESSOA, ' \
+                  f'                 ORIGEMDADO,            CODIGOTABCTBFIS) ' \
+                  f'VALUES          (({client_code}),       {withheld_key},                 ({person_code}), ' \
                   f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
                   f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
                   f'                {taker_comp_num},       {launch.key},                   {inv.nature}, '\
@@ -224,10 +227,7 @@ class SQLCommands:
                   f'                {csrf.variation}, ' \
                   f'                {0},                    \'{issuance_date}\', ' \
                   f'                {0},                    {238},                          ({now}), ' \
-                  f'                {2},                    {838} \n' \
-                  f'FROM (\n' \
-                  f'    {self.get_companies_code(launch)}' \
-                  f'\n)'
+                  f'                {2},                    {838})'
 
         return command
 
@@ -235,7 +235,7 @@ class SQLCommands:
         inv = launch.invoice
         iss_aliquot = str(float(inv.taxes.iss.aliquot) * 100).replace('.', ',')
 
-        taker_code = self.get_company_code(inv.taker.fed_id)
+        taker_code = self.get_company_code(inv.taker.fed_id, self.service_type)
 
         ts = self.type_str
         # if str(inv.nature)[-3:] == '308':
@@ -260,6 +260,14 @@ class SQLCommands:
     def current_datetime():
         return 'SELECT CAST(\'NOW\' AS TIMESTAMP) FROM RDB$DATABASE'
 
+    @staticmethod
+    def format_fed_id(fed_id):
+        if len(fed_id) == 14:
+            fed_id = f'{fed_id[:2]}.{fed_id[2:5]}.{fed_id[5:8]}/{fed_id[8:12]}-{fed_id[12:]}'
+        elif len(fed_id) == 11:
+            fed_id = f'{fed_id[:3]}.{fed_id[3:6]}.{fed_id[6:9]}-{fed_id[9:]}'
+        return fed_id
+
 
 class SQLRun:
     def __init__(self, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB', user='SYSDBA',
@@ -273,7 +281,16 @@ class SQLRun:
         if not commands:
             return
 
-        # commands = [command.replace(' ', '_') for command in commands]
+        # transforma uma possível matriz em uma lista
+        temp_commands = commands
+        commands = list()
+        for element in temp_commands:
+            if type(element) == list:
+                for cmd in element:
+                    commands.append(cmd)
+            else:
+                commands.append(element)
+
         commands = ';'.join(commands)
         with open(SYS_PATH + r'\commands.bin', 'w') as fout:
             print(commands, file=fout)

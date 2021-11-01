@@ -650,6 +650,9 @@ class ResultTable:
                 self.update(table)
 
             if event == 'Lançar':
+                if self.n_errors > 0:
+                    sg.popup('Há notas com erros na conferência. Corrija-as antes de lançar.')
+                    continue
                 if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
                     break
 

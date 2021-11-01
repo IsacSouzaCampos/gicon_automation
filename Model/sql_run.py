@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*-
 import fdb
-from constants import SYS_PATH
+from constants import SYS_PATH, RESULTS_PATH
 
 
 def run_command(host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB',
@@ -22,9 +22,13 @@ def run_command(host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste
         cur = con.cursor()
 
         # Execute the SELECT statements:
+        i = 1
         for command in commands.split(';'):
-            cur.execute(command)
-            results.append(';'.join([';'.join([str(item) for item in row]) for row in cur]))
+            print('RODANDO COMANDO: ' + command.strip())
+            i += 1
+            cur.execute(command.strip())
+            if command.split()[0] == 'SELECT':
+                results.append(';'.join([';'.join([str(item) for item in row]) for row in cur]))
 
         cur.close()
         con.close()
@@ -46,7 +50,7 @@ def write_to_binary(results):
     """
 
     byte_arr = bytearray('\n'.join(results), 'utf8')
-    with open(SYS_PATH + r'\bd_results.bin', 'w+b') as fout:
+    with open(RESULTS_PATH, 'w+b') as fout:
         fout.write(byte_arr)
 
 
