@@ -7,8 +7,8 @@ import Model.excel as excel
 import Model.constants as constants
 from Model.invoices_list import InvoicesList
 
-# from Control.sql import SQLControl
-# from View.inspection_lib import insertion_commands
+from Control.sql import SQLControl
+from View.inspection_lib import insertion_commands
 
 
 def main():
@@ -33,10 +33,10 @@ def main():
         if invoice.to_launch:
             to_launch.add_invoice(invoice)
 
-    # sql_control = SQLControl(to_launch, main_gui.service_type)
-    # commands = sql_control.run()
-    #
-    # insertion_commands(commands)
+    sql_control = SQLControl(to_launch, main_gui.service_type)
+    commands = sql_control.run()
+
+    insertion_commands(commands)
 
 
 if __name__ == '__main__':

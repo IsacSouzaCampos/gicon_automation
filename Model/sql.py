@@ -242,7 +242,7 @@ class SQLCommands:
         command = f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
                   f'VALUES(' \
-                  f'({taker_code}),         {launch.key},               {125},                  {inv.full_cnae});' \
+                  f'({taker_code}),         {launch.key},               {125},                  {inv.cnae.full_code});' \
                   f'\n\n' \
                   f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
