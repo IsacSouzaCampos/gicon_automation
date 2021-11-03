@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 import xml.etree.ElementTree
 from Model.company import Company
+from Model.cnae import CNAE
 # from Model.inspection_lib import extract_tax_from_percentage
 
 from Model.taxes.taxes import Taxes
@@ -22,7 +23,7 @@ class Invoice:
         self.issuance_date = self.issuance_date[2] + '/' + self.issuance_date[1] + '/' + self.issuance_date[0]
         self.cst = self.xml_data['cst']
         self.cfps = self.xml_data['cfps']
-        self.full_cnae = self.gen_cnae(self.xml_data['codigocnae'])
+        self.cnae = CNAE(self.xml_data['codigocnae'], self.xml_data['descricaocnae'])
         self.gross_value = float(self.xml_data['valortotalservicos'])
 
         # if service_type:
@@ -113,16 +114,6 @@ class Invoice:
             return int(cfps + '06')
 
         return int(cfps + '00')
-
-    @staticmethod
-    def gen_cnae(cnae):
-        with open(r'Support\cnae.csv', 'r') as fin:
-            for line in fin.readlines():
-                values = line.split(',')
-                if cnae == values[0]:
-                    v = values[1].replace('\n', '')
-                    return (cnae + v) if len(v) == 4 else (cnae + '0' + v)
-        return cnae
 
     def set_nature(self, nature: str):
         self.nature = int(nature)

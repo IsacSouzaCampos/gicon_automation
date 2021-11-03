@@ -3,7 +3,7 @@ from Model.invoices_list import InvoicesList
 
 class Filter:
     def __init__(self, invoices: InvoicesList, fed_id: str, selected_fed_id: int, sel_iss: bool, sel_irrf: bool,
-                 sel_csrf: bool):
+                 sel_csrf: bool, cnae_description: str):
         self.invoices = invoices
         self.service_type = self.invoices.index(0).service_type
         self._fed_id = fed_id
@@ -11,10 +11,13 @@ class Filter:
         self.sel_iss = sel_iss
         self.sel_irrf = sel_irrf
         self.sel_csrf = sel_csrf
+        self.cnae_descr = cnae_description
+        # print('CNAE description:', cnae_description)
 
     def run(self) -> tuple:
         invoices = self.invoices
         indexes = [i for i in range(len(self.invoices))]
+        indexes, invoices = self.cnae_description(indexes, invoices)
         indexes, invoices = self.fed_id(indexes, invoices)
         indexes, invoices = self.selected_fed_id(indexes, invoices)
         if self.sel_iss:
@@ -23,7 +26,23 @@ class Filter:
             indexes, invoices = self.selected_tax(indexes, invoices, 1)  # filtrar pos irrf
         if self.sel_csrf:
             indexes, invoices = self.selected_tax(indexes, invoices, 2)  # filtrar pos csrf
+
+        if len(self.invoices) == len(invoices):
+            return [], None
         return indexes, invoices
+
+    def cnae_description(self, indexes: list, invoices: InvoicesList) -> tuple:
+        if self.cnae_descr is None or self.cnae_descr == '':
+            return indexes, invoices
+
+        idxs = list()
+        invs = InvoicesList([])
+        for i, inv in zip(indexes, invoices):
+            if inv.cnae.description.title() == self.cnae_descr:
+                idxs.append(i)
+                invs.add_invoice(inv)
+
+        return idxs, invs
 
     def fed_id(self, indexes: list, invoices: InvoicesList) -> tuple:
         fed_id = self._fed_id.replace('.', '').replace('/', '').replace('-', '')

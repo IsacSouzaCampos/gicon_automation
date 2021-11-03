@@ -464,9 +464,10 @@ class EditableResultTable:
 
 
 class ResultTable:
-    def __init__(self, invoices: InvoicesList, companies: list = None, n_errors: int = None):
+    def __init__(self, invoices: InvoicesList, cnae_descriptions: list = None, n_errors: int = None):
         self.invoices = invoices
-        self.companies = companies
+        # self.companies = companies
+        self.cnae_descriptions = cnae_descriptions
         self.n_errors = n_errors
         self.window = None
 
@@ -476,14 +477,6 @@ class ResultTable:
         inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in const.HEADER2]
         inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in const.HEADER2]
 
-        inspection_data_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
-        inspection_data_cols = [[sg.Column(inspection_data_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
-
-        errors_link = [
-            sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
-            if self.n_errors > 0 else sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
-                                              key='-ERRORS-')]
-
         table = list()
         for invoice in self.invoices:
             irrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
@@ -491,15 +484,28 @@ class ResultTable:
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
                           irrf_value, csrf_value, invoice.net_value, invoice.nature])
 
-        _filter = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-'), sg.Button('Filtrar'),
-                   sg.Button('Limpar Filtro', disabled=True), sg.Text('Natureza', pad=((98, 0), (0, 0))),
-                   sg.Input(size=(14, 1), key='-NATURE-'),
-                   sg.Button('Atualizar Naturezas')],
-                   [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
-                    sg.Radio('Ambos', 'radio1')],
-                   [sg.Checkbox('ISS', key='-ISS_FILTER-'),
-                    sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
-                    sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))]]
+        inv_to_update_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
+        inv_to_update_cols = [[sg.Column(inv_to_update_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
+        inv_to_update_frame = sg.Frame('Dados Nota', inv_to_update_cols)
+
+        errors_link = [
+            sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
+            if self.n_errors > 0 else sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
+                                              key='-ERRORS-')]
+
+        update_layout = [[sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 600), (0, 0)))],
+                         [sg.Button('Atualizar', key='-UPDATE_FILTER-')]]
+        update_frame = sg.Frame('Dados de Atualização', update_layout)
+
+        filter_layout = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-')],
+                         [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
+                          sg.Radio('Ambos', 'radio1')],
+                         [sg.Checkbox('ISS', key='-ISS_FILTER-'),
+                          sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
+                          sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
+                         [sg.Text('Descrição CNAE'), sg.Combo(self.cnae_descriptions, size=(90, 1), key='-CNAE_DESCR-')],
+                         [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
+        filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
 
         layout = [
             # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
@@ -515,11 +521,13 @@ class ResultTable:
             # sg.Text('-', pad=(0, 0)),
             # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL5-')],
 
-            [sg.Frame('Filtro', _filter, key='-FILTER_FRAME-')],
+            [filter_frame],
+            [update_frame],
 
-            [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='table')],
-            [sg.Button('Editar'), sg.Button('Atualizar', disabled=True)],
-            inspection_data_cols,
+            [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='-TABLE-')],
+            [sg.Button('Editar'), sg.Button('Atualizar', disabled=True),
+             sg.Text(f'{len(self.invoices)} registros', key='-N_REGISTERS-')],
+            [inv_to_update_frame],
             errors_link,
             [sg.Text()],
             [sg.Button('Lançar')],
@@ -562,12 +570,15 @@ class ResultTable:
                     selected_fed_id = 1
                 temp_table_idxs, temp_invs_lst = Filter(self.invoices, values['-FED_ID_FILTER-'], selected_fed_id,
                                                         values['-ISS_FILTER-'], values['-IRRF_FILTER-'],
-                                                        values['-CSRF_FILTER-']).run()
+                                                        values['-CSRF_FILTER-'], values['-CNAE_DESCR-']).run()
+                if temp_invs_lst is None:
+                    continue
                 temp_table = temp_invs_lst.get_gui_table()
-                self.window['table'].Update(temp_table)
+                self.window['-TABLE-'].Update(temp_table)
+                self.window['-N_REGISTERS-'].Update(f'{len(temp_table)} registros')
                 self.window['Limpar Filtro'].Update(disabled=False)
 
-            if event == 'Atualizar Naturezas':
+            if event == '-UPDATE_FILTER-':
                 invs_lst = temp_invs_lst if temp_table else self.invoices
                 nature = values['-NATURE-']
 
@@ -595,14 +606,15 @@ class ResultTable:
                 self.window['-NATURE-'].Update('')
 
             if event == 'Limpar Filtro':
-                self.window['table'].Update(self.invoices.get_gui_table())
+                self.window['-TABLE-'].Update(self.invoices.get_gui_table())
+                self.window['-N_REGISTERS-'].Update(f'{len(self.invoices)} registros')
                 self.window['Limpar Filtro'].Update(disabled=True)
                 temp_invs_lst = InvoicesList([])
                 temp_table = []
 
             if event == 'Editar':
                 try:
-                    selected_row = values['table'][0]
+                    selected_row = values['-TABLE-'][0]
                     if not len(temp_table):
                         self.edit_row(const.HEADER2, table[selected_row])
                     else:
@@ -666,7 +678,7 @@ class ResultTable:
     def update(self, table: list, selected_row: int = None, row: list = None) -> list and int:
         """Atualiza tabela de conferência com os dados no formato adequado."""
         if selected_row is None:  # se selected_row = None, a atualização vem de outra tela
-            self.window.Element('table').Update(values=table)
+            self.window.Element('-TABLE-').Update(values=table)
             self.n_errors = self.invoices.number_of_errors()
             self.window.Element('-ERRORS-').Update(value=f'{self.n_errors} {const.ERROR_LINK_TEXT}')
             return table
@@ -676,6 +688,6 @@ class ResultTable:
 
         self.invoices.update_invoice(selected_row, row)
         table = self.invoices.get_gui_table()
-        self.window.Element('table').Update(values=table)
+        self.window.Element('-TABLE-').Update(values=table)
         self.n_errors = self.invoices.number_of_errors()
         return table

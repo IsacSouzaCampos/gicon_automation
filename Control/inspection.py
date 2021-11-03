@@ -27,8 +27,9 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
     load_insp.inspection()
 
     # insere os dados de cada um dos arquivos xml a serem analisados em results
-    companies_cnpjs = list()
-    companies_names = list()
+    # companies_cnpjs = list()
+    # companies_names = list()
+    cnae_descriptions = list()
     invoices = InvoicesList([])  # precisa receber lista vazia '[]' para não acumular notas conferidas antes
     for i in range(len(xml_files)):
         xml_file = xml_files[i]
@@ -36,11 +37,14 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
         invoices.add_invoice(invoice)  # implementar esta lista no código ao invés da lista de dados anterior
 
         # dados da empresa que está trocando serviço com o nosso cliente
-        company_id = invoice.provider.fed_id if service_type else invoice.taker.fed_id
-        company_name = invoice.provider.name if service_type else invoice.taker.name
-        if company_id not in companies_cnpjs:
-            companies_names.append(company_name.title())
-            companies_cnpjs.append(company_id)
+        # company_id = invoice.provider.fed_id if service_type else invoice.taker.fed_id
+        # company_name = invoice.provider.name if service_type else invoice.taker.name
+        # if company_id not in companies_cnpjs:
+        #     companies_names.append(company_name.title())
+        #     companies_cnpjs.append(company_id)
+
+        if invoice.cnae.description.title() not in cnae_descriptions:
+            cnae_descriptions.append(invoice.cnae.description.title())
 
         load_insp.update(invoice.serial_number, i)
     load_insp.close()
@@ -49,7 +53,7 @@ def inspect(folder: str, xml_files: list, service_type: int) -> tuple:
         PopUp().msg('A pasta selecionada não contém XML\'s.')
         return False, InvoicesList([])
 
-    res_tb = ResultTable(invoices, companies_names, invoices.number_of_errors())
+    res_tb = ResultTable(invoices, cnae_descriptions, invoices.number_of_errors())
     is_finished, invoices = res_tb.show()
 
     return is_finished, invoices
