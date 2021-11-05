@@ -22,7 +22,6 @@ class SQLCommands:
                   f'CODIGOPESSOA = ({person_code}) ' \
                   f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
 
-        # print(command)
         return command
 
     # @staticmethod
@@ -67,20 +66,22 @@ class SQLCommands:
 
         client_command = f'SELECT CODIGOEMPRESA FROM CLIENTE WHERE INSCRFEDERAL = \'{fed_id}\''
         person_command = f'SELECT CODIGOPESSOA FROM PESSOA WHERE INSCRFEDERAL = \'{fed_id}\''
+
+        # CORRIGIR ESSE RETORNO
         return client_command if self.service_type == company_type else person_command
 
-    def lctofis_key(self, company_id) -> str:
+    def lctofis_key(self, company_code) -> str:
         command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + 1 FROM LCTOFIS{self.type_str} WHERE CODIGOEMPRESA = ' \
-                  f'({self.get_company_code(company_id, self.service_type)})'
+                  f'({company_code})'
         return command
 
-    def lctofisretido_key(self, company_id) -> str:
+    def lctofisretido_key(self, company_code) -> str:
         if self.service_type:
             command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}RETIDO) + 1 FROM LCTOFIS{self.type_str}RETIDO ' \
-                      f'WHERE CODIGOEMPRESA = ({self.get_company_code(company_id, self.service_type)})'
+                      f'WHERE CODIGOEMPRESA = ({company_code})'
         else:
             command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + 1 FROM LCTOFIS{self.type_str}RETIDO ' \
-                      f'WHERE CODIGOEMPRESA = ({self.get_company_code(company_id, self.service_type)})'
+                      f'WHERE CODIGOEMPRESA = ({company_code})'
 
         return command
 
@@ -95,11 +96,11 @@ class SQLCommands:
         ts = self.type_str
 
         client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
-        client_code = self.get_company_code(client_id, self.service_type)
-        person_id = inv.provider.fed_id if not self.service_type else inv.taker.fed_id
-        person_code = self.get_company_code(person_id, 0 if self.service_type else 1)
-        # if str(inv.nature)[-3:] == '308':
-        command = f'INSERT INTO ' \
+        client_code = inv.taker.code if self.service_type else inv.provider.code
+        # person_id = inv.provider.fed_id if not self.service_type else inv.taker.fed_id
+        person_code = inv.provider.code if self.service_type else inv.taker.code
+        if self.service_type:
+            command = f'INSERT INTO ' \
                   f'LCTOFIS{ts}(CODIGOEMPRESA,            CHAVELCTOFIS{ts},         CODIGOESTAB, ' \
                   f'           CODIGOPESSOA,              NUMERONF,                 ESPECIENF, ' \
                   f'           SERIENF,                   DATALCTOFIS,              DATAEMISSAO, ' \
@@ -121,6 +122,39 @@ class SQLCommands:
                   f'           {inv.invoice_situation},   {int(inv.is_canceled)},   {0}, ' \
                   f'           {238},                     ({now}),                  {2})'
 
+        else:
+            command = 'INSERT INTO LCTOFISSAI(' \
+                      '                     CODIGOEMPRESA,                      CHAVELCTOFISSAI, ' \
+                      '                     CODIGOESTAB,                        CODIGOPESSOA, ' \
+                      '                     NUMERONF,                           NUMERONFFINAL, ' \
+                      '                     ESPECIENF,                          SERIENF, ' \
+                      '                     DATALCTOFIS,                        VALORCONTABIL, ' \
+                      '                     BASECALCULOIPI,                     VALORIPI, ' \
+                      '                     ISENTASIPI,                         OUTRASIPI, ' \
+                      '                     CODIGOTIPODCTOSINTEGRA,             CDMODELO, ' \
+                      '                     VERSAONFE,                          EMITENTENF, ' \
+                      '                     FINALIDADEOPERACAO,                 MEIOPAGAMENTO, ' \
+                      '                     MODALIDADEFRETE,                    CDSITUACAO, ' \
+                      '                     CANCELADA,                          CONCILIADA, ' \
+                      '                     CODIGOUSUARIO,                      DATAHORALCTOFIS, ' \
+                      '                     ORIGEMDADO,                         ACRESCIMOFINANCEIRO, ' \
+                      '                     CONTRIBUINTE) ' \
+                      f'VALUES              (({client_code}),                   {launch.key}, ' \
+                      f'                    {int(client_id[-6:-2])},            ({person_code}), ' \
+                      f'                    {inv.serial_number},                {inv.serial_number}, ' \
+                      f'                    \'NFSE\',                           \'U\', ' \
+                      f'                    \'{issuance_date}\',                {inv.gross_value}, ' \
+                      f'                    {launch.ipi.base},                  {launch.ipi.value}, ' \
+                      f'                    {launch.ipi.exemption},             {launch.ipi.others}, ' \
+                      f'                    {99},                               {inv.doc_type}, ' \
+                      f'                    {4.00},                             \'{inv.issuer}\', ' \
+                      f'                    {inv.operation_purpose},            {launch.payment_method}, ' \
+                      f'                    {launch.freight_category},          {inv.invoice_situation}, ' \
+                      f'                    {int(inv.is_canceled)},             {0}, ' \
+                      f'                    {238},                              ({now}), ' \
+                      f'                    {2},                                {0}, ' \
+                      f'                    {0})'
+
         return command
 
     def lctofiscfop(self, launch: LCTOFISData) -> str:
@@ -135,7 +169,7 @@ class SQLCommands:
         ts = self.type_str
         # if str(inv.nature)[-3:] == '308':
         client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
-        client_code = self.get_company_code(client_id, self.service_type)
+        client_code = inv.taker.code if self.service_type else inv.provider.code
         command = f'INSERT INTO ' \
                   f'LCTOFIS{ts}CFOP(CODIGOEMPRESA,               CHAVELCTOFIS{ts},          CODIGOCFOP, ' \
                   f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
@@ -148,7 +182,6 @@ class SQLCommands:
                   f'               {tax_value},                  {0},                       {0}, ' \
                   f'               {0})'
 
-        # print(command)
         return command
 
     def lctofisretido(self, launch: LCTOFISData, withheld_key):
@@ -168,6 +201,7 @@ class SQLCommands:
         cofins = csrf.cofins
         csll = csrf.csll
 
+        iss_value = 0 if not iss.value else iss.value
         irrf_value = 0 if not irrf.value else irrf.value
         csrf_value = 0 if not csrf.value else csrf.value
         pis_value = 0 if not pis.value else pis.value
@@ -175,59 +209,107 @@ class SQLCommands:
         csll_value = 0 if not csll.value else csll.value
 
         ts = self.type_str
-        client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
-        client_code = self.get_company_code(client_id, self.service_type)
-        person_id = inv.provider.fed_id if not self.service_type else inv.taker.fed_id
-        person_code = self.get_company_code(person_id, 0 if self.service_type else 1)
-        command = f'INSERT INTO ' \
-                  f'LCTOFIS{ts}RETIDO(CODIGOEMPRESA,        CHAVELCTOFIS{ts}RETIDO,         CODIGOPESSOA, ' \
-                  f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
-                  f'                 DATALCTOFIS,           DATAEMISSAO,                    VALORCONTABIL, ' \
-                  f'                 CODIGOESTAB,           CHAVELCTOFIS{ts},               CODIGOCFOP, ' \
-                  f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
-                  f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
-                  f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
-                  f'                 APURADOIRPJ,' \
-                  f'                 BASECALCULOIRRF, ' \
-                  f'                 ALIQIRRF,              VALORIRRF,                      CODIGOIMPOSTOIRRF, ' \
-                  f'                 VARIACAOIMPOSTOIRRF, ' \
-                  f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
-                  f'                 BASECALCULOPIS, ' \
-                  f'                 ALIQPIS,               VALORPIS,                       CODIGOIMPOSTOPIS, ' \
-                  f'                 VARIACAOIMPOSTOPIS, ' \
-                  f'                 BASECALCULOCOFINS, ' \
-                  f'                 ALIQCOFINS,            VALORCOFINS,                    CODIGOIMPOSTOCOFINS, ' \
-                  f'                 VARIACAOIMPOSTOCOFINS, ' \
-                  f'                 BASECALCULOCSLL, ' \
-                  f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
-                  f'                 VARIACAOIMPOSTOCSLL, ' \
-                  f'                 APURADOPISCOFINSCSLL,  DATAPGTOPISCOFINSCSLL, '\
-                  f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
-                  f'                 ORIGEMDADO,            CODIGOTABCTBFIS) ' \
-                  f'VALUES          (({client_code}),       {withheld_key},                 ({person_code}), ' \
-                  f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
-                  f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-                  f'                {taker_comp_num},       {launch.key},                   {inv.nature}, '\
-                  f'                {0},                    {0},                            {0}, ' \
-                  f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss.value}, ' \
-                  f'                {0},                    {0},                            {0}, ' \
-                  f'                {0}, ' \
-                  f'                {irrf.calc_basis}, ' \
-                  f'                {irrf.aliquot},         {irrf_value},                   {irrf.code}, ' \
-                  f'                {irrf.variation}, ' \
-                  f'                {0},                    {csrf_value},                   {1}, ' \
-                  f'                {pis.calc_basis}, ' \
-                  f'                {pis.aliquot},          {pis_value},                    {csrf.code}, ' \
-                  f'                {csrf.variation}, ' \
-                  f'                {cofins.calc_basis}, ' \
-                  f'                {cofins.aliquot},       {cofins_value},                 {csrf.code}, ' \
-                  f'                {csrf.variation}, ' \
-                  f'                {csll.calc_basis}, ' \
-                  f'                {csll.aliquot},         {csll_value},                   {csrf.code}, ' \
-                  f'                {csrf.variation}, ' \
-                  f'                {0},                    \'{issuance_date}\', ' \
-                  f'                {0},                    {238},                          ({now}), ' \
-                  f'                {2},                    {838})'
+        # client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
+        client_code = inv.taker.code if self.service_type else inv.provider.code
+        # person_id = inv.provider.fed_id if self.service_type else inv.taker.fed_id
+        person_code = inv.provider.code if self.service_type else inv.taker.code
+
+        if self.service_type:  # se tomado
+            command = f'INSERT INTO ' \
+                      f'LCTOFIS{ts}RETIDO(CODIGOEMPRESA,        CHAVELCTOFIS{ts}RETIDO,         CODIGOPESSOA, ' \
+                      f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
+                      f'                 DATALCTOFIS,           DATAEMISSAO,                    VALORCONTABIL, ' \
+                      f'                 CODIGOESTAB,           CHAVELCTOFIS{ts},               CODIGOCFOP, ' \
+                      f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
+                      f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                      f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
+                      f'                 APURADOIRPJ,' \
+                      f'                 BASECALCULOIRRF, ' \
+                      f'                 ALIQIRRF,              VALORIRRF,                      CODIGOIMPOSTOIRRF, ' \
+                      f'                 VARIACAOIMPOSTOIRRF, ' \
+                      f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
+                      f'                 BASECALCULOPIS, ' \
+                      f'                 ALIQPIS,               VALORPIS,                       CODIGOIMPOSTOPIS, ' \
+                      f'                 VARIACAOIMPOSTOPIS, ' \
+                      f'                 BASECALCULOCOFINS, ' \
+                      f'                 ALIQCOFINS,            VALORCOFINS,                    CODIGOIMPOSTOCOFINS, ' \
+                      f'                 VARIACAOIMPOSTOCOFINS, ' \
+                      f'                 BASECALCULOCSLL, ' \
+                      f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
+                      f'                 VARIACAOIMPOSTOCSLL, ' \
+                      f'                 APURADOPISCOFINSCSLL,  DATAPGTOPISCOFINSCSLL, '\
+                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
+                      f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
+                      f'VALUES          (({client_code}),       {withheld_key},                 ({person_code}), ' \
+                      f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
+                      f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
+                      f'                {taker_comp_num},       {launch.key},                   {inv.nature}, '\
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {0}, ' \
+                      f'                {irrf.calc_basis}, ' \
+                      f'                {irrf.aliquot},         {irrf_value},                   {irrf.code}, ' \
+                      f'                {irrf.variation}, ' \
+                      f'                {0},                    {csrf_value},                   {1}, ' \
+                      f'                {pis.calc_basis}, ' \
+                      f'                {pis.aliquot},          {pis_value},                    {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {cofins.calc_basis}, ' \
+                      f'                {cofins.aliquot},       {cofins_value},                 {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {csll.calc_basis}, ' \
+                      f'                {csll.aliquot},         {csll_value},                   {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {0},                    \'{issuance_date}\', ' \
+                      f'                {0},                    {238},                          ({now}), ' \
+                      f'                {2},                    {838})'
+
+        else:
+            withheld_type = inv.withheld_type
+            command = f'INSERT INTO ' \
+                      f'LCTOFIS{ts}RETIDO(CODIGOEMPRESA,        CHAVELCTOFIS{ts}, ' \
+                      f'                 DATALCTOFIS,           TIPORETENCAO, ' \
+                      f'                 CODIGOESTAB, ' \
+                      f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
+                      f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                      f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
+                      f'                 BASECALCULOIRRF, ' \
+                      f'                 ALIQIRRF,              VALORIRRF,                      CODIGOIMPOSTOIRRF, ' \
+                      f'                 VARIACAOIMPOSTOIRRF, ' \
+                      f'                 TOTALPISCOFINSCSLL, ' \
+                      f'                 BASECALCULOPIS, ' \
+                      f'                 ALIQPIS,               VALORPIS,                       CODIGOIMPOSTOPIS, ' \
+                      f'                 VARIACAOIMPOSTOPIS, ' \
+                      f'                 BASECALCULOCOFINS, ' \
+                      f'                 ALIQCOFINS,            VALORCOFINS,                    CODIGOIMPOSTOCOFINS, ' \
+                      f'                 VARIACAOIMPOSTOCOFINS, ' \
+                      f'                 BASECALCULOCSLL, ' \
+                      f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
+                      f'                 VARIACAOIMPOSTOCSLL, ' \
+                      f'                 DATAPGTOPISCOFINSCSLL, ' \
+                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS) \n' \
+                      f'VALUES          (({client_code}),       {withheld_key}, ' \
+                      f'                \'{issuance_date}\',    ({withheld_type}), ' \
+                      f'                {taker_comp_num}, ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {irrf.calc_basis}, ' \
+                      f'                {irrf.aliquot},         {irrf_value},                   {irrf.code}, ' \
+                      f'                {irrf.variation}, ' \
+                      f'                {csrf_value}, ' \
+                      f'                {pis.calc_basis}, ' \
+                      f'                {pis.aliquot},          {pis_value},                    {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {cofins.calc_basis}, ' \
+                      f'                {cofins.aliquot},       {cofins_value},                 {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {csll.calc_basis}, ' \
+                      f'                {csll.aliquot},         {csll_value},                   {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                \'{issuance_date}\', ' \
+                      f'                {0},                    {238},                          ({now}))'
 
         return command
 
@@ -235,26 +317,36 @@ class SQLCommands:
         inv = launch.invoice
         iss_aliquot = str(float(inv.taxes.iss.aliquot) * 100).replace('.', ',')
 
-        taker_code = self.get_company_code(inv.taker.fed_id, self.service_type)
+        company_code = inv.taker.code if self.service_type else inv.provider.code
 
         ts = self.type_str
-        # if str(inv.nature)[-3:] == '308':
+        # if self.service_type:  # se tomado
         command = f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
                   f'VALUES(' \
-                  f'({taker_code}),         {launch.key},               {125},                  {inv.cnae.full_code});' \
+                  f'({company_code}),         {launch.key},               {125},                {inv.cnae.full_code});'\
                   f'\n\n' \
                   f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
                   f'VALUES(' \
-                  f'({taker_code}),         {launch.key},               {126},                  {inv.cst});' \
+                  f'({company_code}),         {launch.key},               {126},                  {inv.cst});' \
                   f'\n\n' \
                   f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
                   f'VALUES(' \
-                  f'({taker_code}),         {launch.key},               {131},                  \'{iss_aliquot}\')'
+                  f'({company_code}),         {launch.key},               {131},                  \'{iss_aliquot}\')'
 
         return command
+
+    @staticmethod
+    def tiporetencao(client_code, person_code):
+        print(f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND ' \
+              f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '\
+              f'AND CODIGOPESSOA = ({person_code}))')
+
+        return f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND ' \
+               f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '\
+               f'AND CODIGOPESSOA = ({person_code}))'
 
     @staticmethod
     def current_datetime():

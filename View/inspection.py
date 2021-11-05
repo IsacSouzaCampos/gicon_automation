@@ -503,7 +503,8 @@ class ResultTable:
                          [sg.Checkbox('ISS', key='-ISS_FILTER-'),
                           sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
                           sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
-                         [sg.Text('Descrição CNAE'), sg.Combo(self.cnae_descriptions, size=(90, 1), key='-CNAE_DESCR-')],
+                         [sg.Text('Descrição CNAE'),
+                          sg.Combo(self.cnae_descriptions, size=(90, 1), key='-CNAE_DESCR-')],
                          [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
         filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
 

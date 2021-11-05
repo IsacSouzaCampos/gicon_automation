@@ -31,7 +31,7 @@ def main():
     for i in range(len(invoices)):
         invoice = invoices.index(i)
         if invoice.to_launch:
-            to_launch.add_invoice(invoice)
+            to_launch.add(invoice)
 
     sql_control = SQLControl(to_launch, main_gui.service_type)
     commands = sql_control.run()

@@ -40,7 +40,7 @@ class Filter:
         for i, inv in zip(indexes, invoices):
             if inv.cnae.description.title() == self.cnae_descr:
                 idxs.append(i)
-                invs.add_invoice(inv)
+                invs.add(inv)
 
         return idxs, invs
 
@@ -54,12 +54,12 @@ class Filter:
             for index, invoice in enumerate(self.invoices):
                 if fed_id in invoice.provider.fed_id:
                     indexes.append(index)
-                    invoices.add_invoice(invoice)
+                    invoices.add(invoice)
         else:
             for index, invoice in enumerate(self.invoices):
                 if fed_id in invoice.taker.fed_id:
                     indexes.append(index)
-                    invoices.add_invoice(invoice)
+                    invoices.add(invoice)
 
         return indexes, invoices
 
@@ -75,23 +75,23 @@ class Filter:
                 for i, inv in zip(indexes, invoices):
                     if len(inv.provider.fed_id) == 14:
                         idxs.append(i)
-                        invs.add_invoice(inv)
+                        invs.add(inv)
             elif self._selected_fed_id == 1:  # CPF
                 for i, inv in zip(indexes, invoices):
                     if len(inv.provider.fed_id) == 11:
                         idxs.append(i)
-                        invs.add_invoice(inv)
+                        invs.add(inv)
         else:  # prestador
             if self._selected_fed_id == 0:  # CNPJ
                 for i, inv in zip(indexes, invoices):
                     if len(inv.taker.fed_id) == 14:
                         idxs.append(i)
-                        invs.add_invoice(inv)
+                        invs.add(inv)
             elif self._selected_fed_id == 1:  # CPF
                 for i, inv in zip(indexes, invoices):
                     if len(inv.taker.fed_id) == 11:
                         idxs.append(i)
-                        invs.add_invoice(inv)
+                        invs.add(inv)
 
         return idxs, invs
 
@@ -104,19 +104,19 @@ class Filter:
                 for i, inv in zip(indexes, invoices):
                     if inv.taxes.iss.value != '' and float(inv.taxes.iss.value) > 0:
                         idxs.append(i)
-                        invs.add_invoice(inv)
+                        invs.add(inv)
         elif tax == 1:  # irrf
             if self.sel_irrf:
                 for i, inv in zip(indexes, invoices):
                     if inv.taxes.irrf.value != '' and float(inv.taxes.irrf.value) > 0:
                         idxs.append(i)
-                        invs.add_invoice(inv)
+                        invs.add(inv)
         elif tax == 2:  # csrf
             if self.sel_csrf:
                 for i, inv in zip(indexes, invoices):
                     if inv.taxes.csrf.value != '' and float(inv.taxes.csrf.value) > 0:
                         idxs.append(i)
-                        invs.add_invoice(inv)
+                        invs.add(inv)
         else:
             return indexes, invoices
 

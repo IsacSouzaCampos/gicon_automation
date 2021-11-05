@@ -37,7 +37,8 @@ def run_command(host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste
         print('Erro na conexão com o BD:', e)
 
     # if 'select' in command.lower():
-        # print('escrevendo resultado em arquivo')
+        # print('escrevendo resultado em arquivo').
+    results = [result if result else 'NULL' for result in results]
     write_to_binary(results)
 
 

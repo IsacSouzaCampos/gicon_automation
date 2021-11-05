@@ -8,8 +8,14 @@ class InvoicesList:
     def index(self, index):
         return self.invoices[index]
 
-    def add_invoice(self, invoice: Invoice):
+    def add(self, invoice: Invoice):
         self.invoices.append(invoice)
+
+    def remove(self, param) -> None:
+        if type(param) == Invoice:
+            self.invoices.remove(param)
+        elif type(param) == int:
+            self.invoices.remove(self.invoices[param])
 
     def empty(self):
         return len(self.invoices) == 0
@@ -84,12 +90,12 @@ class InvoicesList:
             for index, invoice in enumerate(self.invoices):
                 if fed_id in invoice.provider.fed_id:
                     indexes.append(index)
-                    res_invs.add_invoice(invoice)
+                    res_invs.add(invoice)
         else:
             for index, invoice in enumerate(self.invoices):
                 if fed_id in invoice.taker.fed_id:
                     indexes.append(index)
-                    res_invs.add_invoice(invoice)
+                    res_invs.add(invoice)
 
         return indexes, res_invs
 
