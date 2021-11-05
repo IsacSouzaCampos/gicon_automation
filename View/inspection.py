@@ -508,8 +508,7 @@ class ResultTable:
                           sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
                          [sg.Text('Descrição CNAE'),
                           sg.Combo(self.cnae_descriptions, size=(87, 1), key='-CNAE_DESCR-')],
-                         [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))), sg.Combo(withheld_types_lst, size=(87
-                                                                                                              , 1))],
+                         [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))), sg.Combo(withheld_types_lst, size=(87, 1))],
                          [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
         filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
 
