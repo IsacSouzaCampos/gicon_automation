@@ -482,20 +482,23 @@ class ResultTable:
             irrf_value = '' if not invoice.taxes.irrf.value else invoice.taxes.irrf.value
             csrf_value = '' if not invoice.taxes.csrf.value else invoice.taxes.csrf.value
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
-                          irrf_value, csrf_value, invoice.net_value, invoice.nature])
+                          irrf_value, csrf_value, invoice.net_value, invoice.nature, invoice.withheld_type])
 
-        inv_to_update_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
-        inv_to_update_cols = [[sg.Column(inv_to_update_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
-        inv_to_update_frame = sg.Frame('Dados Nota', inv_to_update_cols)
+        # inv_to_update_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
+        # inv_to_update_cols = [[sg.Column(inv_to_update_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
+        # inv_to_update_frame = sg.Frame('Dados Nota', inv_to_update_cols)
 
         errors_link = [
             sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
             if self.n_errors > 0 else sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
                                               key='-ERRORS-')]
 
-        update_layout = [[sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 600), (0, 0)))],
-                         [sg.Button('Atualizar', key='-UPDATE_FILTER-')]]
-        update_frame = sg.Frame('Dados de Atualização', update_layout)
+        withheld_types_lst = ['Órgãos, Autarquias e Fundacoes Federais',
+                              'Demais Entidades da Administração Pública Federal',
+                              'Pessoas Jurídicas de Direito Privado',
+                              'Órgãos, Autarquias e Fundacoes dos Estados, Distrito Federal e Municípios',
+                              'Sociedade Cooperativa',
+                              'Fabricantes de Veículos e Máquinas']
 
         filter_layout = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-')],
                          [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
@@ -504,9 +507,27 @@ class ResultTable:
                           sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
                           sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
                          [sg.Text('Descrição CNAE'),
-                          sg.Combo(self.cnae_descriptions, size=(90, 1), key='-CNAE_DESCR-')],
+                          sg.Combo(self.cnae_descriptions, size=(87, 1), key='-CNAE_DESCR-')],
+                         [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))), sg.Combo(withheld_types_lst, size=(87
+                                                                                                              , 1))],
                          [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
         filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
+
+        # withheld_types = {
+        #                     'Órgãos, Autarquias e Fundacoes Federais': 1,
+        #                     'Demais Entidades da Administração Pública Federal': 2,
+        #                     'Pessoas Jurídicas de Direito Privado': 3,
+        #                     'Órgãos, Autarquias e Fundacoes dos Estados, Distrito Federal e Municípios': 4,
+        #                     'Sociedade Cooperativa': 5,
+        #                     'Fabricantes de Veículos e Máquinas': 6
+        #                   }
+
+        update_layout = [
+                         [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 80), (0, 0))),
+                          sg.Text('Tipo Retenção'), sg.Combo(withheld_types_lst, size=(54, 1))],
+                         [sg.Button('Atualizar', key='-UPDATE_FILTER-')]
+                         ]
+        update_frame = sg.Frame('Dados de Atualização', update_layout)
 
         layout = [
             # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
@@ -528,7 +549,7 @@ class ResultTable:
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='-TABLE-')],
             [sg.Button('Editar'), sg.Button('Atualizar', disabled=True),
              sg.Text(f'{len(self.invoices)} registros', key='-N_REGISTERS-')],
-            [inv_to_update_frame],
+            # [inv_to_update_frame],
             errors_link,
             [sg.Text()],
             [sg.Button('Lançar')],

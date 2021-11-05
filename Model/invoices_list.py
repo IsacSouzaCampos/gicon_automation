@@ -38,8 +38,7 @@ class InvoicesList:
             csrf_value = '' if not invoice.taxes.csrf.value else invoice.taxes.csrf.value
 
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
-                          irrf_value, csrf_value, invoice.net_value,
-                          invoice.nature])
+                          irrf_value, csrf_value, invoice.net_value, invoice.nature, invoice.withheld_type])
         return table
 
     def update(self, indexes: list, invoice_data_lst: list):

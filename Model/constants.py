@@ -8,11 +8,11 @@ RESULTS_PATH = SYS_PATH + r'\bd_results.bin'
 MAX_INVOICES = 100
 TAX_EXTRACTION_ERROR = '******'
 
-HEADER1 = ['Nº Nota', 'Data', 'Valor Bruto', 'Retenção ISS',
-           'Retenção IR', 'Retenção CSRF', 'Valor Líquido', 'Natureza']
+HEADER1 = ['Nº Nota', 'Data', 'Vlr Bruto', 'Ret. ISS',
+           'Ret. IR', 'Ret. CSRF', 'Vlr Líquido', 'Natureza', 'Tipo Retenção']
 
 HEADER2 = ['Nº Nota', 'Data', 'Valor Bruto', 'ISS', 'IR',
-           'CSRF', 'Valor Líquido', 'Natureza']
+           'CSRF', 'Valor Líquido', 'Natureza', 'Tipo Retenção']
 
 ERROR_LINK_TEXT = 'erros detectados'
 

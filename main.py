@@ -28,8 +28,7 @@ def main():
 
     # seleciona apenas notas com retenção
     to_launch = InvoicesList([])
-    for i in range(len(invoices)):
-        invoice = invoices.index(i)
+    for invoice in invoices:
         if invoice.to_launch:
             to_launch.add(invoice)
 
