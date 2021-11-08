@@ -192,7 +192,7 @@ class SQLCommands:
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
-        taker_comp_num = int(inv.taker.fed_id[-6:-2])
+        client_comp_num = int(inv.taker.fed_id[-6:-2]) if self.service_type else int(inv.provider.fed_id[-6:-2])
 
         iss = inv.taxes.iss
         irrf = inv.taxes.irrf
@@ -207,6 +207,13 @@ class SQLCommands:
         pis_value = 0 if not pis.value else pis.value
         cofins_value = 0 if not cofins.value else cofins.value
         csll_value = 0 if not csll.value else csll.value
+
+        iss_situation = 3 if iss_value else 1
+        irrf_situation = 3 if irrf_value else 1
+        irpj_situation = 1
+        pis_situation = 3 if pis_value else 1
+        cofins_situation = 3 if cofins_value else 1
+        csll_situation = 3 if csll_value else 1
 
         ts = self.type_str
         # client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
@@ -243,7 +250,7 @@ class SQLCommands:
                       f'VALUES          (({client_code}),       {withheld_key},                 ({person_code}), ' \
                       f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
                       f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-                      f'                {taker_comp_num},       {launch.key},                   {inv.nature}, '\
+                      f'                {client_comp_num},       {launch.key},                   {inv.nature}, '\
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
                       f'                {0},                    {0},                            {0}, ' \
@@ -288,10 +295,12 @@ class SQLCommands:
                       f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
                       f'                 VARIACAOIMPOSTOCSLL, ' \
                       f'                 DATAPGTOPISCOFINSCSLL, ' \
-                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS) \n' \
+                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
+                      f'                 SITUACAOISSQN,         SITUACAOIRRF,                   SITUACAOIRPJ, ' \
+                      f'                 SITUACAOPIS,           SITUACAOCOFINS,                 SITUACAOCSLL) \n' \
                       f'VALUES          (({client_code}),       {withheld_key}, ' \
                       f'                \'{issuance_date}\',    ({withheld_type}), ' \
-                      f'                {taker_comp_num}, ' \
+                      f'                {client_comp_num}, ' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
                       f'                {0},                    {0},                            {0}, ' \
@@ -309,7 +318,9 @@ class SQLCommands:
                       f'                {csll.aliquot},         {csll_value},                   {csrf.code}, ' \
                       f'                {csrf.variation}, ' \
                       f'                \'{issuance_date}\', ' \
-                      f'                {0},                    {238},                          ({now}))'
+                      f'                {0},                    {238},                          ({now}), ' \
+                      f'                {iss_situation},        {irrf_situation},               {irpj_situation}, ' \
+                      f'                {pis_situation},        {cofins_situation},             {csll_situation})'
 
         return command
 
@@ -338,15 +349,15 @@ class SQLCommands:
 
         return command
 
-    @staticmethod
-    def tiporetencao(client_code, person_code):
-        print(f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND ' \
-              f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '\
-              f'AND CODIGOPESSOA = ({person_code}))')
-
-        return f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND ' \
-               f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '\
-               f'AND CODIGOPESSOA = ({person_code}))'
+    # @staticmethod
+    # def tiporetencao(client_code, person_code):
+    #     print(f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND '
+    #           f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '
+    #           f'AND CODIGOPESSOA = ({person_code}))')
+    #
+    #     return f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND ' \
+    #          f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '\
+    #            f'AND CODIGOPESSOA = ({person_code}))'
 
     @staticmethod
     def current_datetime():

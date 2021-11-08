@@ -20,7 +20,7 @@ class SQLControl:
         self.clear_results_file()
 
         self.get_companies_codes()
-        self.remove_company_code_errors()
+        self.get_null_companies_codes()
 
         commands = list()
         for invoice in self.invoices:
@@ -37,7 +37,7 @@ class SQLControl:
                 to_launch.add(invoice)
 
         launch_keys = self.get_launch_keys(to_launch)
-        withheld_keys = self.get_launch_withheld_key(to_launch)
+        withheld_keys = self.get_withheld_launch_key(to_launch)
         commands = list()
         for invoice, launch_key, withheld_key in zip(to_launch, launch_keys, withheld_keys):
             print(f'GERANDO CÓDIGOS SQL DE INSERÇÃO... Nota: {invoice.serial_number}')
@@ -77,10 +77,11 @@ class SQLControl:
         for invoice in to_launch:
             company_code = invoice.taker.code if self.service_type else invoice.provider.code
             if company_code in aux.keys():
-                launch_keys.append(aux[company_code] + 1)
                 aux[company_code] += 1
+                launch_keys.append(aux[company_code])
             else:
                 aux[company_code] = results[count]
+                launch_keys.append(aux[company_code])
                 count += 1
 
         for lk in launch_keys:
@@ -88,7 +89,7 @@ class SQLControl:
 
         return launch_keys
 
-    def get_launch_withheld_key(self, to_launch: InvoicesList) -> list:
+    def get_withheld_launch_key(self, to_launch: InvoicesList) -> list:
         withheld_keys_commands = list()
         for i in range(len(to_launch)):
             inv = to_launch.index(i)
@@ -102,12 +103,24 @@ class SQLControl:
         self.sql_run.run(withheld_keys_commands)
 
         try:
-            withheld_keys = list(map(int, self.sql_run.result()))
+            results = list(map(int, self.sql_run.result()))
         except Exception as e:
             print(f'Error: {e}')
             return []  # retorna uma lista vazia caso todas as notas já estejam lançadas
 
-        withheld_keys = [wk + i for i, wk in enumerate(withheld_keys)]
+        # withheld_keys = [wk + i for i, wk in enumerate(withheld_keys)]
+        withheld_keys = list()
+        aux = dict()
+        count = 0
+        for invoice in to_launch:
+            company_code = invoice.taker.code if self.service_type else invoice.provider.code
+            if company_code in aux.keys():
+                aux[company_code] += 1
+                withheld_keys.append(aux[company_code])
+            else:
+                aux[company_code] = results[count]
+                withheld_keys.append(aux[company_code])
+                count += 1
 
         # for lk in launch_keys:
         #     print(type(lk), lk)
@@ -151,18 +164,13 @@ class SQLControl:
                 invoice.taker.code = person_code
                 invoice.provider.code = client_code
 
-    def remove_company_code_errors(self):
-        error_invoices_idxs = list()
-        for i in range(len(self.invoices)):
-            invoice = self.invoices.index(i)
+    def get_null_companies_codes(self):
+        error_invoices = InvoicesList()
+        for index, invoice in enumerate(self.invoices):
             if invoice.taker.code == 'NULL' or invoice.provider.code == 'NULL':
-                error_invoices_idxs.append(i)
+                error_invoices.add(invoice)
 
-        error_invoices = InvoicesList([])
-        for idx in error_invoices_idxs:
-            invoice = self.invoices.index(idx)
-            error_invoices.add(invoice)
-            self.invoices.remove(invoice)
+        return error_invoices if len(error_invoices) else None
 
     def insert(self, invoice: Invoice, launch_key, withheld_key) -> list:
         commands = SQLCommands(self.service_type)

@@ -474,8 +474,8 @@ class ResultTable:
     def show(self):
         """Mostra tabela de resultados simplificada por conta do número grande de notas conferidas."""
 
-        inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in const.HEADER2]
-        inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in const.HEADER2]
+        # inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in const.HEADER2]
+        # inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in const.HEADER2]
 
         table = list()
         for invoice in self.invoices:
@@ -493,12 +493,13 @@ class ResultTable:
             if self.n_errors > 0 else sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
                                               key='-ERRORS-')]
 
-        withheld_types_lst = ['Órgãos, Autarquias e Fundacoes Federais',
-                              'Demais Entidades da Administração Pública Federal',
-                              'Pessoas Jurídicas de Direito Privado',
-                              'Órgãos, Autarquias e Fundacoes dos Estados, Distrito Federal e Municípios',
-                              'Sociedade Cooperativa',
-                              'Fabricantes de Veículos e Máquinas']
+        withheld_types = {'Órgãos, Autarquias e Fundacoes Federais': 1,
+                          'Demais Entidades da Administração Pública Federal': 2,
+                          'Pessoas Jurídicas de Direito Privado': 3,
+                          'Órgãos, Autarquias e Fundacoes dos Estados, Distrito Federal e Municípios': 4,
+                          'Sociedade Cooperativa': 5,
+                          'Fabricantes de Veículos e Máquinas': 6
+                          }
 
         filter_layout = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-')],
                          [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
@@ -508,7 +509,8 @@ class ResultTable:
                           sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
                          [sg.Text('Descrição CNAE'),
                           sg.Combo(self.cnae_descriptions, size=(87, 1), key='-CNAE_DESCR-')],
-                         [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))), sg.Combo(withheld_types_lst, size=(87, 1))],
+                         [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))),
+                          sg.Combo([''] + list(withheld_types.keys()), size=(87, 1), key='-WITHHELD_TYPE_FILTER-')],
                          [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
         filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
 
@@ -522,8 +524,9 @@ class ResultTable:
         #                   }
 
         update_layout = [
-                         [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 80), (0, 0))),
-                          sg.Text('Tipo Retenção'), sg.Combo(withheld_types_lst, size=(54, 1))],
+                         [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 20), (0, 0))),
+                          sg.Text('Tipo Retenção'), sg.Combo(list(withheld_types.keys()), size=(62, 1),
+                                                             key='-WITHHELD_TYPE_UPDATE-')],
                          [sg.Button('Atualizar', key='-UPDATE_FILTER-')]
                          ]
         update_frame = sg.Frame('Dados de Atualização', update_layout)
@@ -589,9 +592,14 @@ class ResultTable:
                     selected_fed_id = 0
                 elif values['-RAD12-']:
                     selected_fed_id = 1
+
+                withheld_type = withheld_types[values['-WITHHELD_TYPE_FILTER-']] if values['-WITHHELD_TYPE_FILTER-'] \
+                    else None
+
                 temp_table_idxs, temp_invs_lst = Filter(self.invoices, values['-FED_ID_FILTER-'], selected_fed_id,
                                                         values['-ISS_FILTER-'], values['-IRRF_FILTER-'],
-                                                        values['-CSRF_FILTER-'], values['-CNAE_DESCR-']).run()
+                                                        values['-CSRF_FILTER-'], values['-CNAE_DESCR-'],
+                                                        withheld_type).run()
                 if temp_invs_lst is None:
                     continue
                 temp_table = temp_invs_lst.get_gui_table()
@@ -602,19 +610,23 @@ class ResultTable:
             if event == '-UPDATE_FILTER-':
                 invs_lst = temp_invs_lst if temp_table else self.invoices
                 nature = values['-NATURE-']
+                withheld_type = withheld_types[values['-WITHHELD_TYPE_UPDATE-']]
 
-                if len(nature) != 7:
+                if nature != '' and len(nature) != 7:
                     PopUp.msg('Natureza deve possuir 7 caracteres.')
                     continue
                 try:
-                    nature = int(nature)
+                    nature = int(nature) if nature else ''
                 except Exception as e:
                     print(e)
                     PopUp.msg('Formato de natureza errado.')
                     continue
 
-                for i in range(len(invs_lst)):
-                    invs_lst.index(i).set_nature(nature)
+                for invoice in invs_lst:
+                    invoice.nature = nature if nature else invoice.nature
+                    # print('withheld type:', withheld_type)
+                    invoice.withheld_type = withheld_type if withheld_type else None
+                    # print('invoice withheld type:', invoice.withheld_type)
 
                 if temp_table:
                     temp_table = invs_lst.get_gui_table()

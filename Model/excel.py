@@ -84,11 +84,11 @@ def upload_sheet_content(sheet1, xml_files):
     ir_value_sum = 0
     csrf_value_sum = 0
     net_value_sum = 0
-    gross_value_column = HEADER1.index('Valor Bruto') + 1
-    iss_value_column = HEADER1.index('Retenção ISS') + 1
-    ir_value_column = HEADER1.index('Retenção IR') + 1
-    csrf_value_column = HEADER1.index('Retenção CSRF') + 1
-    net_value_column = HEADER1.index('Valor Líquido') + 1
+    gross_value_column = HEADER1.index('Vlr Bruto') + 1
+    iss_value_column = HEADER1.index('Ret. ISS') + 1
+    ir_value_column = HEADER1.index('Ret. IR') + 1
+    csrf_value_column = HEADER1.index('Ret. CSRF') + 1
+    net_value_column = HEADER1.index('Vlr Líquido') + 1
     for i in range(number_of_rows):
         gross_value_cell = sheet1.cell(row=(i + 2), column=gross_value_column).value
         iss_value_cell = sheet1.cell(row=(i + 2), column=iss_value_column).value

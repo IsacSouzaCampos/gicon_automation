@@ -116,8 +116,8 @@ class Invoice:
 
         return int(cfps + '00')
 
-    def set_nature(self, nature: str):
-        self.nature = int(nature)
+    # def set_nature(self, nature: str):
+    #     self.nature = int(nature)
 
     def set_net_value(self):
         self.net_value = self.gross_value

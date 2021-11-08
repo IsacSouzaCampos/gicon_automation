@@ -3,7 +3,7 @@ from Model.invoices_list import InvoicesList
 
 class Filter:
     def __init__(self, invoices: InvoicesList, fed_id: str, selected_fed_id: int, sel_iss: bool, sel_irrf: bool,
-                 sel_csrf: bool, cnae_description: str):
+                 sel_csrf: bool, cnae_description: str, withheld_type: int):
         self.invoices = invoices
         self.service_type = self.invoices.index(0).service_type
         self._fed_id = fed_id
@@ -12,6 +12,7 @@ class Filter:
         self.sel_irrf = sel_irrf
         self.sel_csrf = sel_csrf
         self.cnae_descr = cnae_description
+        self.wh_type = withheld_type
         # print('CNAE description:', cnae_description)
 
     def run(self) -> tuple:
@@ -20,6 +21,8 @@ class Filter:
         indexes, invoices = self.cnae_description(indexes, invoices)
         indexes, invoices = self.fed_id(indexes, invoices)
         indexes, invoices = self.selected_fed_id(indexes, invoices)
+        indexes, invoices = self.withheld_type(indexes, invoices)
+
         if self.sel_iss:
             indexes, invoices = self.selected_tax(indexes, invoices, 0)  # filtrar pos iss
         if self.sel_irrf:
@@ -119,5 +122,19 @@ class Filter:
                         invs.add(inv)
         else:
             return indexes, invoices
+
+        return idxs, invs
+
+    def withheld_type(self, indexes: list, invoices: InvoicesList):
+        if not self.wh_type:
+            return indexes, invoices
+
+        idxs = list()
+        invs = InvoicesList([])
+
+        for index, invoice in zip(indexes, invoices):
+            if invoice.withheld_type == self.wh_type:
+                idxs.append(index)
+                invs.add(invoice)
 
         return idxs, invs
