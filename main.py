@@ -9,7 +9,7 @@ from Model.constants import SYS_PATH
 from Model.invoices_list import InvoicesList
 
 from Control.sql import SQLControl
-from View.inspection_lib import insertion_commands
+from View.inspection_lib import insertion_commands, create_delete_commands
 
 
 def main():
@@ -50,6 +50,7 @@ def main():
                 print(infos, file=fout)
 
     insertion_commands(sql_control.commands)
+    create_delete_commands(sql_control.launch_keys[0], sql_control.withheld_keys[0])
 
 
 if __name__ == '__main__':

@@ -15,6 +15,8 @@ class SQLControl:
         self.sql_commands = SQLCommands(self.service_type)
         self.sql_run = SQLRun()
         self.to_launch = InvoicesList([])
+        self.launch_keys = list()
+        self.withheld_keys = list()
         self.commands = list()
 
     def run(self):
@@ -39,13 +41,13 @@ class SQLControl:
                 if len(person_fed_id) == 14:  # se é CNPJ
                     self.to_launch.add(invoice)
 
-        launch_keys = self.get_launch_keys()
-        withheld_keys = self.get_withheld_launch_key()
-        for invoice, launch_key, withheld_key in zip(self.to_launch, launch_keys, withheld_keys):
+        self.set_launch_keys()
+        self.set_withheld_keys()
+        for invoice, launch_key, withheld_key in zip(self.to_launch, self.launch_keys, self.withheld_keys):
             print(f'GERANDO CÓDIGOS SQL DE INSERÇÃO... Nota: {invoice.serial_number}')
             self.commands.append(self.insert(invoice, launch_key, withheld_key))
 
-    def get_launch_keys(self) -> list:
+    def set_launch_keys(self) -> list:
         launch_keys_commands = list()
         controler = list()
         for invoice in self.to_launch:
@@ -85,9 +87,9 @@ class SQLControl:
         for lk in launch_keys:
             print(type(lk), lk)
 
-        return launch_keys
+        self.launch_keys = launch_keys
 
-    def get_withheld_launch_key(self) -> list:
+    def set_withheld_keys(self) -> list:
         withheld_keys_commands = list()
         for invoice in self.to_launch:
             print(f'GERANDO CHAVES DE LANÇAMENTO DA TABELA RETIDOS... Nota: {invoice.serial_number}')
@@ -122,7 +124,7 @@ class SQLControl:
         # for lk in launch_keys:
         #     print(type(lk), lk)
 
-        return withheld_keys
+        self.withheld_keys = withheld_keys
 
     def set_companies_codes(self):
         clients_commands = list()
