@@ -11,10 +11,8 @@ class SQLCommands:
         self.run = SQLRun()
 
     def is_launched(self, invoice: Invoice) -> str:
-        company_code = self.get_company_code(invoice.taker.fed_id, self.service_type)
-
-        # person_type = 0 if invoice.service_type else 1
-        person_code = self.get_company_code(invoice.provider.fed_id, 0 if self.service_type else 1)
+        company_code = invoice.taker.code if self.service_type else invoice.provider.code
+        person_code = invoice.provider.code if self.service_type else invoice.taker.code
 
         command = f'SELECT \'{invoice.taker.fed_id}\', \'{invoice.provider.fed_id}\', NUMERONF ' \
                   f'FROM LCTOFIS{self.type_str} ' \
@@ -73,6 +71,7 @@ class SQLCommands:
     def lctofis_key(self, company_code) -> str:
         command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + 1 FROM LCTOFIS{self.type_str} WHERE CODIGOEMPRESA = ' \
                   f'({company_code})'
+        # print('lctofis_key command:', command)
         return command
 
     def lctofisretido_key(self, company_code) -> str:
@@ -216,9 +215,7 @@ class SQLCommands:
         csll_situation = 3 if csll_value else 1
 
         ts = self.type_str
-        # client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
         client_code = inv.taker.code if self.service_type else inv.provider.code
-        # person_id = inv.provider.fed_id if self.service_type else inv.taker.fed_id
         person_code = inv.provider.code if self.service_type else inv.taker.code
 
         if self.service_type:  # se tomado

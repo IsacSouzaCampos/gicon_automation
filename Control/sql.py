@@ -14,13 +14,15 @@ class SQLControl:
         self.service_type = service_type
         self.sql_commands = SQLCommands(self.service_type)
         self.sql_run = SQLRun()
+        self.to_launch = InvoicesList([])
+        self.commands = list()
 
     def run(self):
 
         self.clear_results_file()
 
-        self.get_companies_codes()
-        self.get_null_companies_codes()
+        self.set_companies_codes()
+        # null_companies_codes = self.get_null_companies_codes()
 
         commands = list()
         for invoice in self.invoices:
@@ -30,27 +32,23 @@ class SQLControl:
         self.sql_run.run(commands)
         results = self.sql_run.result()
 
-        to_launch = InvoicesList([])
         for i in range(len(self.invoices)):
             invoice = self.invoices.index(i)
             if f'{invoice.taker.fed_id};{invoice.provider.fed_id};{invoice.serial_number}' not in results:
-                to_launch.add(invoice)
+                person_fed_id = invoice.provider.fed_id if self.service_type else invoice.taker.fed_id
+                if len(person_fed_id) == 14:  # se é CNPJ
+                    self.to_launch.add(invoice)
 
-        launch_keys = self.get_launch_keys(to_launch)
-        withheld_keys = self.get_withheld_launch_key(to_launch)
-        commands = list()
-        for invoice, launch_key, withheld_key in zip(to_launch, launch_keys, withheld_keys):
+        launch_keys = self.get_launch_keys()
+        withheld_keys = self.get_withheld_launch_key()
+        for invoice, launch_key, withheld_key in zip(self.to_launch, launch_keys, withheld_keys):
             print(f'GERANDO CÓDIGOS SQL DE INSERÇÃO... Nota: {invoice.serial_number}')
-            commands.append(self.insert(invoice, launch_key, withheld_key))
+            self.commands.append(self.insert(invoice, launch_key, withheld_key))
 
-        # print('RODANDO CÓDIGOS SQL DE INSERÇÃO...')
-        # self.sql_run.run(commands)
-        return commands
-
-    def get_launch_keys(self, to_launch: InvoicesList) -> list:
+    def get_launch_keys(self) -> list:
         launch_keys_commands = list()
         controler = list()
-        for invoice in to_launch:
+        for invoice in self.to_launch:
             print(f'GERANDO CÓDIGO DE OBTENÇÃO DAS CHAVES DE LANÇAMENTO... Nota: {invoice.serial_number}')
             company_code = invoice.taker.code if self.service_type else invoice.provider.code
             if company_code in controler:
@@ -74,7 +72,7 @@ class SQLControl:
         launch_keys = list()
         aux = dict()
         count = 0
-        for invoice in to_launch:
+        for invoice in self.to_launch:
             company_code = invoice.taker.code if self.service_type else invoice.provider.code
             if company_code in aux.keys():
                 aux[company_code] += 1
@@ -89,12 +87,11 @@ class SQLControl:
 
         return launch_keys
 
-    def get_withheld_launch_key(self, to_launch: InvoicesList) -> list:
+    def get_withheld_launch_key(self) -> list:
         withheld_keys_commands = list()
-        for i in range(len(to_launch)):
-            inv = to_launch.index(i)
-            print(f'GERANDO CHAVES DE LANÇAMENTO DA TABELA RETIDOS... Nota: {inv.serial_number}')
-            company_code = inv.taker.code if self.service_type else inv.provider.code
+        for invoice in self.to_launch:
+            print(f'GERANDO CHAVES DE LANÇAMENTO DA TABELA RETIDOS... Nota: {invoice.serial_number}')
+            company_code = invoice.taker.code if self.service_type else invoice.provider.code
             withheld_keys_commands.append(self.sql_commands.lctofisretido_key(company_code))
 
         print('RODANDO CHAVES DE LANÇAMENTO DA TABELA RETIDOS...')
@@ -112,7 +109,7 @@ class SQLControl:
         withheld_keys = list()
         aux = dict()
         count = 0
-        for invoice in to_launch:
+        for invoice in self.to_launch:
             company_code = invoice.taker.code if self.service_type else invoice.provider.code
             if company_code in aux.keys():
                 aux[company_code] += 1
@@ -127,7 +124,7 @@ class SQLControl:
 
         return withheld_keys
 
-    def get_companies_codes(self):
+    def set_companies_codes(self):
         clients_commands = list()
         persons_commands = list()
         if self.service_type:  # se tomado

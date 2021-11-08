@@ -3,7 +3,7 @@ import sys
 
 
 ROOT_DIR = sys.path[0]
-SYS_PATH = r'C:\Program Files\gicon_automation'
+SYS_PATH = r'Support'
 RESULTS_PATH = SYS_PATH + r'\bd_results.bin'
 MAX_INVOICES = 100
 TAX_EXTRACTION_ERROR = '******'

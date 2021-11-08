@@ -2,6 +2,7 @@
 import xml.etree.ElementTree
 from Model.company import Company
 from Model.cnae import CNAE
+from Model.constants import SYS_PATH
 # from Model.inspection_lib import extract_tax_from_percentage
 
 from Model.taxes.taxes import Taxes
@@ -50,13 +51,14 @@ class Invoice:
         self.net_value = 0
         self.set_net_value()
 
-        self.nature = self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
-                                          self.taxes.csrf.is_withheld, self.service_type)
-
         self.is_canceled = 'datacancelamento' in self.xml_data and self.xml_data['datacancelamento'] is not None
         self.invoice_situation = 2 if self.is_canceled else 0
         self.to_launch = self.taxes.iss.is_withheld or self.taxes.irrf.is_withheld or self.taxes.csrf.is_withheld
-        self.withheld_type = None
+        self.withheld_type, self.nature = self.check_withheld_infos()
+
+        if self.nature is None:
+            self.nature = self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
+                                              self.taxes.csrf.is_withheld, self.service_type)
 
     def data_list(self) -> list:
         """
@@ -115,6 +117,16 @@ class Invoice:
             return int(cfps + '06')
 
         return int(cfps + '00')
+
+    def check_withheld_infos(self):
+        with open(SYS_PATH + r'\query.csv') as fin:
+            for line in fin.readlines():
+                if f'{self.taker.code};{self.provider.code};{self.cnae.description};' \
+                    f'{self.taxes.iss.is_withheld};{self.taxes.irrf.is_withheld};' \
+                   f'{self.taxes.csrf.is_withheld};' in line:
+                    splitted = line.split(';')
+                    return splitted[-2], splitted[-1]
+        return None, None
 
     # def set_nature(self, nature: str):
     #     self.nature = int(nature)

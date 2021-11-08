@@ -5,6 +5,7 @@ from View.inspection import MainGUI
 import Model.initiate as initiate
 import Model.excel as excel
 import Model.constants as constants
+from Model.constants import SYS_PATH
 from Model.invoices_list import InvoicesList
 
 from Control.sql import SQLControl
@@ -33,9 +34,22 @@ def main():
             to_launch.add(invoice)
 
     sql_control = SQLControl(to_launch, main_gui.service_type)
-    commands = sql_control.run()
+    sql_control.run()
 
-    insertion_commands(commands)
+    with open(SYS_PATH + r'\query.csv', 'r') as fin:
+        services_infos = fin.readlines()
+
+    to_launch = sql_control.to_launch
+    with open(SYS_PATH + r'\query.csv', 'w+') as fout:
+        for invoice in to_launch:
+            infos = f'{invoice.taker.code};{invoice.provider.code};{invoice.cnae.description};' \
+                    f'{invoice.taxes.iss.is_withheld};{invoice.taxes.irrf.is_withheld};' \
+                    f'{invoice.taxes.csrf.is_withheld};{invoice.withheld_type};{invoice.nature};'
+
+            if infos not in services_infos:
+                print(infos, file=fout)
+
+    insertion_commands(sql_control.commands)
 
 
 if __name__ == '__main__':
