@@ -23,7 +23,7 @@ class SQLControl:
 
         self.clear_results_file()
 
-        self.set_companies_codes()
+        # self.set_companies_codes()
         # null_companies_codes = self.get_null_companies_codes()
 
         commands = list()
@@ -125,6 +125,36 @@ class SQLControl:
         #     print(type(lk), lk)
 
         self.withheld_keys = withheld_keys
+
+    def set_company_code(self, index):
+        invoice = self.invoices.index(index)
+
+        client_command = list()
+        person_command = list()
+
+        if self.service_type:
+            client_command.append(self.sql_commands.get_company_code(invoice.taker.fed_id, 1))
+            person_command.append(self.sql_commands.get_company_code(invoice.provider.fed_id, 0))
+        else:
+            client_command.append(self.sql_commands.get_company_code(invoice.provider.fed_id, 0))
+            person_command.append(self.sql_commands.get_company_code(invoice.taker.fed_id, 1))
+
+        self.sql_run.run(client_command)
+        client_code = self.sql_run.result()[0]
+
+        self.sql_run.run(person_command)
+        person_code = self.sql_run.result()[0]
+
+        invoice.client.code = client_code
+        invoice.person.code = person_code
+
+        # print('client:', client_code)
+        # print('person:', person_code)
+
+        invoice.taker.code = invoice.client.code if self.service_type else invoice.person.code
+        invoice.provider.code = invoice.person.code if self.service_type else invoice.client.code
+
+        return client_code, person_code
 
     def set_companies_codes(self):
         clients_commands = list()

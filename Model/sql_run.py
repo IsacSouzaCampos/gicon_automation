@@ -24,7 +24,7 @@ def run_command(host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste
         # Execute the SELECT statements:
         i = 1
         for command in commands.split(';'):
-            print('RODANDO COMANDO: ' + command.strip())
+            # print('RODANDO COMANDO: ' + command.strip())
             i += 1
             cur.execute(command.strip())
             if command.split()[0] == 'SELECT':

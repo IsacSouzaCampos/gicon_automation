@@ -33,6 +33,9 @@ class Invoice:
         self.taker = Company(self.xml_data['identificacaotomador'],
                              self.xml_data['razaosocialtomador'], 'Florianópolis')
 
+        self.client = self.taker if self.service_type else self.provider
+        self.person = self.provider if self.service_type else self.taker
+
         if 'descricaoservico' in self.xml_data and self.xml_data['descricaoservico'] is not None:
             self.service_description = self.xml_data['descricaoservico']
         else:
