@@ -30,8 +30,8 @@ class Filter:
         if self.sel_csrf:
             indexes, invoices = self.selected_tax(indexes, invoices, 2)  # filtrar pos csrf
 
-        if len(self.invoices) == len(invoices):
-            return [], None
+        # if len(self.invoices) == len(invoices):
+        #     return [], None
         return indexes, invoices
 
     def cnae_description(self, indexes: list, invoices: InvoicesList) -> tuple:
@@ -132,8 +132,9 @@ class Filter:
         idxs = list()
         invs = InvoicesList([])
 
+        # print('wh type:', self.wh_type)
         for index, invoice in zip(indexes, invoices):
-            if invoice.withheld_type == self.wh_type:
+            if invoice.withheld_type == str(self.wh_type):
                 idxs.append(index)
                 invs.add(invoice)
 

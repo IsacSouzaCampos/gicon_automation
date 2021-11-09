@@ -18,13 +18,13 @@ class SQLControl:
         self.launch_keys = list()
         self.withheld_keys = list()
         self.commands = list()
+        self.failed_invoices = InvoicesList([])
 
     def run(self):
 
         self.clear_results_file()
 
         # self.set_companies_codes()
-        # null_companies_codes = self.get_null_companies_codes()
 
         commands = list()
         for invoice in self.invoices:
@@ -45,7 +45,11 @@ class SQLControl:
         self.set_withheld_keys()
         for invoice, launch_key, withheld_key in zip(self.to_launch, self.launch_keys, self.withheld_keys):
             print(f'GERANDO CÓDIGOS SQL DE INSERÇÃO... Nota: {invoice.serial_number}')
-            self.commands.append(self.insert(invoice, launch_key, withheld_key))
+            comp_codes_ok = self.companies_codes_ok(invoice)
+            if comp_codes_ok:
+                self.commands.append(self.insert(invoice, launch_key, withheld_key))
+            else:
+                self.failed_invoices.add(invoice)
 
     def set_launch_keys(self) -> list:
         launch_keys_commands = list()
@@ -193,13 +197,11 @@ class SQLControl:
                 invoice.taker.code = person_code
                 invoice.provider.code = client_code
 
-    def get_null_companies_codes(self):
-        error_invoices = InvoicesList()
-        for index, invoice in enumerate(self.invoices):
-            if invoice.taker.code == 'NULL' or invoice.provider.code == 'NULL':
-                error_invoices.add(invoice)
-
-        return error_invoices if len(error_invoices) else None
+    @staticmethod
+    def companies_codes_ok(invoice: Invoice):
+        # if str(invoice.serial_number) == '90108':
+        #     print('taker:', invoice.taker.code, 'provider:', invoice.provider.code)
+        return invoice.taker.code != 'NULL' and invoice.provider.code != 'NULL'
 
     def insert(self, invoice: Invoice, launch_key, withheld_key) -> list:
         commands = SQLCommands(self.service_type)

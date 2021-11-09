@@ -27,7 +27,7 @@ class Main:
 
         sql_control = SQLControl(invoices, main_gui.service_type)
 
-        invoices = self.update_companies_codes(main_gui.xml_files, sql_control, invoices)
+        invoices = self.update_companies_codes(main_gui.xml_files, sql_control)
         invoices = self.update_invoices_infos(invoices, len(invoices))
 
         res_tb = ResultTable(invoices, inspection_control.cnae_descriptions, invoices.number_of_errors())
@@ -54,8 +54,12 @@ class Main:
         if sql_control.launch_keys and sql_control.withheld_keys:
             create_delete_commands(sql_control.launch_keys[0], sql_control.withheld_keys[0])
 
+        # print('failed invoices:')
+        # for invoice in sql_control.failed_invoices:
+        #     print(f'{invoice.serial_number} - provider:', invoice.provider.code, ' - taker:', invoice.taker.code)
+
     @staticmethod
-    def update_companies_codes(xml_files, sql_control, invoices):
+    def update_companies_codes(xml_files, sql_control):
         load_insp = Loading()
         load_insp.total_size = len(xml_files)
         load_insp.inspection()
@@ -89,8 +93,8 @@ class Main:
 
                 for ser_infos in services_infos:
                     splitted_ser_infos = ser_infos.split(';')
-                    print('splitted infos:', splitted_ser_infos[:-2])
-                    print('infos:', infos)
+                    # print('splitted infos:', splitted_ser_infos[:-2])
+                    # print('infos:', infos)
                     if infos == splitted_ser_infos[:-2]:
                         invoice.withheld_type = splitted_ser_infos[-2]
                         invoice.nature = splitted_ser_infos[-1]

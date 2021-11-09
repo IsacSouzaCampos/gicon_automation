@@ -600,8 +600,8 @@ class ResultTable:
                                                         values['-ISS_FILTER-'], values['-IRRF_FILTER-'],
                                                         values['-CSRF_FILTER-'], values['-CNAE_DESCR-'],
                                                         withheld_type).run()
-                if temp_invs_lst is None:
-                    continue
+                # if temp_invs_lst is None:
+                #     continue
                 temp_table = temp_invs_lst.get_gui_table()
                 self.window['-TABLE-'].Update(temp_table)
                 self.window['-N_REGISTERS-'].Update(f'{len(temp_table)} registros')

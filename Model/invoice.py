@@ -102,7 +102,10 @@ class Invoice:
         # service_type: 0 - prestado / 1 - tomado
         # o prestado é temporário, enquanto não se acha uma solução para detectar a natureza exata para este
         # caso. Esta solução temporária gera resultados errados e serve apenas para testes.
-        cfps = self.cfps + '3' if service_type else self.cfps + '0'
+        if not service_type:
+            return '0000000'
+
+        cfps = self.cfps + '3'
 
         if iss_withheld and is_ir_withheld and is_csrf_withheld:
             return int(cfps + '02')
