@@ -44,9 +44,11 @@ class SQLControl:
         self.set_launch_keys()
         self.set_withheld_keys()
         for invoice, launch_key, withheld_key in zip(self.to_launch, self.launch_keys, self.withheld_keys):
-            print(f'GERANDO CÓDIGOS SQL DE INSERÇÃO... Nota: {invoice.serial_number}')
+            # print(f'GERANDO CÓDIGOS SQL DE INSERÇÃO... Nota: {invoice.serial_number}')
             comp_codes_ok = self.companies_codes_ok(invoice)
             if comp_codes_ok:
+                # print('serial number:', invoice.serial_number, ' - taker:', invoice.taker.code,
+                #       ' - provider:', invoice.provider.code)
                 self.commands.append(self.insert(invoice, launch_key, withheld_key))
             else:
                 self.failed_invoices.add(invoice)

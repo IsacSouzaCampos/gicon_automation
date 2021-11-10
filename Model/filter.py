@@ -73,28 +73,16 @@ class Filter:
         idxs = list()
         invs = InvoicesList([])
 
-        if self.service_type:  # tomado
-            if self._selected_fed_id == 0:  # CNPJ
-                for i, inv in zip(indexes, invoices):
-                    if len(inv.provider.fed_id) == 14:
-                        idxs.append(i)
-                        invs.add(inv)
-            elif self._selected_fed_id == 1:  # CPF
-                for i, inv in zip(indexes, invoices):
-                    if len(inv.provider.fed_id) == 11:
-                        idxs.append(i)
-                        invs.add(inv)
-        else:  # prestador
-            if self._selected_fed_id == 0:  # CNPJ
-                for i, inv in zip(indexes, invoices):
-                    if len(inv.taker.fed_id) == 14:
-                        idxs.append(i)
-                        invs.add(inv)
-            elif self._selected_fed_id == 1:  # CPF
-                for i, inv in zip(indexes, invoices):
-                    if len(inv.taker.fed_id) == 11:
-                        idxs.append(i)
-                        invs.add(inv)
+        if self._selected_fed_id == 0:  # CNPJ
+            for i, inv in zip(indexes, invoices):
+                if len(inv.person.fed_id) == 14:
+                    idxs.append(i)
+                    invs.add(inv)
+        elif self._selected_fed_id == 1:  # CPF
+            for i, inv in zip(indexes, invoices):
+                if len(inv.person.fed_id) == 11:
+                    idxs.append(i)
+                    invs.add(inv)
 
         return idxs, invs
 
