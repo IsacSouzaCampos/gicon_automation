@@ -135,3 +135,9 @@ class Invoice:
     @staticmethod
     def is_cnpj(fed_id):
         return len(fed_id) == 14
+
+    def reset_withheldtype(self):
+        self.withheld_type = None
+
+    def reset_nature(self):
+        self.nature = '0000000'

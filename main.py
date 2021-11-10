@@ -20,26 +20,27 @@ class Main:
         initiate.init()
 
         main_gui = MainGUI()
-        main_gui.show()
 
-        size = len(main_gui.xml_files)
-        service_type = main_gui.service_type
-
-        inspection_control = InspectControl(main_gui.folder, main_gui.xml_files, main_gui.service_type)
-        invoices = inspection_control.inspect()
-
-        sql_control = SQLControl(invoices, main_gui.service_type)
-
-        invoices = self.update_companies_codes(size, sql_control)
-        client_code = self.get_client_code(invoices)
-        invoices = self.update_invoices_infos(invoices, len(invoices), client_code, service_type)
-
-        res_tb = ResultTable(invoices, inspection_control.cnae_code, invoices.number_of_errors())
-        is_finished, invoices = res_tb.show()
-
-        while not is_finished:
+        while True:
             main_gui.show()
-            is_finished, invoices = inspection_control.inspect()
+
+            size = len(main_gui.xml_files)
+            service_type = main_gui.service_type
+
+            inspection_control = InspectControl(main_gui.folder, main_gui.xml_files, main_gui.service_type)
+            invoices = inspection_control.inspect()
+
+            sql_control = SQLControl(invoices, main_gui.service_type)
+
+            invoices = self.update_companies_codes(size, sql_control)
+            client_code = self.get_client_code(invoices)
+            invoices = self.update_invoices_infos(invoices, len(invoices), client_code, service_type)
+
+            res_tb = ResultTable(invoices, inspection_control.cnae_code, invoices.number_of_errors())
+            is_finished, invoices = res_tb.show()
+
+            if is_finished:
+                break
 
         xlsx_file_name = main_gui.folder.split('/')[-1] + '.xlsx'
         excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, main_gui.xml_files)

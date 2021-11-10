@@ -517,8 +517,9 @@ class ResultTable:
         update_layout = [
                          [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 20), (0, 0))),
                           sg.Text('Tipo Retenção'), sg.Combo(list(withheld_types.keys()), size=(62, 1),
+                                                             default_value='Pessoas Jurídicas de Direito Privado',
                                                              key='-WITHHELD_TYPE_UPDATE-')],
-                         [sg.Button('Atualizar', key='-UPDATE_FILTER-')]
+                         [sg.Button('Atualizar', key='-UPDATE_FILTER-'), sg.Button('Resetar', key='-RESET-')]
                          ]
         update_frame = sg.Frame('Dados de Atualização', update_layout)
 
@@ -629,6 +630,14 @@ class ResultTable:
                     table = invs_lst.get_gui_table()
                     self.update(table)
                 self.window['-NATURE-'].Update('')
+
+            if event == '-RESET-':
+                if sg.popup('Deseja resetar Natureza e Tipo de Retenção?', custom_text=('Sim', 'Não')) == 'Sim':
+                    for invoice in self.invoices:
+                        invoice.reset_nature()
+                        invoice.reset_withheldtype()
+                    table = self.invoices.get_gui_table()
+                    self.update(table)
 
             if event == 'Limpar Filtro':
                 self.window['-TABLE-'].Update(self.invoices.get_gui_table())
