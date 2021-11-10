@@ -90,8 +90,8 @@ class SQLControl:
                 launch_keys.append(aux[company_code])
                 count += 1
 
-        for lk in launch_keys:
-            print(type(lk), lk)
+        # for lk in launch_keys:
+        #     print(type(lk), lk)
 
         self.launch_keys = launch_keys
 

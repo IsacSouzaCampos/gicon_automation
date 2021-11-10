@@ -3,7 +3,7 @@ from Model.invoices_list import InvoicesList
 
 class Filter:
     def __init__(self, invoices: InvoicesList, fed_id: str, selected_fed_id: int, sel_iss: bool, sel_irrf: bool,
-                 sel_csrf: bool, cnae_description: str, withheld_type: int):
+                 sel_csrf: bool, cnae_cod: str, withheld_type: int):
         self.invoices = invoices
         self.service_type = self.invoices.index(0).service_type
         self._fed_id = fed_id
@@ -11,14 +11,14 @@ class Filter:
         self.sel_iss = sel_iss
         self.sel_irrf = sel_irrf
         self.sel_csrf = sel_csrf
-        self.cnae_descr = cnae_description
+        self.cnae_cod = cnae_cod
         self.wh_type = withheld_type
         # print('CNAE description:', cnae_description)
 
     def run(self) -> tuple:
         invoices = self.invoices
         indexes = [i for i in range(len(self.invoices))]
-        indexes, invoices = self.cnae_description(indexes, invoices)
+        indexes, invoices = self.cnae_code(indexes, invoices)
         indexes, invoices = self.fed_id(indexes, invoices)
         indexes, invoices = self.selected_fed_id(indexes, invoices)
         indexes, invoices = self.withheld_type(indexes, invoices)
@@ -34,14 +34,14 @@ class Filter:
         #     return [], None
         return indexes, invoices
 
-    def cnae_description(self, indexes: list, invoices: InvoicesList) -> tuple:
-        if self.cnae_descr is None or self.cnae_descr == '':
+    def cnae_code(self, indexes: list, invoices: InvoicesList) -> tuple:
+        if self.cnae_cod is None or self.cnae_cod == '':
             return indexes, invoices
 
         idxs = list()
         invs = InvoicesList([])
         for i, inv in zip(indexes, invoices):
-            if inv.cnae.description.title() == self.cnae_descr:
+            if inv.cnae.code == self.cnae_cod:
                 idxs.append(i)
                 invs.add(inv)
 

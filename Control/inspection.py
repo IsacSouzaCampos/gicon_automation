@@ -1,9 +1,9 @@
-from View.inspection import *
+# from View.inspection import *
 from View.inspection import Loading
 
 from Model.invoices_list import InvoicesList
 from Model.invoice import Invoice
-from Model.constants import SYS_PATH
+# from Model.constants import SYS_PATH
 
 from View.inspection import PopUp
 
@@ -25,7 +25,7 @@ class InspectControl:
         self.folder = folder
         self.xml_files = xml_files
         self.service_type = service_type
-        self.cnae_descriptions = list()
+        self.cnae_code = list()
 
     def inspect(self) -> InvoicesList:
         # inicia janela da barra de progresso da conferência
@@ -36,15 +36,15 @@ class InspectControl:
         # insere os dados de cada um dos arquivos xml a serem analisados em results
         # companies_cnpjs = list()
         # companies_names = list()
-        self.cnae_descriptions = ['']
+        self.cnae_code = ['']
         invoices = InvoicesList([])  # precisa receber lista vazia '[]' para não acumular notas conferidas antes
         for i in range(len(self.xml_files)):
             xml_file = self.xml_files[i]
             invoice = Invoice(f'{self.folder}\\{xml_file}', self.service_type)
             invoices.add(invoice)  # implementar esta lista no código ao invés da lista de dados anterior
 
-            if invoice.cnae.description.title() not in self.cnae_descriptions:
-                self.cnae_descriptions.append(invoice.cnae.description.title())
+            if invoice.cnae.code not in self.cnae_code:
+                self.cnae_code.append(invoice.cnae.code)
 
             load_insp.update(invoice.serial_number, i)
         load_insp.close()

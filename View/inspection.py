@@ -507,21 +507,12 @@ class ResultTable:
                          [sg.Checkbox('ISS', key='-ISS_FILTER-'),
                           sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
                           sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
-                         [sg.Text('Descrição CNAE'),
-                          sg.Combo(self.cnae_descriptions, size=(87, 1), key='-CNAE_DESCR-')],
+                         [sg.Text('CNAE'),
+                          sg.Combo(self.cnae_descriptions, size=(87, 1), pad=((67, 0), (0, 0)), key='-CNAE_CODE-')],
                          [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))),
                           sg.Combo([''] + list(withheld_types.keys()), size=(87, 1), key='-WITHHELD_TYPE_FILTER-')],
                          [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
         filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
-
-        # withheld_types = {
-        #                     'Órgãos, Autarquias e Fundacoes Federais': 1,
-        #                     'Demais Entidades da Administração Pública Federal': 2,
-        #                     'Pessoas Jurídicas de Direito Privado': 3,
-        #                     'Órgãos, Autarquias e Fundacoes dos Estados, Distrito Federal e Municípios': 4,
-        #                     'Sociedade Cooperativa': 5,
-        #                     'Fabricantes de Veículos e Máquinas': 6
-        #                   }
 
         update_layout = [
                          [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 20), (0, 0))),
@@ -598,7 +589,7 @@ class ResultTable:
 
                 temp_table_idxs, temp_invs_lst = Filter(self.invoices, values['-FED_ID_FILTER-'], selected_fed_id,
                                                         values['-ISS_FILTER-'], values['-IRRF_FILTER-'],
-                                                        values['-CSRF_FILTER-'], values['-CNAE_DESCR-'],
+                                                        values['-CSRF_FILTER-'], values['-CNAE_CODE-'],
                                                         withheld_type).run()
                 # if temp_invs_lst is None:
                 #     continue
@@ -610,7 +601,8 @@ class ResultTable:
             if event == '-UPDATE_FILTER-':
                 invs_lst = temp_invs_lst if temp_table else self.invoices
                 nature = values['-NATURE-']
-                withheld_type = withheld_types[values['-WITHHELD_TYPE_UPDATE-']]
+                wh_type_value = values['-WITHHELD_TYPE_UPDATE-']
+                withheld_type = withheld_types[wh_type_value] if wh_type_value != '' else None
 
                 if nature != '' and len(nature) != 7:
                     PopUp.msg('Natureza deve possuir 7 caracteres.')

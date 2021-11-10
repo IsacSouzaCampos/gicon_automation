@@ -34,7 +34,7 @@ class Main:
         client_code = self.get_client_code(invoices)
         invoices = self.update_invoices_infos(invoices, len(invoices), client_code, service_type)
 
-        res_tb = ResultTable(invoices, inspection_control.cnae_descriptions, invoices.number_of_errors())
+        res_tb = ResultTable(invoices, inspection_control.cnae_code, invoices.number_of_errors())
         is_finished, invoices = res_tb.show()
 
         while not is_finished:
@@ -96,7 +96,7 @@ class Main:
                     continue
 
                 load_insp.update(invoice.serial_number, index)
-                infos = [invoice.person.code, invoice.cnae.description, invoice.taxes.iss.is_withheld,
+                infos = [invoice.person.code, invoice.cnae.code, invoice.taxes.iss.is_withheld,
                          invoice.taxes.irrf.is_withheld, invoice.taxes.csrf.is_withheld]
                 infos = list(map(str, infos))
 
@@ -119,22 +119,33 @@ class Main:
             services_infos = fin.readlines()
 
         with open(path, 'a') as fout:
+            new_infos = list()
             for invoice in to_launch:
-                infos = [invoice.person.code, invoice.cnae.description, invoice.taxes.iss.is_withheld,
+                # print('person code:', invoice.person.code)
+                infos = [invoice.person.code, invoice.cnae.code, invoice.taxes.iss.is_withheld,
                          invoice.taxes.irrf.is_withheld, invoice.taxes.csrf.is_withheld]
                 infos = list(map(str, infos))
 
+                if ';'.join(infos) in new_infos:
+                    continue
+
+                # print('infos:', infos, type(infos))
+                # print('new_infos[0]:', new_infos[0] if len(new_infos) else '',
+                #       type(new_infos[0]) if len(new_infos) else '')
+
                 for ser_infos in services_infos:
-                    print('infos:', infos)
-                    print('serv_infos:', ser_infos.split(';')[:-2])
+                    # print('infos:', infos)
+                    # print('serv_infos:', ser_infos.split(';')[:-2])
                     if infos == ser_infos.split(';')[:-2]:
                         break
                 else:
-                    if invoice.person.code == 'NULL':
-                        break
-                    s = f'{invoice.withheld_type};{invoice.nature}'
-                    # print('s:', s)
-                    print((';'.join([str(info) for info in infos]) + ';' + s).strip(), file=fout)
+                    if invoice.person.code != 'NULL':
+                        # print('else serial number:', invoice.serial_number)
+                        s = f'{invoice.withheld_type};{invoice.nature}'
+                        # print('s:', s)
+                        print((';'.join([str(info) for info in infos]) + ';' + s).strip(), file=fout)
+                        new_infos.append(';'.join(infos))
+            print(new_infos)
 
     @staticmethod
     def get_client_code(invoices: InvoicesList) -> int:
