@@ -6,6 +6,8 @@ import Model.constants as const
 from Model.invoices_list import InvoicesList
 from Model.filter import Filter
 
+from View.popup import PopUp
+
 
 class MainGUI:
     def __init__(self, folder: str = '', xml_files: list = None, service_type: int = None):
@@ -74,77 +76,6 @@ class MainGUI:
 
         window.close()
         # return folder_name, xml_file_names, service_type
-
-
-class Loading:
-    def __init__(self, window: sg.Window = None, total_size: int = None):
-        """
-                Atualiza a barra de progresso da conferência.
-
-                :param window:         Janela de carregamento a ser atualizada.
-                :type window:          (sg.Window)
-                :param total_size:     Número total de notas a serem conferidas.
-                :type total_size:      (int)
-                """
-        self.window = window
-        self.total_size = total_size
-
-    def inspection(self):
-        """
-        Inicializa a janela que mostrará o progresso da conferência
-
-        :return: Janela de carregamento das conferências.
-        :rtype:  (sg.Window)
-        """
-
-        layout = [
-            [sg.Text(key='text')],
-            [sg.ProgressBar(1, orientation='horizontal', size=(40, 20), key='progress')]
-        ]
-
-        self.window = sg.Window('Conferindo Notas', layout, disable_close=True, finalize=True)
-
-    def update(self, invoice_number: int, progress: int):
-        self.window.Element('text').Update('Nota: ' + str(invoice_number))
-        self.window.Element('progress').UpdateBar(progress, self.total_size)
-
-    def close(self):
-        self.window.close()
-
-
-class PopUp:
-    @staticmethod
-    def max_invoices() -> int:
-        """
-        Popup de aviso de limite de notas excedido.
-
-        :return: Valor referente à opçõa escolhida pelo usuário no tratamento do caso.
-        :rtype:  (int)
-        """
-        layout = [
-            [sg.Text(f'Número limite de notas excedido ({const.MAX_INVOICES}). Com um número assim, a edição das'
-                     ' notas com possíveis erros não é tão prática quanto com a tela padrão do sistema. '
-                     f'Gostaria que as notas fossem separadas em subgrupos de {const.MAX_INVOICES} ou conferir '
-                     'com uma interface gráfica mais simplificada?', size=(50, 5))],
-
-            [sg.Button('Conferir com interface simplificada'), sg.Button(f'Criar subgrupos de '
-                                                                         f'{const.MAX_INVOICES} notas')]
-        ]
-
-        window = sg.Window('Limite de Notas Excedido', layout)
-        event, values = window.read()
-        window.close()
-
-        if event == f'Criar subgrupos de {const.MAX_INVOICES} notas':
-            return 0
-        elif event == 'Conferir com interface simplificada':
-            return 1
-        else:
-            return 2
-
-    @staticmethod
-    def msg(msg):
-        sg.popup(msg)
 
 
 class EditableResultTable:

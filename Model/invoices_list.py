@@ -98,6 +98,12 @@ class InvoicesList:
 
         return indexes, res_invs
 
+    def repeated_fed_ids(self):
+        aux = True
+        for index in range(len(self.invoices) - 1):
+            aux = aux and (self.invoices[index].client.fed_id == self.invoices[index + 1].client.fed_id)
+        return not aux
+
     def __iter__(self):
         return InvoicesListIterator(self)
 

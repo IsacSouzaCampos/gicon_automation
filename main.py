@@ -12,7 +12,8 @@ from Control.sql import SQLControl
 
 from View.inspection_lib import insertion_commands, create_delete_commands
 from View.inspection import ResultTable
-from View.inspection import Loading
+from View.loading import Loading
+from View.popup import PopUp
 
 
 class Main:
@@ -24,17 +25,24 @@ class Main:
         while True:
             main_gui.show()
 
-            size = len(main_gui.xml_files)
+            # size = len(main_gui.xml_files)
             service_type = main_gui.service_type
 
             inspection_control = InspectControl(main_gui.folder, main_gui.xml_files, main_gui.service_type)
             invoices = inspection_control.inspect()
 
+            if invoices.repeated_fed_ids():
+                s = 'tomadora' if service_type else 'prestadora'
+                PopUp().msg(f'Há mais de uma empresa {s} nas notas. Certifique-se de manter notas da  mesma '
+                            f'empresa na pasta.')
+                import sys
+                sys.exit()
+
             sql_control = SQLControl(invoices, main_gui.service_type)
 
-            invoices = self.update_companies_codes(size, sql_control)
-            client_code = self.get_client_code(invoices)
-            invoices = self.update_invoices_infos(invoices, len(invoices), client_code, service_type)
+            # invoices = self.update_companies_codes(size, sql_control)
+            client_fed_id = self.get_client_fed_id(invoices)
+            invoices = self.update_invoices_infos(invoices, len(invoices), client_fed_id, service_type)
 
             res_tb = ResultTable(invoices, inspection_control.cnae_code, invoices.number_of_errors())
             is_finished, invoices = res_tb.show()
@@ -51,22 +59,21 @@ class Main:
                 sql_control.to_launch.add(invoice)
 
         sql_control.run()
-        to_launch = sql_control.to_launch
-        self.update_infos_table(to_launch, client_code, service_type)
+        # to_launch = sql_control.to_launch
+        # self.update_infos_table(to_launch, client_code, service_type)
 
         insertion_commands(sql_control.commands)
-        if sql_control.launch_keys and sql_control.withheld_keys:
-            create_delete_commands(sql_control.launch_keys[0], sql_control.withheld_keys[0])
+        if sql_control.launch_key_cmd and sql_control.withheld_key_cmd:
+            create_delete_commands(sql_control.launch_key_cmd[0], sql_control.withheld_key_cmd[0])
 
         # print('failed invoices:')
         # for invoice in sql_control.failed_invoices:
         #     print(f'{invoice.serial_number} - provider:', invoice.provider.code, ' - taker:', invoice.taker.code)
 
     @staticmethod
-    def update_companies_codes(size, sql_control):
-        load_insp = Loading()
-        load_insp.total_size = size
-        load_insp.inspection()
+    def update_companies_codes(n_invoices, sql_control):
+        load_insp = Loading('Obtendo código das empresas... ', total_size=n_invoices)
+        load_insp.start()
         for index, invoice in enumerate(sql_control.invoices):
             if len(invoice.person.fed_id) == 14:
                 load_insp.update(invoice.serial_number, index)
@@ -78,9 +85,9 @@ class Main:
         return sql_control.invoices
 
     @staticmethod
-    def update_invoices_infos(invoices: InvoicesList, n_invoices, client_code, service_type):
+    def update_invoices_infos(invoices: InvoicesList, n_invoices, client_fed_id, service_type):
         service_str = 'tomado' if service_type else 'prestado'
-        path = fr'{SYS_PATH}\{service_str}\{client_code}.csv'
+        path = fr'{SYS_PATH}\{service_str}\{client_fed_id}.csv'
 
         import os.path
         if not os.path.exists(path):
@@ -89,9 +96,9 @@ class Main:
         with open(path, 'r') as fin:
             services_infos = fin.readlines()
 
-            load_insp = Loading()
-            load_insp.total_size = n_invoices
-            load_insp.inspection()
+            load_insp = Loading('Atualizando dados da nota... ', total_size=n_invoices)
+            load_insp.start()
+
             for index, invoice in enumerate(invoices):
                 if len(invoice.person.fed_id) != 14:  # se não for cnpj
                     continue
@@ -113,9 +120,9 @@ class Main:
         return invoices
 
     @staticmethod
-    def update_infos_table(to_launch, client_code, service_type):
+    def update_infos_table(to_launch, client_fed_id, service_type):
         service_str = 'tomado' if service_type else 'prestado'
-        path = fr'{SYS_PATH}\{service_str}\{client_code}.csv'
+        path = fr'{SYS_PATH}\{service_str}\{client_fed_id}.csv'
         with open(path, 'r') as fin:
             services_infos = fin.readlines()
 
@@ -146,17 +153,17 @@ class Main:
                         # print('s:', s)
                         print((';'.join([str(info) for info in infos]) + ';' + s).strip(), file=fout)
                         new_infos.append(';'.join(infos))
-            print(new_infos)
+            # print(new_infos)
 
     @staticmethod
-    def get_client_code(invoices: InvoicesList) -> int:
+    def get_client_fed_id(invoices: InvoicesList) -> int:
         for invoice in invoices:
-            if invoice.client.code is not None:
-                client_code = invoice.client.code
+            if invoice.client.fed_id is not None:
+                client_fed_id = invoice.client.fed_id
                 break
         else:
             raise Exception('Cliente não encontrado no BD.')
-        return client_code
+        return client_fed_id
 
 
 if __name__ == '__main__':

@@ -68,9 +68,9 @@ class SQLCommands:
         # CORRIGIR ESSE RETORNO
         return client_command if self.service_type == company_type else person_command
 
-    def lctofis_key(self, company_code) -> str:
-        command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + 1 FROM LCTOFIS{self.type_str} WHERE CODIGOEMPRESA = ' \
-                  f'({company_code})'
+    def lctofis_key(self, company_code, index=1) -> str:
+        command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + {index} FROM LCTOFIS{self.type_str} ' \
+                  f'WHERE CODIGOEMPRESA = ({company_code})'
         # print('lctofis_key command:', command)
         return command
 

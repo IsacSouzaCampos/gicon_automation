@@ -1,11 +1,11 @@
 # from View.inspection import *
-from View.inspection import Loading
+from View.loading import Loading
 
 from Model.invoices_list import InvoicesList
 from Model.invoice import Invoice
 # from Model.constants import SYS_PATH
 
-from View.inspection import PopUp
+from View.popup import PopUp
 
 
 class InspectControl:
@@ -29,9 +29,8 @@ class InspectControl:
 
     def inspect(self) -> InvoicesList:
         # inicia janela da barra de progresso da conferência
-        load_insp = Loading()
-        load_insp.total_size = len(self.xml_files)
-        load_insp.inspection()
+        load_insp = Loading('Conferindo... ', total_size=len(self.xml_files))
+        load_insp.start()
 
         # insere os dados de cada um dos arquivos xml a serem analisados em results
         # companies_cnpjs = list()
