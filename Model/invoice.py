@@ -11,7 +11,7 @@ from Model.taxes.taxes import Taxes
 class Invoice:
 
     def __init__(self, file_path, service_type, doc_type=99):
-        self.operation_purpose = 1
+        self.operation_purpose = 0
         self.issuer = 'T' if service_type else 'P'
         self.doc_type = doc_type
         self.service_type = service_type  # 0: prestado / 1: tomado

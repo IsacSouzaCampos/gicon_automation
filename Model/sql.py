@@ -106,7 +106,7 @@ class SQLCommands:
                   f'           VALORCONTABIL,             BASECALCULOIPI,           VALORIPI, ' \
                   f'           ISENTASIPI,                OUTRASIPI,                BASECALCULOFUNRURAL, ' \
                   f'           ALIQFUNRURAL,              VALORFUNRURAL,            CODIGOTIPODCTOSINTEGRA, ' \
-                  f'           CDMODELO,                  VERSAONFE,                EMITENTENF, ' \
+                  f'           CDMODELO,                  EMITENTENF, ' \
                   f'           FINALIDADEOPERACAO,        MEIOPAGAMENTO,            MODALIDADEFRETE, ' \
                   f'           CDSITUACAO,                CANCELADA,                CONCILIADA, ' \
                   f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO) ' \
@@ -116,10 +116,10 @@ class SQLCommands:
                   f'           {inv.gross_value},         {launch.ipi.base},        {launch.ipi.value}, ' \
                   f'           {launch.ipi.exemption},    {launch.ipi.others},      {launch.funrural.base}, ' \
                   f'           {launch.funrural.aliquot}, {launch.funrural.value},  {99}, ' \
-                  f'           {inv.doc_type},            {4.00},                   \'{inv.issuer}\', ' \
+                  f'           {inv.doc_type},            \'{inv.issuer}\', ' \
                   f'           {inv.operation_purpose},   {launch.payment_method},  {launch.freight_category}, ' \
                   f'           {inv.invoice_situation},   {int(inv.is_canceled)},   {0}, ' \
-                  f'           {238},                     ({now}),                  {2})'
+                  f'           {238},                     ({now}),                  {3})'
 
         else:
             command = 'INSERT INTO LCTOFISSAI(' \
@@ -151,7 +151,7 @@ class SQLCommands:
                       f'                    {launch.freight_category},          {inv.invoice_situation}, ' \
                       f'                    {int(inv.is_canceled)},             {0}, ' \
                       f'                    {238},                              ({now}), ' \
-                      f'                    {2},                                {0}, ' \
+                      f'                    {3},                                {0}, ' \
                       f'                    {0})'
 
         return command
@@ -244,7 +244,7 @@ class SQLCommands:
                       f'                 APURADOPISCOFINSCSLL,  DATAPGTOPISCOFINSCSLL, '\
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
-                      f'VALUES          (({client_code}),       {key},                          ({person_code}), ' \
+                      f'VALUES          (({client_code}),       ({key}),                        ({person_code}), ' \
                       f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
                       f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
                       f'                {client_comp_num},      ({key}),                        {inv.nature}, '\
@@ -267,7 +267,7 @@ class SQLCommands:
                       f'                {csrf.variation}, ' \
                       f'                {0},                    \'{issuance_date}\', ' \
                       f'                {0},                    {238},                          ({now}), ' \
-                      f'                {2},                    {838})'
+                      f'                {3},                    {838})'
 
         else:
             withheld_type = inv.withheld_type
@@ -295,7 +295,7 @@ class SQLCommands:
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 SITUACAOISSQN,         SITUACAOIRRF,                   SITUACAOIRPJ, ' \
                       f'                 SITUACAOPIS,           SITUACAOCOFINS,                 SITUACAOCSLL) \n' \
-                      f'VALUES          (({client_code}),       {key}, ' \
+                      f'VALUES          (({client_code}),       ({key}), ' \
                       f'                \'{issuance_date}\',    ({withheld_type}), ' \
                       f'                {client_comp_num}, ' \
                       f'                {0},                    {0},                            {0}, ' \
