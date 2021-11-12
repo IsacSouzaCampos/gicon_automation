@@ -85,8 +85,8 @@ def upload_sheet_content(sheet1, xml_files):
     csrf_value_sum = 0
     net_value_sum = 0
     gross_value_column = HEADER1.index('Vlr Bruto') + 1
-    iss_value_column = HEADER1.index('Ret. ISS') + 1
-    ir_value_column = HEADER1.index('Ret. IR') + 1
+    iss_value_column = HEADER1.index('Reten. ISS') + 1
+    ir_value_column = HEADER1.index('Reten. IR') + 1
     csrf_value_column = HEADER1.index('Ret. CSRF') + 1
     net_value_column = HEADER1.index('Vlr Líquido') + 1
     for i in range(number_of_rows):

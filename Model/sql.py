@@ -84,7 +84,7 @@ class SQLCommands:
 
         return command
 
-    def lctofis(self, launch: LCTOFISData) -> str:
+    def lctofis(self, launch: LCTOFISData, key) -> str:
         now = self.current_datetime()
 
         inv = launch.invoice
@@ -110,7 +110,7 @@ class SQLCommands:
                   f'           FINALIDADEOPERACAO,        MEIOPAGAMENTO,            MODALIDADEFRETE, ' \
                   f'           CDSITUACAO,                CANCELADA,                CONCILIADA, ' \
                   f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO) ' \
-                  f'VALUES     (({client_code}),          {launch.key},             {int(client_id[-6:-2])}, '\
+                  f'VALUES     (({client_code}),          ({key}),                  {int(client_id[-6:-2])}, '\
                   f'           ({person_code}),           {inv.serial_number},      \'NFSE\', ' \
                   f'           \'U\',                     \'{issuance_date}\',      \'{issuance_date}\', ' \
                   f'           {inv.gross_value},         {launch.ipi.base},        {launch.ipi.value}, ' \
@@ -138,7 +138,7 @@ class SQLCommands:
                       '                     CODIGOUSUARIO,                      DATAHORALCTOFIS, ' \
                       '                     ORIGEMDADO,                         ACRESCIMOFINANCEIRO, ' \
                       '                     CONTRIBUINTE) ' \
-                      f'VALUES              (({client_code}),                   {launch.key}, ' \
+                      f'VALUES              (({client_code}),                   ({key}), ' \
                       f'                    {int(client_id[-6:-2])},            ({person_code}), ' \
                       f'                    {inv.serial_number},                {inv.serial_number}, ' \
                       f'                    \'NFSE\',                           \'U\', ' \
@@ -156,7 +156,7 @@ class SQLCommands:
 
         return command
 
-    def lctofiscfop(self, launch: LCTOFISData) -> str:
+    def lctofiscfop(self, launch: LCTOFISData, key) -> str:
         inv = launch.invoice
 
         issuance_date = inv.issuance_date.split('/')
@@ -175,7 +175,7 @@ class SQLCommands:
                   f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
                   f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
                   f'               VALOREXVALORADICIONAL) ' \
-                  f'VALUES         (({client_code}),             {launch.key},              {inv.nature}, '\
+                  f'VALUES         (({client_code}),             ({key}),                   {inv.nature}, '\
                   f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
                   f'               {int(client_id[-6:-2])},      {inv.gross_value},         {inv.gross_value}, ' \
                   f'               {tax_value},                  {0},                       {0}, ' \
@@ -183,7 +183,7 @@ class SQLCommands:
 
         return command
 
-    def lctofisretido(self, launch: LCTOFISData, withheld_key):
+    def lctofisretido(self, launch: LCTOFISData, key):
         now = self.current_datetime()
 
         inv = launch.invoice
@@ -244,10 +244,10 @@ class SQLCommands:
                       f'                 APURADOPISCOFINSCSLL,  DATAPGTOPISCOFINSCSLL, '\
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
-                      f'VALUES          (({client_code}),       {withheld_key},                 ({person_code}), ' \
+                      f'VALUES          (({client_code}),       {key},                          ({person_code}), ' \
                       f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
                       f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-                      f'                {client_comp_num},       {launch.key},                   {inv.nature}, '\
+                      f'                {client_comp_num},      ({key}),                        {inv.nature}, '\
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
                       f'                {0},                    {0},                            {0}, ' \
@@ -295,7 +295,7 @@ class SQLCommands:
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 SITUACAOISSQN,         SITUACAOIRRF,                   SITUACAOIRPJ, ' \
                       f'                 SITUACAOPIS,           SITUACAOCOFINS,                 SITUACAOCSLL) \n' \
-                      f'VALUES          (({client_code}),       {withheld_key}, ' \
+                      f'VALUES          (({client_code}),       {key}, ' \
                       f'                \'{issuance_date}\',    ({withheld_type}), ' \
                       f'                {client_comp_num}, ' \
                       f'                {0},                    {0},                            {0}, ' \
@@ -321,7 +321,7 @@ class SQLCommands:
 
         return command
 
-    def lctofisvaloriss(self, launch: LCTOFISData):
+    def lctofisvaloriss(self, launch: LCTOFISData, key):
         inv = launch.invoice
         iss_aliquot = str(float(inv.taxes.iss.aliquot) * 100).replace('.', ',')
 
@@ -332,17 +332,17 @@ class SQLCommands:
         command = f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
                   f'VALUES(' \
-                  f'({company_code}),         {launch.key},               {125},                {inv.cnae.full_code});'\
+                  f'({company_code}),         ({key}),                  {125},              {inv.cnae.full_code});'\
                   f'\n\n' \
                   f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
                   f'VALUES(' \
-                  f'({company_code}),         {launch.key},               {126},                  {inv.cst});' \
+                  f'({company_code}),         ({key}),                  {126},                  {inv.cst});' \
                   f'\n\n' \
                   f'INSERT INTO LCTOFIS{ts}VALORISS(' \
                   f'CODIGOEMPRESA,          CHAVELCTOFIS{ts},           CODIGOCAMPO,            VALOR) ' \
                   f'VALUES(' \
-                  f'({company_code}),         {launch.key},               {131},                  \'{iss_aliquot}\')'
+                  f'({company_code}),         ({key}),                  {131},                  \'{iss_aliquot}\')'
 
         return command
 

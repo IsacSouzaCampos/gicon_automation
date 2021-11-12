@@ -17,8 +17,8 @@ class SQLControl:
         self.sql_commands = SQLCommands(self.service_type)
         self.sql_run = SQLRun()
         self.to_launch = InvoicesList([])
-        self.launch_key_cmd = str()
-        self.withheld_key_cmd = str()
+        # self.launch_key_cmd = str()
+        # self.withheld_key_cmd = str()
         self.commands = list()
         self.failed_invoices = InvoicesList([])
 
@@ -29,24 +29,24 @@ class SQLControl:
         for invoice in self.to_launch:
             self.set_company_code(invoice)
 
-        self.launch_key_cmd = self.get_launch_key_cmd()
-        self.launch_key_cmd = self.get_withheld_keys_cmds()
+        # self.launch_key_cmd = self.get_launch_key_cmd()
+        # self.withheld_key_cmd = self.launch_key_cmd
 
         self.gen_insertion_commands()
 
     def get_launch_key_cmd(self):
         fed_id = self.invoices.index(0).client.fed_id
         client_code_cmd = self.sql_commands.get_company_code(fed_id, self.service_type)
-        return self.sql_commands.lctofisretido_key(client_code_cmd)
+        return self.sql_commands.lctofis_key(client_code_cmd)
 
     # def update_launch_keys(self, launch_keys):
     #     launch_keys = [lk + i for i, lk in enumerate(launch_keys)]
     #     self.launch_keys = launch_keys
 
-    def get_withheld_keys_cmds(self):
-        fed_id = self.invoices.index(0).client.fed_id
-        client_code_cmd = self.sql_commands.get_company_code(fed_id, self.service_type)
-        return self.sql_commands.lctofisretido_key(client_code_cmd)
+    # def get_withheld_keys_cmds(self):
+    #     fed_id = self.invoices.index(0).client.fed_id
+    #     client_code_cmd = self.sql_commands.get_company_code(fed_id, self.service_type)
+    #     return self.sql_commands.lctofis_key(client_code_cmd, 0)
 
     def set_company_code(self, invoice):
         if self.service_type:
@@ -73,23 +73,28 @@ class SQLControl:
             load_insertion_commands.update(invoice.serial_number, index)
             comp_codes_ok = self.companies_codes_ok(invoice)
             if comp_codes_ok:
-                self.commands.append(self.insert(invoice, self.launch_key_cmd, self.withheld_key_cmd))
+                self.commands.append(self.insert(invoice))
             else:
                 self.failed_invoices.add(invoice)
 
         load_insertion_commands.close()
 
-    def insert(self, invoice: Invoice, launch_key, withheld_key) -> list:
+    def insert(self, invoice: Invoice) -> list:
         commands = SQLCommands(self.service_type)
 
         commands_list = list()
         # if invoice.service_type:  # = 1 / serviço tomado
-        launch = LCTOFISData(invoice, launch_key, invoice.service_type, IPI(), FunRural())
+        launch = LCTOFISData(invoice, invoice.service_type, IPI(), FunRural())
 
-        commands_list.append(self.clear_command(commands.lctofis(launch)))
-        commands_list.append(self.clear_command(commands.lctofiscfop(launch)))
-        commands_list.append(self.clear_command(commands.lctofisvaloriss(launch)))
-        commands_list.append(self.clear_command(commands.lctofisretido(launch, withheld_key)))
+        fed_id = self.invoices.index(0).client.fed_id
+        client_code_cmd = self.sql_commands.get_company_code(fed_id, self.service_type)
+        key = self.sql_commands.lctofis_key(client_code_cmd)
+        commands_list.append(self.clear_command(commands.lctofis(launch, key)))
+
+        key = self.sql_commands.lctofis_key(client_code_cmd, 0)
+        commands_list.append(self.clear_command(commands.lctofiscfop(launch, key)))
+        commands_list.append(self.clear_command(commands.lctofisvaloriss(launch, key)))
+        commands_list.append(self.clear_command(commands.lctofisretido(launch, key)))
         return commands_list
 
     @staticmethod

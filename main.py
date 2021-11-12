@@ -10,7 +10,7 @@ from Model.invoices_list import InvoicesList
 
 from Control.sql import SQLControl
 
-from View.inspection_lib import insertion_commands, create_delete_commands
+from View.inspection_lib import insertion_commands
 from View.inspection import ResultTable
 from View.loading import Loading
 from View.popup import PopUp
@@ -20,8 +20,9 @@ class Main:
     def main(self):
         initiate.init()
 
+        client_fed_id = str()
+        sql_control = SQLControl
         main_gui = MainGUI()
-
         while True:
             main_gui.show()
 
@@ -35,12 +36,12 @@ class Main:
                 s = 'tomadora' if service_type else 'prestadora'
                 PopUp().msg(f'Há mais de uma empresa {s} nas notas. Certifique-se de manter notas da  mesma '
                             f'empresa na pasta.')
-                import sys
-                sys.exit()
+                continue
 
             sql_control = SQLControl(invoices, main_gui.service_type)
 
-            # invoices = self.update_companies_codes(size, sql_control)
+            size = len(invoices)
+            invoices = self.update_companies_codes(size, sql_control)
             client_fed_id = self.get_client_fed_id(invoices)
             invoices = self.update_invoices_infos(invoices, len(invoices), client_fed_id, service_type)
 
@@ -59,12 +60,12 @@ class Main:
                 sql_control.to_launch.add(invoice)
 
         sql_control.run()
-        # to_launch = sql_control.to_launch
-        # self.update_infos_table(to_launch, client_code, service_type)
+        to_launch = sql_control.to_launch
+        self.update_infos_table(to_launch, client_fed_id, service_type)
 
         insertion_commands(sql_control.commands)
-        if sql_control.launch_key_cmd and sql_control.withheld_key_cmd:
-            create_delete_commands(sql_control.launch_key_cmd[0], sql_control.withheld_key_cmd[0])
+        # if sql_control.launch_key_cmd and sql_control.withheld_key_cmd:
+        #     create_delete_commands(sql_control.launch_key_cmd[0], sql_control.withheld_key_cmd[0])
 
         # print('failed invoices:')
         # for invoice in sql_control.failed_invoices:
@@ -77,7 +78,7 @@ class Main:
         for index, invoice in enumerate(sql_control.invoices):
             if len(invoice.person.fed_id) == 14:
                 load_insp.update(invoice.serial_number, index)
-                sql_control.set_company_code(index)
+                sql_control.set_company_code(invoice)
                 # print('taker:', sql_control.invoices.index(index).taker.code)
                 # print('provider:', sql_control.invoices.index(index).provider.code)
         load_insp.close()
@@ -104,7 +105,7 @@ class Main:
                     continue
 
                 load_insp.update(invoice.serial_number, index)
-                infos = [invoice.person.code, invoice.cnae.code, invoice.taxes.iss.is_withheld,
+                infos = [invoice.person.fed_id, invoice.cnae.code, invoice.taxes.iss.is_withheld,
                          invoice.taxes.irrf.is_withheld, invoice.taxes.csrf.is_withheld]
                 infos = list(map(str, infos))
 
@@ -119,41 +120,43 @@ class Main:
 
         return invoices
 
-    @staticmethod
-    def update_infos_table(to_launch, client_fed_id, service_type):
+    def update_infos_table(self, to_launch, client_fed_id, service_type):
         service_str = 'tomado' if service_type else 'prestado'
         path = fr'{SYS_PATH}\{service_str}\{client_fed_id}.csv'
         with open(path, 'r') as fin:
             services_infos = fin.readlines()
 
-        with open(path, 'a') as fout:
-            new_infos = list()
-            for invoice in to_launch:
-                # print('person code:', invoice.person.code)
-                infos = [invoice.person.code, invoice.cnae.code, invoice.taxes.iss.is_withheld,
-                         invoice.taxes.irrf.is_withheld, invoice.taxes.csrf.is_withheld]
-                infos = list(map(str, infos))
+        new_infos = list()
+        for invoice in to_launch:
+            infos = [invoice.person.fed_id, invoice.cnae.code, invoice.taxes.iss.is_withheld,
+                     invoice.taxes.irrf.is_withheld, invoice.taxes.csrf.is_withheld]
+            infos = list(map(str, infos))
 
-                if ';'.join(infos) in new_infos:
-                    continue
+            if ';'.join(infos) in new_infos:
+                continue
 
-                # print('infos:', infos, type(infos))
-                # print('new_infos[0]:', new_infos[0] if len(new_infos) else '',
-                #       type(new_infos[0]) if len(new_infos) else '')
-
-                for ser_infos in services_infos:
-                    # print('infos:', infos)
-                    # print('serv_infos:', ser_infos.split(';')[:-2])
-                    if infos == ser_infos.split(';')[:-2]:
+            for ser_infos in services_infos:
+                if infos == ser_infos.split(';')[:-2]:
+                    f_infos = [invoice.withheld_type, invoice.nature]
+                    if infos + f_infos == ser_infos.split(';'):
                         break
-                else:
-                    if invoice.person.code != 'NULL':
-                        # print('else serial number:', invoice.serial_number)
-                        s = f'{invoice.withheld_type};{invoice.nature}'
-                        # print('s:', s)
-                        print((';'.join([str(info) for info in infos]) + ';' + s).strip(), file=fout)
-                        new_infos.append(';'.join(infos))
-            # print(new_infos)
+                    self.remove_line(path, infos)
+            else:
+                with open(path, 'a') as fout:
+                    s = f'{invoice.withheld_type};{invoice.nature}'
+                    print((';'.join([str(info) for info in infos]) + ';' + s).strip(), file=fout)
+                    new_infos.append(';'.join(infos))
+
+    @staticmethod
+    def remove_line(path, infos):
+        with open(path, 'r') as fin:
+            lines = fin.readlines()
+
+        with open(path, 'w') as fout:
+            for line in lines:
+                if infos == line.split(';')[:-2]:
+                    continue
+                fout.write(line)
 
     @staticmethod
     def get_client_fed_id(invoices: InvoicesList) -> int:
