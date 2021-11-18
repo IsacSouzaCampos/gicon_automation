@@ -2,8 +2,7 @@
 import xml.etree.ElementTree
 from Model.company import Company
 from Model.cnae import CNAE
-# from Model.constants import SYS_PATH
-# from Model.inspection_lib import extract_tax_from_percentage
+from Model.constants import DEFAULT_NATURE
 
 from Model.taxes.taxes import Taxes
 
@@ -100,30 +99,33 @@ class Invoice:
         """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
            CFPS fornecido na nota"""
 
-        # service_type: 0 - prestado / 1 - tomado
-        # o prestado é temporário, enquanto não se acha uma solução para detectar a natureza exata para este
-        # caso. Esta solução temporária gera resultados errados e serve apenas para testes.
-        if not service_type:
-            return '0000000'
+        # # service_type: 0 - prestado / 1 - tomado
+        # if not service_type:
+        #     return DEFAULT_NATURE
 
-        cfps = self.cfps + '3'
+        if service_type:
+            cfps = self.cfps + '3'
 
-        if iss_withheld and is_ir_withheld and is_csrf_withheld:
-            return int(cfps + '02')
-        if iss_withheld and is_ir_withheld:
-            return int(cfps + '04')
-        if iss_withheld and is_csrf_withheld:
-            return int(cfps + '02')
-        if is_ir_withheld and is_csrf_withheld:
-            return int(cfps + '02')
-        if iss_withheld:
-            return int(cfps + '08')
-        if is_ir_withheld:
-            return int(cfps + '04')
-        if is_csrf_withheld:
-            return int(cfps + '06')
+            if iss_withheld and is_ir_withheld and is_csrf_withheld:
+                return int(cfps + '02')
+            if iss_withheld and is_ir_withheld:
+                return int(cfps + '04')
+            if iss_withheld and is_csrf_withheld:
+                return int(cfps + '02')
+            if is_ir_withheld and is_csrf_withheld:
+                return int(cfps + '02')
+            if iss_withheld:
+                return int(cfps + '08')
+            if is_ir_withheld:
+                return int(cfps + '04')
+            if is_csrf_withheld:
+                return int(cfps + '06')
 
-        return int(cfps + '00')
+        if self.xml_data['uftomador'] == 'SC':
+            if self.xml_data['codigomunicipiotomador'] == '88':
+                return '9201'
+            return '9202'
+        return '9203'
 
     def set_net_value(self):
         self.net_value = self.gross_value
@@ -140,4 +142,4 @@ class Invoice:
         self.withheld_type = None
 
     def reset_nature(self):
-        self.nature = '0000000'
+        self.nature = DEFAULT_NATURE
