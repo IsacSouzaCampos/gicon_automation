@@ -13,7 +13,8 @@ class CSRF:
         #       self.csll.value)
 
         self.is_withheld = self.outer.is_fed_tax_withheld(1)
-        self.value = self.extract_value() if self.is_withheld else 0
+        self.value = self.extract_value() if self.is_withheld else self.pis.value + self.cofins.value + self.csll.value
+        self.value = round(self.value, 2)
         if self.value != '' and self.value < 0:
             self.csrf_value = TAX_EXTRACTION_ERROR
         gross_value = self.outer.gross_value
@@ -30,8 +31,6 @@ class CSRF:
             self.csll.value = round(self.outer.gross_value * self.csll.aliquot, 2)
 
             self.value = self.pis.value + self.cofins.value + self.csll.value
-            # print(f'nota {self.outer.data["numeroserie"]}')
-            # print('pis:', self.pis.value, 'cofins:', self.cofins.value, 'csll:', self.csll.value, 'csrf:', self.value)
 
         self.code = 5952 if type(self.value) == float else 'NULL'
         self.variation = 7 if type(self.value) == float else 'NULL'

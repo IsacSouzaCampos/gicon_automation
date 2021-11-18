@@ -1,28 +1,3 @@
-import os
-# from Model.constants import ALL_KEYWORDS
-
-
-# def separate_xml_files(folder, xml_files):
-#     import math
-#     from Model.constants import MAX_INVOICES
-#
-#     n_xmls = len(xml_files)
-#     n_folders = int(math.ceil(n_xmls / MAX_INVOICES))
-#     for i in range(n_folders):
-#         new_folder = folder + '/' + folder.split("/")[-1] + '(' + str(i + 1) + ')'
-#         os.mkdir(new_folder)
-#
-#         for j in range(MAX_INVOICES):
-#             # calcula posição atual do xml a ser movido na lista de xmls
-#             pos = (i * MAX_INVOICES) + j
-#
-#             # se a posição calculada for igual ao tamanho da lista, finaliza varredura
-#             if pos == n_xmls:
-#                 return
-#             xml_file = xml_files[pos]
-#             os.replace(folder + '/' + xml_file, new_folder + '/' + xml_file)
-
-
 def clear_string(s: str) -> str:
     """
     Altera a string a ser analisada de maneira conveniente para a detecção de

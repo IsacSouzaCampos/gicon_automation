@@ -226,10 +226,12 @@ class SQLCommands:
                       f'                 CODIGOESTAB,           CHAVELCTOFIS{ts},               CODIGOCFOP, ' \
                       f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
                       f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                      f'                 DATAPREVISSQN, ' \
                       f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
                       f'                 APURADOIRPJ,' \
                       f'                 BASECALCULOIRRF, ' \
-                      f'                 ALIQIRRF,              VALORIRRF,                      CODIGOIMPOSTOIRRF, ' \
+                      f'                 ALIQIRRF,              VALORIRRF,                      DATAPREVIRRFIRPJ, ' \
+                      f'                 CODIGOIMPOSTOIRRF, ' \
                       f'                 VARIACAOIMPOSTOIRRF, ' \
                       f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
                       f'                 BASECALCULOPIS, ' \
@@ -250,10 +252,12 @@ class SQLCommands:
                       f'                {client_comp_num},      ({key}),                        {inv.nature}, '\
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
+                      f'                \'{issuance_date}\'' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {0}, ' \
                       f'                {irrf.calc_basis}, ' \
-                      f'                {irrf.aliquot},         {irrf_value},                   {irrf.code}, ' \
+                      f'                {irrf.aliquot},         {irrf_value},                   \'{issuance_date}\', ' \
+                      f'                {irrf.code}, ' \
                       f'                {irrf.variation}, ' \
                       f'                {0},                    {csrf_value},                   {1}, ' \
                       f'                {pis.calc_basis}, ' \
@@ -277,9 +281,11 @@ class SQLCommands:
                       f'                 CODIGOESTAB, ' \
                       f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
                       f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                      f'                 DATAPREVISSQN, ' \
                       f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
                       f'                 BASECALCULOIRRF, ' \
-                      f'                 ALIQIRRF,              VALORIRRF,                      CODIGOIMPOSTOIRRF, ' \
+                      f'                 ALIQIRRF,              VALORIRRF,                      DATAPREVIRRFIRPJ, ' \
+                      f'                 CODIGOIMPOSTOIRRF, ' \
                       f'                 VARIACAOIMPOSTOIRRF, ' \
                       f'                 TOTALPISCOFINSCSLL, ' \
                       f'                 BASECALCULOPIS, ' \
@@ -300,9 +306,11 @@ class SQLCommands:
                       f'                {client_comp_num}, ' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
+                      f'                \'{issuance_date}\', ' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {irrf.calc_basis}, ' \
-                      f'                {irrf.aliquot},         {irrf_value},                   {irrf.code}, ' \
+                      f'                {irrf.aliquot},         {irrf_value},                   \'{issuance_date}\', ' \
+                      f'                {irrf.code}, ' \
                       f'                {irrf.variation}, ' \
                       f'                {csrf_value}, ' \
                       f'                {pis.calc_basis}, ' \

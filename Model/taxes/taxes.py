@@ -96,6 +96,29 @@ class Taxes:
     def extract_tax_from_percentage(self, service_description, aditional_data, gross_value, tax_type):
         """Encontra e extrai o valor do imposto federal solicitado com base no seu percentual"""
 
+        keywords = list()
+        if not tax_type:
+            keywords = ['porcentagemir', 'porcentagemdeir', 'percentualir', 'percentualdeir']
+        elif tax_type == 1:
+            keywords = ['porcentagempis', 'porcentagemdepis', 'percentualpis', 'percentualdepis']
+        elif tax_type == 2:
+            keywords = ['porcentagemcofins', 'porcentagemdecofins', 'percentualcofins', 'percentualdecofins']
+        elif tax_type == 3:
+            keywords = ['porcentagemcsll', 'porcentagemdecsll', 'percentualcsll', 'percentualdecsll']
+        elif tax_type == 4:
+            keywords = ['porcentagemcsrf', 'porcentagemdecsrf', 'percentualcsrf', 'percentualdecsrf',
+                        'porcentagemcrf', 'porcentagemdecrf', 'percentualcrf', 'percentualdecrf',
+                        'porcentagempcc', 'porcentagemdepcc', 'percentualpcc', 'percentualdepcc']
+
+        for kw in keywords:
+            for text in [clear_string(service_description), clear_string(aditional_data)]:
+                if kw in text:
+                    str_percentage = self.extract_first_value(text.split(kw)[1])
+                    percentage = self.to_float(str_percentage)
+                    value = self.gross_value * (percentage / 100) if percentage > 0.2 else self.gross_value * percentage
+                    value = round(value, 2)
+                    return value
+
         # 0 = IR / 1 = PIS / 2 = COFINS / 3 = CSLL / 4 = CSRF
         keywords = ALL_KEYWORDS[tax_type]
 
@@ -131,6 +154,20 @@ class Taxes:
                             i += 1
 
         return -1
+
+    @staticmethod
+    def extract_first_value(text: str) -> str:
+        value = ''
+
+        i = 0
+        while not text[i].isnumeric():
+            i += 1
+        for c in text[i:]:
+            if not c.isnumeric() and c not in ['.', ',']:
+                break
+            value += c
+
+        return value
 
     @staticmethod
     def tax_percentage(tax_value: float, gross_value: float) -> float:

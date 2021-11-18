@@ -1,4 +1,5 @@
 from Model.constants import *
+from Model.inspection_lib import clear_string
 
 
 class IRRF:
@@ -14,10 +15,20 @@ class IRRF:
         self.variation = 6 if self.is_withheld else 'NULL'
 
     def extract_value(self):
+        keywords = ['porcentagemir', 'porcentagemdeir', 'percentualir', 'percentualdeir']
+        service_description = self.outer.service_description
+        aditional_data = self.outer.aditional_data
+
+        calc_from_percentage = False
+        for kw in keywords:
+            if kw in clear_string(service_description) or kw in clear_string(aditional_data):
+                calc_from_percentage = True
+                break
+
         try:
-            service_description = self.outer.service_description
-            aditional_data = self.outer.aditional_data
-            value = self.outer.extract_tax_value(service_description, aditional_data, 0)
+            value = -1
+            if not calc_from_percentage:
+                value = self.outer.extract_tax_value(service_description, aditional_data, 0)
 
             if value > -1:
                 ir_value = value
