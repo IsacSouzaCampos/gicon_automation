@@ -418,10 +418,9 @@ class ResultTable:
         # inv_to_update_cols = [[sg.Column(inv_to_update_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
         # inv_to_update_frame = sg.Frame('Dados Nota', inv_to_update_cols)
 
-        errors_link = [
-            sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-')
+        errors_link = sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-') \
             if self.n_errors > 0 else sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
-                                              key='-ERRORS-')]
+                                              key='-ERRORS-')
 
         withheld_types = {'Órgãos, Autarquias e Fundacoes Federais': 1,
                           'Demais Entidades da Administração Pública Federal': 2,
@@ -453,6 +452,12 @@ class ResultTable:
                          ]
         update_frame = sg.Frame('Dados de Atualização', update_layout)
 
+        aditional_data_layout = [
+            [sg.Text('Num. Empresa ', pad=((0, 0), (10, 10))),
+             sg.Input(size=(14, 1), key='-COMP_NUM-', pad=((0, 540), (10, 10)))]
+        ]
+        aditiona_data_frame = sg.Frame('Dados Adicionais', aditional_data_layout)
+
         layout = [
             # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
             #  sg.Button('Limpar Filtro', disabled=True)],
@@ -471,11 +476,12 @@ class ResultTable:
             [update_frame],
 
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='-TABLE-')],
-            [sg.Button('Editar'), sg.Button('Atualizar', disabled=True),
-             sg.Text(f'{len(self.invoices)} registros', key='-N_REGISTERS-')],
+            [  # sg.Button('Editar'), sg.Button('Atualizar', disabled=True),
+             sg.Text(f'{len(self.invoices)} registros', key='-N_REGISTERS-'), errors_link],
             # [inv_to_update_frame],
-            errors_link,
-            [sg.Text()],
+            # [sg.Text()],
+            [aditiona_data_frame],
+            # [sg.Text()],
             [sg.Button('Lançar')],
         ]
 

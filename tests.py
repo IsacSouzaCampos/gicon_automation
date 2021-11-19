@@ -8,7 +8,7 @@
 #
 # from Model.insertion_commands import insertion_commands
 # import os
-# 
+#
 #
 # def test():
 #     # TIPOS DE SERVICO (PRESTADO, TOMADO):
