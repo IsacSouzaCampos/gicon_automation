@@ -32,9 +32,6 @@ class InspectControl:
         load_insp = Loading('Conferindo... ', total_size=len(self.xml_files))
         load_insp.start()
 
-        # insere os dados de cada um dos arquivos xml a serem analisados em results
-        # companies_cnpjs = list()
-        # companies_names = list()
         self.cnae_code = ['']
         invoices = InvoicesList([])  # precisa receber lista vazia '[]' para não acumular notas conferidas antes
         for i in range(len(self.xml_files)):

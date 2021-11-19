@@ -1,6 +1,5 @@
 import PySimpleGUI as sg
 import os
-# import re
 
 import Model.constants as const
 from Model.invoices_list import InvoicesList
@@ -565,7 +564,6 @@ class ResultTable:
             if event == '-RESET-':
                 if sg.popup('Deseja resetar Natureza e Tipo de Retenção?', custom_text=('Sim', 'Não')) == 'Sim':
                     for invoice in self.invoices:
-                        invoice.reset_nature()
                         invoice.reset_withheldtype()
                     table = self.invoices.get_gui_table()
                     self.update(table)

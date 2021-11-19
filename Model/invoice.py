@@ -2,7 +2,6 @@
 import xml.etree.ElementTree
 from Model.company import Company
 from Model.cnae import CNAE
-from Model.constants import DEFAULT_NATURE
 
 from Model.taxes.taxes import Taxes
 
@@ -26,7 +25,6 @@ class Invoice:
         self.cnae = CNAE(self.xml_data['codigocnae'], self.xml_data['descricaocnae'])
         self.gross_value = float(self.xml_data['valortotalservicos'])
 
-        # if service_type:
         self.provider = Company(self.xml_data['cnpjprestador'], self.xml_data['razaosocialprestador'],
                                 self.xml_data['nomemunicipioprestador'])
         self.taker = Company(self.xml_data['identificacaotomador'],
@@ -99,10 +97,6 @@ class Invoice:
         """Gera o código da natureza do serviço *tomado* baseado nos impostos retidos e no
            CFPS fornecido na nota"""
 
-        # # service_type: 0 - prestado / 1 - tomado
-        # if not service_type:
-        #     return DEFAULT_NATURE
-
         if service_type:
             cfps = self.cfps + '3'
 
@@ -140,6 +134,3 @@ class Invoice:
 
     def reset_withheldtype(self):
         self.withheld_type = None
-
-    def reset_nature(self):
-        self.nature = DEFAULT_NATURE

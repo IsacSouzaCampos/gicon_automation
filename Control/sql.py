@@ -1,13 +1,10 @@
-# from Model.invoice import Invoice
 from Model.sql import *
 from Model.launch import LCTOFISData
 from Model.ipi import IPI
 from Model.funrural import FunRural
 from Model.invoices_list import InvoicesList
-# from Model.constants import RESULTS_PATH
 
 from View.loading import Loading
-# from View.popup import PopUp
 
 
 class SQLControl:
@@ -17,20 +14,12 @@ class SQLControl:
         self.sql_commands = SQLCommands(self.service_type)
         self.sql_run = SQLRun()
         self.to_launch = InvoicesList([])
-        # self.launch_key_cmd = str()
-        # self.withheld_key_cmd = str()
         self.commands = list()
         self.failed_invoices = InvoicesList([])
 
     def run(self):
-
-        # self.clear_results_file()
-
         for invoice in self.to_launch:
             self.set_company_code(invoice)
-
-        # self.launch_key_cmd = self.get_launch_key_cmd()
-        # self.withheld_key_cmd = self.launch_key_cmd
 
         self.gen_insertion_commands()
 
@@ -38,15 +27,6 @@ class SQLControl:
         fed_id = self.invoices.index(0).client.fed_id
         client_code_cmd = self.sql_commands.get_company_code(fed_id, self.service_type)
         return self.sql_commands.lctofis_key(client_code_cmd)
-
-    # def update_launch_keys(self, launch_keys):
-    #     launch_keys = [lk + i for i, lk in enumerate(launch_keys)]
-    #     self.launch_keys = launch_keys
-
-    # def get_withheld_keys_cmds(self):
-    #     fed_id = self.invoices.index(0).client.fed_id
-    #     client_code_cmd = self.sql_commands.get_company_code(fed_id, self.service_type)
-    #     return self.sql_commands.lctofis_key(client_code_cmd, 0)
 
     def set_company_code(self, invoice):
         if self.service_type:
@@ -61,8 +41,6 @@ class SQLControl:
 
     @staticmethod
     def companies_codes_ok(invoice: Invoice):
-        # if str(invoice.serial_number) == '90108':
-        #     print('taker:', invoice.taker.code, 'provider:', invoice.provider.code)
         return invoice.taker.code != 'NULL' and invoice.provider.code != 'NULL'
 
     def gen_insertion_commands(self):
@@ -83,7 +61,6 @@ class SQLControl:
         commands = SQLCommands(self.service_type)
 
         commands_list = list()
-        # if invoice.service_type:  # = 1 / serviço tomado
         launch = LCTOFISData(invoice, invoice.service_type, IPI(), FunRural())
 
         fed_id = self.invoices.index(0).client.fed_id
@@ -102,7 +79,3 @@ class SQLControl:
         while '  ' in command:
             command = command.replace('  ', ' ')
         return command
-
-    # @staticmethod
-    # def clear_results_file():
-    #     open(RESULTS_PATH, 'w').close()
