@@ -1,17 +1,16 @@
-from Control.inspection import InspectControl
-
-from View.inspection import MainGUI
-
 import Model.excel as excel
 import Model.constants as constants
 from Model.invoices_list import InvoicesList
+from Model.insertion_commands import InsertionCommands
 
 from Control.sql import SQLControl
+from Control.inspection import InspectControl
 
-from View.inspection_lib import insertion_commands
+from View.inspection import MainGUI
 from View.inspection import ResultTable
 from View.loading import Loading
 from View.popup import PopUp
+from View.insertion_commands import InsertionCommandsView
 
 
 class Controller:
@@ -53,7 +52,11 @@ class Controller:
 
         sql_control.run()
 
-        insertion_commands(sql_control.commands)
+        insertion_commands = InsertionCommands(sql_control.commands, self.get_client_fed_id(invoices), service_type)
+        text = insertion_commands.to_string()
+        text += '\n\n' + insertion_commands.updates_commands()
+
+        InsertionCommandsView(text).show()
 
     @staticmethod
     def update_companies_codes(n_invoices, sql_control):
