@@ -31,10 +31,8 @@ class Controller:
                             f'empresa na pasta.')
                 continue
 
-            sql_control = SQLControl(invoices, main_gui.service_type)
-
-            size = len(invoices)
-            invoices = self.update_companies_codes(size, sql_control)
+            # size = len(invoices)
+            # invoices = self.update_companies_codes(size, sql_control)
 
             res_tb = ResultTable(invoices, inspection_control.cnae_code, invoices.number_of_errors())
             is_finished, invoices = res_tb.show()
@@ -46,10 +44,17 @@ class Controller:
         excel.create_xlsx(constants.HEADER1, invoices, xlsx_file_name, main_gui.xml_files)
 
         # seleciona apenas notas com retenção
-        for invoice in invoices:
-            if invoice.to_launch:
-                sql_control.to_launch.add(invoice)
+        # for invoice in invoices:
+        #     if invoice.to_launch:
+        #         sql_control.to_launch.add(invoice)
 
+        sql_control = SQLControl(invoices, main_gui.service_type)
+        if invoices.index(0).client.code is None:
+            for invoice in invoices:
+                invoice.client.set_code(sql_control.get_company_code_cmd(invoice.client, service_type))
+        for invoice in invoices:
+            person_serv_type = 0 if service_type else 1
+            invoice.person.set_code(sql_control.get_company_code_cmd(invoice.person, person_serv_type))
         sql_control.run()
 
         insertion_commands = InsertionCommands(sql_control.commands, self.get_client_fed_id(invoices), service_type)
@@ -65,7 +70,7 @@ class Controller:
         for index, invoice in enumerate(sql_control.invoices):
             if len(invoice.person.fed_id) == 14:
                 load_insp.update(invoice.serial_number, index)
-                sql_control.set_company_code(invoice)
+                sql_control.set_companies_codes(invoice)
         load_insp.close()
 
         return sql_control.invoices

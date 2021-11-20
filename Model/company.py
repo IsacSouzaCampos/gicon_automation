@@ -6,3 +6,6 @@ class Company:
         self.city = 'Florianópolis' if city.lower() == 'florianopolis' else city
 
         self.code = code
+
+    def set_code(self, code):
+        self.code = code

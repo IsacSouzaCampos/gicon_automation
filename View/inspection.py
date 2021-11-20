@@ -454,7 +454,7 @@ class ResultTable:
 
         aditional_data_layout = [
             [sg.Text('Num. Empresa ', pad=((0, 0), (10, 10))),
-             sg.Input(size=(14, 1), key='-COMP_NUM-', pad=((0, 540), (10, 10)))]
+             sg.Input(size=(14, 1), key='-COMPANY_NUMBER-', pad=((0, 540), (10, 10)))]
         ]
         aditiona_data_frame = sg.Frame('Dados Adicionais', aditional_data_layout)
 
@@ -482,7 +482,7 @@ class ResultTable:
             # [sg.Text()],
             [aditiona_data_frame],
             # [sg.Text()],
-            [sg.Button('Lançar')],
+            [sg.Button('Gerar SQL')],
         ]
 
         self.window = sg.Window('Resultados da Conferência', layout)
@@ -630,12 +630,17 @@ class ResultTable:
                 table = new_table
                 self.update(table)
 
-            if event == 'Lançar':
+            if event == 'Gerar SQL':
                 if self.n_errors > 0:
                     sg.popup('Há notas com erros na conferência. Corrija-as antes de lançar.')
                     continue
-                if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
-                    break
+                if values['-COMPANY_NUMBER-']:
+                    num = values['-COMPANY_NUMBER-']
+                    for invoice in self.invoices:
+                        invoice.client.set_code(num)
+                # if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
+                #     break
+                break
 
         self.window.close()
         return True, self.invoices

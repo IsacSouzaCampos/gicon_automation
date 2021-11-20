@@ -71,7 +71,6 @@ class SQLCommands:
     def lctofis_key(self, company_code, index=1) -> str:
         command = f'SELECT MAX(CHAVELCTOFIS{self.type_str}) + {index} FROM LCTOFIS{self.type_str} ' \
                   f'WHERE CODIGOEMPRESA = ({company_code})'
-        # print('lctofis_key command:', command)
         return command
 
     def lctofisretido_key(self, company_code) -> str:
