@@ -22,34 +22,6 @@ class SQLCommands:
 
         return command
 
-    # @staticmethod
-    # def get_companies_code(launch: LCTOFISData):
-    #     inv = launch.invoice
-    #     if launch.type:  # tomado
-    #         company_id = inv.taker.fed_id
-    #         person_id = inv.provider.fed_id
-    #     else:  # prestado
-    #         person_id = inv.taker.fed_id
-    #         company_id = inv.provider.fed_id
-    #
-    #     if len(company_id) == 14:  # CNPJ
-    #         company_id = f'{company_id[:2]}.{company_id[2:5]}.{company_id[5:8]}' \
-    #                      f'/{company_id[8:12]}-{company_id[12:]}'
-    #     elif len(company_id) == 11:  # CPF
-    #         company_id = f'{company_id[:3]}.{company_id[3:6]}.{company_id[6:9]}-{company_id[9:]}'
-    #
-    #     if len(person_id) == 14:  # CNPJ
-    #         person_id = f'{person_id[:2]}.{person_id[2:5]}.{person_id[5:8]}' \
-    #                     f'/{person_id[8:12]}-{person_id[12:]}'
-    #     elif len(person_id) == 11:  # CPF
-    #         person_id = f'{person_id[:3]}.{person_id[3:6]}.{person_id[6:9]}-{person_id[9:]}'
-    #
-    #     command = f'SELECT C.CODIGOEMPRESA AS CODEMPRESA, P.CODIGOPESSOA AS CODPESSOA ' \
-    #               f'FROM CLIENTE C, PESSOA P ' \
-    #               f'WHERE (C.INSCRFEDERAL = \'{company_id}\' AND P.INSCRFEDERAL = \'{person_id}\') '
-    #
-    #     return command
-
     def get_company_code(self, fed_id: str, company_type) -> str:
         """
         Retorna o código da empresa com base no seu nome.
@@ -168,17 +140,31 @@ class SQLCommands:
         # if str(inv.nature)[-3:] == '308':
         client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
         client_code = inv.taker.code if self.service_type else inv.provider.code
-        command = f'INSERT INTO ' \
-                  f'LCTOFIS{ts}CFOP(CODIGOEMPRESA,               CHAVELCTOFIS{ts},          CODIGOCFOP, ' \
-                  f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
-                  f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
-                  f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
-                  f'               VALOREXVALORADICIONAL) ' \
-                  f'VALUES         (({client_code}),             ({key}),                   {inv.nature}, '\
-                  f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
-                  f'               {int(client_id[-6:-2])},      {inv.gross_value},         {inv.gross_value}, ' \
-                  f'               {tax_value},                  {0},                       {0}, ' \
-                  f'               {0})'
+
+        if inv.taxes.iss.value != '' and inv.taxes.iss.value > 0:
+            command = f'INSERT INTO ' \
+                      f'LCTOFIS{ts}CFOP(CODIGOEMPRESA,               CHAVELCTOFIS{ts},          CODIGOCFOP, ' \
+                      f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
+                      f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
+                      f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
+                      f'               VALOREXVALORADICIONAL) ' \
+                      f'VALUES         (({client_code}),             ({key}),                   {inv.nature}, '\
+                      f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
+                      f'               {int(client_id[-6:-2])},      {inv.gross_value},         {inv.gross_value}, ' \
+                      f'               {tax_value},                  {0},                       {inv.gross_value}, ' \
+                      f'               {0})'
+        else:
+            command = f'INSERT INTO ' \
+                      f'LCTOFIS{ts}CFOP(CODIGOEMPRESA,               CHAVELCTOFIS{ts},          CODIGOCFOP, ' \
+                      f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
+                      f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
+                      f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
+                      f'               VALOREXVALORADICIONAL) ' \
+                      f'VALUES         (({client_code}),             ({key}),                   {inv.nature}, ' \
+                      f'               {2},                          {0},                       \'{issuance_date}\', ' \
+                      f'               {int(client_id[-6:-2])},      {inv.gross_value},         {0}, ' \
+                      f'               {0},                          {0},                       {inv.gross_value}, ' \
+                      f'               {0})'
 
         return command
 
@@ -199,12 +185,19 @@ class SQLCommands:
         cofins = csrf.cofins
         csll = csrf.csll
 
-        iss_value = 0 if not iss.value else iss.value
-        irrf_value = 0 if not irrf.value else irrf.value
-        csrf_value = 0 if not csrf.value else csrf.value
-        pis_value = 0 if not pis.value else pis.value
-        cofins_value = 0 if not cofins.value else cofins.value
-        csll_value = 0 if not csll.value else csll.value
+        iss_value = 0 if (not iss.value or inv.is_canceled) else iss.value
+        irrf_value = 0 if (not irrf.value or inv.is_canceled) else irrf.value
+        csrf_value = 0 if (not csrf.value or inv.is_canceled) else csrf.value
+        pis_value = 0 if (not pis.value or inv.is_canceled) else pis.value
+        cofins_value = 0 if (not cofins.value or inv.is_canceled) else cofins.value
+        csll_value = 0 if (not csll.value or inv.is_canceled) else csll.value
+
+        iss.aliquot = round((iss_value / inv.gross_value) * 100, 2)
+        irrf.aliquot = round((irrf_value / inv.gross_value) * 100, 2)
+        csrf.aliquot = round((csrf_value / inv.gross_value) * 100, 2)
+        pis.aliquot = round((pis_value / inv.gross_value) * 100, 2)
+        cofins.aliquot = round((cofins_value / inv.gross_value) * 100, 2)
+        csll.aliquot = round((csll_value / inv.gross_value) * 100, 2)
 
         iss_situation = 3 if iss_value else 1
         irrf_situation = 3 if irrf_value else 1
@@ -352,16 +345,6 @@ class SQLCommands:
                   f'({company_code}),         ({key}),                  {131},                  \'{iss_aliquot}\')'
 
         return command
-
-    # @staticmethod
-    # def tiporetencao(client_code, person_code):
-    #     print(f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND '
-    #           f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '
-    #           f'AND CODIGOPESSOA = ({person_code}))')
-    #
-    #     return f'SELECT TIPORETENCAO FROM LCTOFISSAIRETIDO WHERE CODIGOEMPRESA = ({client_code}) AND ' \
-    #          f'CHAVELCTOFISSAI = (SELECT MAX(CHAVELCTOFISSAI) FROM LCTOFISSAI WHERE CODIGOEMPRESA = ({client_code}) '\
-    #            f'AND CODIGOPESSOA = ({person_code}))'
 
     @staticmethod
     def current_datetime():

@@ -57,7 +57,8 @@ class Controller:
             invoice.person.set_code(sql_control.get_company_code_cmd(invoice.person, person_serv_type))
         sql_control.run()
 
-        insertion_commands = InsertionCommands(sql_control.commands, self.get_client_fed_id(invoices), service_type)
+        insertion_commands = InsertionCommands(sql_control.commands, self.get_client_fed_id(invoices),
+                                               invoices.index(0).client.code, service_type)
         text = insertion_commands.to_string()
         text += '\n\n' + insertion_commands.updates_commands()
 

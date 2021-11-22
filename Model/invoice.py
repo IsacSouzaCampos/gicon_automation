@@ -57,7 +57,7 @@ class Invoice:
         has_tax_withheld = self.taxes.iss.is_withheld or self.taxes.irrf.is_withheld or self.taxes.csrf.is_withheld
         self.to_launch = has_tax_withheld and self.is_cnpj(self.person.fed_id)
 
-        self.withheld_type = None
+        self.withheld_type = 3
         self.nature = self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
                                           self.taxes.csrf.is_withheld, self.service_type)
 
