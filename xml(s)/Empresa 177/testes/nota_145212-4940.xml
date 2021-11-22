@@ -1,0 +1,85 @@
+<?xml version="1.0" encoding="UTF-8"?><xmlNfpse>
+    <numeroAEDF>145212</numeroAEDF>
+    <numeroSerie>4940</numeroSerie>
+    <codigoVerificacao>0C1F69C9E1BA8C4A</codigoVerificacao>
+    <dataEmissao>2021-10-04T00:00:00-03:00</dataEmissao>
+    <dataProcessamento>2021-10-04T14:19:40.767-03:00</dataProcessamento>
+    <cfps>9202</cfps>
+    <statusNFPSe>0</statusNFPSe>
+    <baseCalculo>0</baseCalculo>
+    <valorISSQN>0</valorISSQN>
+    <valorTotalServicos>1716.56</valorTotalServicos>
+    <dadosAdicionais>Percentual de IRRF  1,50   Reais 25,75    Percentual de PIS  0,65   Reais 11,16    Percentual de COFINS  3,00   Reais 51,50    Percentual de CSLL  1,00   Reais 17,17    Valor aproximado dos tributos   F  R  230,88  13,45    M  R  57,50  3,35  . Fonte  IBPT.</dadosAdicionais>
+    <cnpjPrestador>02291806000101</cnpjPrestador>
+    <inscricaoMunicipalPrestador>0982059</inscricaoMunicipalPrestador>
+    <razaoSocialPrestador>BORGES &amp; ALMEIDA ADV E CONSULT JURIDICA S/S</razaoSocialPrestador>
+    <logradouroPrestador>RUA  GERMANO WENDHAUSEN, 203, ESCRITORIO 601 NIV 9</logradouroPrestador>
+    <bairroPrestador>CENTRO</bairroPrestador>
+    <nomeMunicipioPrestador>FLORIANOPOLIS</nomeMunicipioPrestador>
+    <codigoPostalPrestador>88015460</codigoPostalPrestador>
+    <ufPrestador>SC</ufPrestador>
+    <emailPrestador>fiscal@gicon.cnt.br</emailPrestador>
+    <telefonePrestador>39520200</telefonePrestador>
+    <identificacao>4690</identificacao>
+    <identificacaoTomador>01894432000156</identificacaoTomador>
+    <razaoSocialTomador>UNIASSELVI   SOCIEDADE EDUCACIONAL LEONARDO DA VINCI S S LTD</razaoSocialTomador>
+    <logradouroTomador>ROD BR 470, KM 71</logradouroTomador>
+    <numeroEnderecoTomador>1040</numeroEnderecoTomador>
+    <bairroTomador>BENEDITO</bairroTomador>
+    <codigoMunicipioTomador>4207502</codigoMunicipioTomador>
+    <codigoPostalTomador>89080001</codigoPostalTomador>
+    <ufTomador>SC</ufTomador>
+    <paisTomador>1058</paisTomador>
+    <emailTomador>julio.maas@uniasselvi.com.br</emailTomador>
+    <itensServico>
+        <itemServico>
+            <aliquota>0</aliquota>
+            <baseCalculo>0</baseCalculo>
+            <codigoCNAE>6911701</codigoCNAE>
+            <cst>14</cst>
+            <descricaoCNAE>SERVICOS ADVOCATICIOS</descricaoCNAE>
+            <descricaoServico>Honorarios   PRESTACAO DE SERVICOS DE CONSULTORIA E ASSESSORIA JURIDICA, DE CARATER PREVENTIVO E CONTENCIOSO, NO AMBITO DO DIREITO CIVIL, COMERCIAL, ADMINISTRATIVO, AMBIENTAL, TRABALHISTA E TRIBUTARIO. CONFORME PROPOSTA BSA29783.19. MES DE setembro.2021.</descricaoServico>
+            <idCNAE>8783</idCNAE>
+            <quantidade>1</quantidade>
+            <valorTotal>1716.56</valorTotal>
+            <valorUnitario>1716.56</valorUnitario>
+        </itemServico>
+    </itensServico>
+<ds:Signature xmlns:ds="http://www.w3.org/2000/09/xmldsig#" xmlns:xades="http://uri.etsi.org/01903/v1.3.2#" Id="Sign-1"><ds:SignedInfo><ds:CanonicalizationMethod Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/><ds:SignatureMethod Algorithm="http://www.w3.org/2001/04/xmldsig-more#rsa-sha256"/><ds:Reference Id="RefSignProp-1" Type="http://uri.etsi.org/01903#SignedProperties" URI="#SigProperties-1"><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>leKpCtcU6SpiJk1TfYAOiiWXHljgaCML2WHCPrghxnM=</ds:DigestValue></ds:Reference><ds:Reference Id="RefElement-1" URI=""><ds:Transforms><ds:Transform Algorithm="http://www.w3.org/2000/09/xmldsig#enveloped-signature"/><ds:Transform Algorithm="http://www.w3.org/TR/1999/REC-xpath-19991116"><ds:XPath>not(ancestor-or-self::ds:Signature)</ds:XPath></ds:Transform><ds:Transform Algorithm="http://www.w3.org/2001/10/xml-exc-c14n#"/></ds:Transforms><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>v9X3OBff4Bhuk7ScwIpyL6tuQRfGU/o/PmiUPdNNlJo=</ds:DigestValue></ds:Reference></ds:SignedInfo><ds:SignatureValue Id="SignatureValueID-1">l0+DE5qB6h+pfvroZUghJvzXpVEXjQA+Eog6m0dtsJa4hA8QHonGaYm411IFiorEkSOEcWrtEg/v
+OK6apB/sU3Mn+ivEiP9ZxS66LIdMBehEEAYz+Z6Di04wuD97PeIMtZshAPQ2KHDhrpK10mS5CuK3
+toWqhOnLVjsaExPq5V8WxDrc7hCckU91rQZAp/AU2HaxNo7QDhzAK3tzM4tMfOCbkA4wX6dM2Sgg
+Z7HhMgSGqv4C2sFlmRv14nswboXUxg+atAUc1Xg2GVz2cINZD6qkPuV3rfMc/X+2B5EPBVsiNGDy
+NvqweK997uIWa/ZkCHCsad0a/Rk0F3asXhVahg==</ds:SignatureValue><ds:KeyInfo><ds:X509Data><ds:X509SubjectName>CN=MUNICIPIO DE FLORIANOPOLIS:82892282000143,OU=RFB e-CNPJ A1,OU=ARCIASC,OU=Secretaria da Receita Federal do Brasil - RFB,OU=83043745000165,OU=videoconferencia,O=ICP-Brasil,L=FLORIANOPOLIS,ST=SC,C=BR</ds:X509SubjectName><ds:X509Certificate>MIIHdDCCBVygAwIBAgINAMLRNL0jbgu7HoZmHjANBgkqhkiG9w0BAQsFADCBiTELMAkGA1UEBhMC
+QlIxEzARBgNVBAoMCklDUC1CcmFzaWwxNjA0BgNVBAsMLVNlY3JldGFyaWEgZGEgUmVjZWl0YSBG
+ZWRlcmFsIGRvIEJyYXNpbCAtIFJGQjEtMCsGA1UEAwwkQXV0b3JpZGFkZSBDZXJ0aWZpY2Fkb3Jh
+IFNFUlBST1JGQnY1MB4XDTIxMDgyNzE5MzczOVoXDTIyMDgyNzE5MzczOVowggERMQswCQYDVQQG
+EwJCUjELMAkGA1UECAwCU0MxFjAUBgNVBAcMDUZMT1JJQU5PUE9MSVMxEzARBgNVBAoMCklDUC1C
+cmFzaWwxGTAXBgNVBAsMEHZpZGVvY29uZmVyZW5jaWExFzAVBgNVBAsMDjgzMDQzNzQ1MDAwMTY1
+MTYwNAYDVQQLDC1TZWNyZXRhcmlhIGRhIFJlY2VpdGEgRmVkZXJhbCBkbyBCcmFzaWwgLSBSRkIx
+EDAOBgNVBAsMB0FSQ0lBU0MxFjAUBgNVBAsMDVJGQiBlLUNOUEogQTExMjAwBgNVBAMMKU1VTklD
+SVBJTyBERSBGTE9SSUFOT1BPTElTOjgyODkyMjgyMDAwMTQzMIIBIjANBgkqhkiG9w0BAQEFAAOC
+AQ8AMIIBCgKCAQEAtXT4AcCvyiNvef4ZafSuUeGl2ejE8LQK27lTztImqI/nL5cOj0E777PVVRSY
+WZEoyyPLqMMVAfHptHyQF1j5kdrphB/YjyKoiyeyzOJs0E9/p0tZAOD/WpNjun33kIidR1zNeWzY
+VCvydfHqNdOGGpL4jL3ZcyEMAv9wKa8NwZBcJpzi9SVXQXsdpaUrTO8+sb6Oj/N9kYYBaVHGMuoA
+ZW0N6wBqupUArokEqnbvM6iV0nhuxGr15vPDtlTMrtGCoz+QQ44cZ5nQL9p4AXberv+Z2adNXrw4
+ZY0gtQh6fhIcNEQn0DAfKfp6nqj4BePXkZaXROzfzVIdGjWudP6KWQIDAQABo4ICTjCCAkowHwYD
+VR0jBBgwFoAUFIAtnX6aRcDxWz8Z1UCwby9l4OkwgYgGA1UdHwSBgDB+MDygOqA4hjZodHRwOi8v
+cmVwb3NpdG9yaW8uc2VycHJvLmdvdi5ici9sY3IvYWNzZXJwcm9yZmJ2NS5jcmwwPqA8oDqGOGh0
+dHA6Ly9jZXJ0aWZpY2Fkb3MyLnNlcnByby5nb3YuYnIvbGNyL2Fjc2VycHJvcmZidjUuY3JsMFYG
+CCsGAQUFBwEBBEowSDBGBggrBgEFBQcwAoY6aHR0cDovL3JlcG9zaXRvcmlvLnNlcnByby5nb3Yu
+YnIvY2FkZWlhcy9hY3NlcnByb3JmYnY1LnA3YjCBtwYDVR0RBIGvMIGsoDgGBWBMAQMEoC8ELTA5
+MTAxOTcyODIzMzQxOTY5OTEwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMDAwMKAgBgVgTAEDAqAXBBVH
+RUFOIE1BUlFVRVMgTE9VUkVJUk+gGQYFYEwBAwOgEAQOODI4OTIyODIwMDAxNDOgFwYFYEwBAweg
+DgQMMDAwMDAwMDAwMDAwgRpnZWFubG91cmVpcm9AcG1mLnNjLmdvdi5icjAOBgNVHQ8BAf8EBAMC
+BeAwHQYDVR0lBBYwFAYIKwYBBQUHAwQGCCsGAQUFBwMCMFsGA1UdIARUMFIwUAYGYEwBAgEKMEYw
+RAYIKwYBBQUHAgEWOGh0dHA6Ly9yZXBvc2l0b3Jpby5zZXJwcm8uZ292LmJyL2RvY3MvZHBjYWNz
+ZXJwcm9yZmIucGRmMA0GCSqGSIb3DQEBCwUAA4ICAQCyc/yyZ/bE1hOXjslkrmdY74lehrUo6+zH
+hIyhFzZ1ITIr1kU3CjKYztpiMnNa6Zg2+ZWjuiFXrvV2tN17+HX+Jv5NwPsV9afwso5+F9W24KF9
+JlI+7OeZiiLWEw1HPPt2YDJpskR+jQQ7sam+cOXyZm1zZJsb3wbbT2OANBINC8pkckt6S0mHyv/f
+riUhNjoBd3ZvrJQOm7oNjTAWuFWNr2gPBbS/6Xhv32bcl0amC2Xv4riy+YBaY6pnSzKb6tkHDcF0
+17AFhvPZY9Qpnsec3x5SE/YAbEGOp6+wrv5D8/kICgBQXw6HXMw7J6arG7Vc5kNtT+q9yXPEJKS4
+YZqNMJcj7IuEooxp7kpe3whlkTcOztnPGtdxPGC+jLBsPhqtJ75R9Jm90mlQB47Oyuf2FOiq1vH2
+QYkkbi8n9dWV4cQOlCm5nVY4EGYsyAXxXv+reLNBw1aRQFLkVcAzu6UTRInsVq+77ZqGl+OHMog7
+IQTsnC0rduE1eFzAcUuItoI6Bes6BCFk2xlawS/10B9d/i6hOPDT0446AnwlsCDMlhcq0BD28Up3
+mbTYXGKRTiQpqA/gNbRxxY208pelIPkrnoE/cthItFdxj7x2zMjv5v/unO0CDEb3QUU+UzoGDWMS
+OSadyXk3e84BiYLqyC/0+mglWQU+PsT3fvbsGK75rw==</ds:X509Certificate></ds:X509Data></ds:KeyInfo><ds:Object><xades:QualifyingProperties Id="QualProperties-1" Target="#Sign-1"><xades:SignedProperties Id="SigProperties-1"><xades:SignedSignatureProperties><xades:SigningTime>2021-10-04T14:19:41-03:00</xades:SigningTime><xades:SigningCertificate><xades:Cert><xades:CertDigest><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>AtKLiNj4+unI4AFPJxeKtMTHz6XH5joQy7+YUch+1gs=</ds:DigestValue></xades:CertDigest><xades:IssuerSerial><ds:X509IssuerName>CN=Autoridade Certificadora SERPRORFBv5,OU=Secretaria da Receita Federal do Brasil - RFB,O=ICP-Brasil,C=BR</ds:X509IssuerName><ds:X509SerialNumber>60293006453685130919842047518</ds:X509SerialNumber></xades:IssuerSerial></xades:Cert></xades:SigningCertificate><xades:SignaturePolicyIdentifier><xades:SignaturePolicyId><xades:SigPolicyId><xades:Identifier Qualifier="OIDAsURN">urn:oid:2.16.76.1.7.1.6.2.4</xades:Identifier></xades:SigPolicyId><xades:SigPolicyHash><ds:DigestMethod Algorithm="http://www.w3.org/2001/04/xmlenc#sha256"/><ds:DigestValue>V1oxev3+Z5tia7oVifHtePiXskTb6LP9K1QE2u1zoV4=</ds:DigestValue></xades:SigPolicyHash><xades:SigPolicyQualifiers><xades:SigPolicyQualifier><xades:SPURI>http://politicas.icpbrasil.gov.br/PA_AD_RB_v2_4.xml</xades:SPURI></xades:SigPolicyQualifier></xades:SigPolicyQualifiers></xades:SignaturePolicyId></xades:SignaturePolicyIdentifier></xades:SignedSignatureProperties><xades:SignedDataObjectProperties><xades:DataObjectFormat ObjectReference="#RefElement-1"><xades:MimeType>text/xml</xades:MimeType></xades:DataObjectFormat></xades:SignedDataObjectProperties></xades:SignedProperties></xades:QualifyingProperties></ds:Object></ds:Signature></xmlNfpse>
