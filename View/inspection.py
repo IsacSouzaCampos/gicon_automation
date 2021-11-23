@@ -418,9 +418,11 @@ class ResultTable:
         # inv_to_update_cols = [[sg.Column(inv_to_update_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
         # inv_to_update_frame = sg.Frame('Dados Nota', inv_to_update_cols)
 
-        errors_link = sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', enable_events=True, key='-ERRORS-') \
-            if self.n_errors > 0 else sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue',
-                                              key='-ERRORS-')
+        if self.n_errors > 0:
+            errors_link = sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}',
+                                  text_color='blue', enable_events=True, key='-ERRORS-')
+        else:
+            errors_link = sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}', text_color='blue', key='-ERRORS-')
 
         withheld_types = {'Órgãos, Autarquias e Fundacoes Federais': 1,
                           'Demais Entidades da Administração Pública Federal': 2,
@@ -454,7 +456,9 @@ class ResultTable:
 
         aditional_data_layout = [
             [sg.Text('Num. Empresa ', pad=((0, 0), (10, 10))),
-             sg.Input(size=(14, 1), key='-COMPANY_NUMBER-', pad=((0, 540), (10, 10)))]
+             sg.Input(size=(14, 1), key='-COMPANY_NUMBER-', pad=((0, 0), (10, 10))),
+             sg.Text('Série ', pad=((20, 0), (10, 10))),
+             sg.Input(size=(5, 1), key='-SERIE-', pad=((0, 425), (10, 10)))]
         ]
         aditiona_data_frame = sg.Frame('Dados Adicionais', aditional_data_layout)
 
@@ -472,8 +476,8 @@ class ResultTable:
             # sg.Text('-', pad=(0, 0)),
             # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL5-')],
 
-            [filter_frame],
-            [update_frame],
+            # [filter_frame],
+            # [update_frame],
 
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='-TABLE-')],
             [  # sg.Button('Editar'), sg.Button('Atualizar', disabled=True),
@@ -634,12 +638,19 @@ class ResultTable:
                 if self.n_errors > 0:
                     sg.popup('Há notas com erros na conferência. Corrija-as antes de lançar.')
                     continue
+
+                serie = values['-SERIE-'].upper()
+                if serie not in ['U', '1']:
+                    sg.popup('Série não reconhecida. Tente novamente.')
+                    continue
                 if values['-COMPANY_NUMBER-']:
                     num = values['-COMPANY_NUMBER-']
                     for invoice in self.invoices:
                         invoice.client.set_code(num)
-                # if sg.popup('Deseja realmente lançar os dados no sistema?', custom_text=('Sim', 'Não')) == 'Sim':
-                #     break
+                        invoice.set_serie(serie)
+                else:
+                    for invoice in self.invoices:
+                        invoice.set_serie(serie)
                 break
 
         self.window.close()

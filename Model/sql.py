@@ -10,17 +10,17 @@ class SQLCommands:
         self.type_str = 'ENT' if self.service_type else 'SAI'
         self.run = SQLRun()
 
-    def is_launched(self, invoice: Invoice) -> str:
-        company_code = invoice.taker.code if self.service_type else invoice.provider.code
-        person_code = invoice.provider.code if self.service_type else invoice.taker.code
-
-        command = f'SELECT \'{invoice.taker.fed_id}\', \'{invoice.provider.fed_id}\', NUMERONF ' \
-                  f'FROM LCTOFIS{self.type_str} ' \
-                  f'WHERE CODIGOEMPRESA = ({company_code}) AND ' \
-                  f'CODIGOPESSOA = ({person_code}) ' \
-                  f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
-
-        return command
+    # def is_launched(self, invoice: Invoice) -> str:
+    #     company_code = invoice.taker.code if self.service_type else invoice.provider.code
+    #     person_code = invoice.provider.code if self.service_type else invoice.taker.code
+    #
+    #     command = f'SELECT \'{invoice.taker.fed_id}\', \'{invoice.provider.fed_id}\', NUMERONF ' \
+    #               f'FROM LCTOFIS{self.type_str} ' \
+    #               f'WHERE CODIGOEMPRESA = ({company_code}) AND ' \
+    #               f'CODIGOPESSOA = ({person_code}) ' \
+    #               f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
+    #
+    #     return command
 
     def get_company_code(self, fed_id: str, company_type) -> str:
         """
@@ -83,7 +83,7 @@ class SQLCommands:
                   f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO) ' \
                   f'VALUES     (({client_code}),          ({key}),                  {int(client_id[-6:-2])}, '\
                   f'           ({person_code}),           {inv.serial_number},      \'NFSE\', ' \
-                  f'           \'U\',                     \'{issuance_date}\',      \'{issuance_date}\', ' \
+                  f'           {inv.serie},               \'{issuance_date}\',      \'{issuance_date}\', ' \
                   f'           {inv.gross_value},         {launch.ipi.base},        {launch.ipi.value}, ' \
                   f'           {launch.ipi.exemption},    {launch.ipi.others},      {launch.funrural.base}, ' \
                   f'           {launch.funrural.aliquot}, {launch.funrural.value},  {99}, ' \
@@ -112,7 +112,7 @@ class SQLCommands:
                       f'VALUES              (({client_code}),                   ({key}), ' \
                       f'                    {int(client_id[-6:-2])},            ({person_code}), ' \
                       f'                    {inv.serial_number},                {inv.serial_number}, ' \
-                      f'                    \'NFSE\',                           \'U\', ' \
+                      f'                    \'NFSE\',                           {inv.serie}, ' \
                       f'                    \'{issuance_date}\',                {inv.gross_value}, ' \
                       f'                    {launch.ipi.base},                  {launch.ipi.value}, ' \
                       f'                    {launch.ipi.exemption},             {launch.ipi.others}, ' \
@@ -235,11 +235,11 @@ class SQLCommands:
                       f'                 BASECALCULOCSLL, ' \
                       f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
                       f'                 VARIACAOIMPOSTOCSLL, ' \
-                      f'                 APURADOPISCOFINSCSLL,  DATAPGTOPISCOFINSCSLL, '\
+                      f'                 APURADOPISCOFINSCSLL,  DATAPREVPISCOFINSCSLL, '\
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
                       f'VALUES          (({client_code}),       ({key}),                        ({person_code}), ' \
-                      f'                {inv.serial_number},    \'NFSE\',                       \'U\', ' \
+                      f'                {inv.serial_number},    \'NFSE\',                       {inv.serie}, ' \
                       f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
                       f'                {client_comp_num},      ({key}),                        {inv.nature}, '\
                       f'                {0},                    {0},                            {0}, ' \
@@ -289,7 +289,7 @@ class SQLCommands:
                       f'                 BASECALCULOCSLL, ' \
                       f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
                       f'                 VARIACAOIMPOSTOCSLL, ' \
-                      f'                 DATAPGTOPISCOFINSCSLL, ' \
+                      f'                 DATAPREVPISCOFINSCSLL, ' \
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 SITUACAOISSQN,         SITUACAOIRRF,                   SITUACAOIRPJ, ' \
                       f'                 SITUACAOPIS,           SITUACAOCOFINS,                 SITUACAOCSLL) \n' \

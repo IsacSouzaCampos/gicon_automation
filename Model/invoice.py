@@ -57,6 +57,7 @@ class Invoice:
         has_tax_withheld = self.taxes.iss.is_withheld or self.taxes.irrf.is_withheld or self.taxes.csrf.is_withheld
         self.to_launch = has_tax_withheld and self.is_cnpj(self.person.fed_id)
 
+        self.serie = 'U'
         self.withheld_type = 3
         self.nature = self.service_nature(self.taxes.iss.is_withheld, self.taxes.irrf.is_withheld,
                                           self.taxes.csrf.is_withheld, self.service_type)
@@ -127,6 +128,9 @@ class Invoice:
             if type(tax) != str:
                 self.net_value -= tax
         self.net_value = round(self.net_value, 2)
+
+    def set_serie(self, serie):
+        self.serie = serie
 
     @staticmethod
     def is_cnpj(fed_id):
