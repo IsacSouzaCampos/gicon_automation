@@ -1,26 +1,13 @@
 import os
 from Model.constants import SYS_PATH
 from Model.launch import LCTOFISData
-from Model.invoice import Invoice
 
 
 class SQLCommands:
     def __init__(self, service_type):
         self.service_type = service_type
         self.type_str = 'ENT' if self.service_type else 'SAI'
-        self.run = SQLRun()
-
-    # def is_launched(self, invoice: Invoice) -> str:
-    #     company_code = invoice.taker.code if self.service_type else invoice.provider.code
-    #     person_code = invoice.provider.code if self.service_type else invoice.taker.code
-    #
-    #     command = f'SELECT \'{invoice.taker.fed_id}\', \'{invoice.provider.fed_id}\', NUMERONF ' \
-    #               f'FROM LCTOFIS{self.type_str} ' \
-    #               f'WHERE CODIGOEMPRESA = ({company_code}) AND ' \
-    #               f'CODIGOPESSOA = ({person_code}) ' \
-    #               f'AND NUMERONF = {invoice.serial_number} AND ESPECIENF = \'NFSE\' AND SERIENF = \'U\''
-    #
-    #     return command
+        # self.run = SQLRun()
 
     def get_company_code(self, fed_id: str, company_type) -> str:
         """
@@ -65,8 +52,9 @@ class SQLCommands:
 
         ts = self.type_str
 
-        client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
-        client_code = inv.taker.code if self.service_type else inv.provider.code
+        client = inv.client
+        # client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
+        # client_code = inv.taker.code if self.service_type else inv.provider.code
         # person_id = inv.provider.fed_id if not self.service_type else inv.taker.fed_id
         person_code = inv.provider.code if self.service_type else inv.taker.code
         if self.service_type:
@@ -81,7 +69,7 @@ class SQLCommands:
                   f'           FINALIDADEOPERACAO,        MEIOPAGAMENTO,            MODALIDADEFRETE, ' \
                   f'           CDSITUACAO,                CANCELADA,                CONCILIADA, ' \
                   f'           CODIGOUSUARIO,             DATAHORALCTOFIS,          ORIGEMDADO) ' \
-                  f'VALUES     (({client_code}),          ({key}),                  {int(client_id[-6:-2])}, '\
+                  f'VALUES     (({client.code}),          ({key}),                  {client.estab_num}, '\
                   f'           ({person_code}),           {inv.serial_number},      \'NFSE\', ' \
                   f'           {inv.serie},               \'{issuance_date}\',      \'{issuance_date}\', ' \
                   f'           {inv.gross_value},         {launch.ipi.base},        {launch.ipi.value}, ' \
@@ -109,8 +97,8 @@ class SQLCommands:
                       '                     CODIGOUSUARIO,                      DATAHORALCTOFIS, ' \
                       '                     ORIGEMDADO,                         ACRESCIMOFINANCEIRO, ' \
                       '                     CONTRIBUINTE) ' \
-                      f'VALUES              (({client_code}),                   ({key}), ' \
-                      f'                    {int(client_id[-6:-2])},            ({person_code}), ' \
+                      f'VALUES              (({client.code}),                   ({key}), ' \
+                      f'                    {client.estab_num},                 ({person_code}), ' \
                       f'                    {inv.serial_number},                {inv.serial_number}, ' \
                       f'                    \'NFSE\',                           {inv.serie}, ' \
                       f'                    \'{issuance_date}\',                {inv.gross_value}, ' \
@@ -137,20 +125,21 @@ class SQLCommands:
         tax_value = float(inv.gross_value) * float(inv.taxes.iss.aliquot)
 
         ts = self.type_str
-        # if str(inv.nature)[-3:] == '308':
-        client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
-        client_code = inv.taker.code if self.service_type else inv.provider.code
+        client = inv.client
+        # client_id = inv.taker.fed_id if self.service_type else inv.provider.fed_id
+        # client_code = inv.taker.code if self.service_type else inv.provider.code
 
-        if inv.taxes.iss.value != '' and inv.taxes.iss.value > 0:
+        # print(f'{inv.taxes.iss.value = }')
+        if inv.taxes.iss.value != '' and float(inv.taxes.iss.value) > 0:
             command = f'INSERT INTO ' \
                       f'LCTOFIS{ts}CFOP(CODIGOEMPRESA,               CHAVELCTOFIS{ts},          CODIGOCFOP, ' \
                       f'               TIPOIMPOSTO,                  ALIQIMPOSTO,               DATALCTOFIS, ' \
                       f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
                       f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
                       f'               VALOREXVALORADICIONAL) ' \
-                      f'VALUES         (({client_code}),             ({key}),                   {inv.nature}, '\
+                      f'VALUES         (({client.code}),             ({key}),                   {inv.nature}, '\
                       f'               {2},                          {tax_aliquot},             \'{issuance_date}\', '\
-                      f'               {int(client_id[-6:-2])},      {inv.gross_value},         {inv.gross_value}, ' \
+                      f'               {client.estab_num},           {inv.gross_value},         {inv.gross_value}, ' \
                       f'               {tax_value},                  {0},                       {inv.gross_value}, ' \
                       f'               {0})'
         else:
@@ -160,9 +149,9 @@ class SQLCommands:
                       f'               CODIGOESTAB,                  VALORCONTABILIMPOSTO,      BASECALCULOIMPOSTO,' \
                       f'               VALORIMPOSTO,                 ISENTASIMPOSTO,            OUTRASIMPOSTO, ' \
                       f'               VALOREXVALORADICIONAL) ' \
-                      f'VALUES         (({client_code}),             ({key}),                   {inv.nature}, ' \
+                      f'VALUES         (({client.code}),             ({key}),                   {inv.nature}, ' \
                       f'               {2},                          {0},                       \'{issuance_date}\', ' \
-                      f'               {int(client_id[-6:-2])},      {inv.gross_value},         {0}, ' \
+                      f'               {client.estab_num},           {inv.gross_value},         {0}, ' \
                       f'               {0},                          {0},                       {inv.gross_value}, ' \
                       f'               {0})'
 
@@ -176,7 +165,7 @@ class SQLCommands:
         issuance_date = inv.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
-        client_comp_num = int(inv.taker.fed_id[-6:-2]) if self.service_type else int(inv.provider.fed_id[-6:-2])
+        # client_comp_num = int(inv.taker.fed_id[-6:-2]) if self.service_type else int(inv.provider.fed_id[-6:-2])
 
         iss = inv.taxes.iss
         irrf = inv.taxes.irrf
@@ -185,7 +174,7 @@ class SQLCommands:
         cofins = csrf.cofins
         csll = csrf.csll
 
-        iss_value = 0 if (not iss.value or inv.is_canceled) else iss.value
+        iss_value = float(0 if (not iss.value or inv.is_canceled) else iss.value)
         irrf_value = 0 if (not irrf.value or inv.is_canceled) else irrf.value
         csrf_value = 0 if (not csrf.value or inv.is_canceled) else csrf.value
         pis_value = 0 if (not pis.value or inv.is_canceled) else pis.value
@@ -199,16 +188,25 @@ class SQLCommands:
         cofins.aliquot = round((cofins_value / inv.gross_value) * 100, 2)
         csll.aliquot = round((csll_value / inv.gross_value) * 100, 2)
 
-        iss_situation = 3 if iss_value else 1
-        irrf_situation = 3 if irrf_value else 1
+        # iss_situation = 3 if iss_value else 1
+        # irrf_situation = 3 if irrf_value else 1
+        # irpj_situation = 1
+        # pis_situation = 3 if pis_value else 1
+        # cofins_situation = 3 if cofins_value else 1
+        # csll_situation = 3 if csll_value else 1
+
+        iss_situation = 1
+        irrf_situation = 1
         irpj_situation = 1
-        pis_situation = 3 if pis_value else 1
-        cofins_situation = 3 if cofins_value else 1
-        csll_situation = 3 if csll_value else 1
+        pis_situation = 1
+        cofins_situation = 1
+        csll_situation = 1
 
         ts = self.type_str
-        client_code = inv.taker.code if self.service_type else inv.provider.code
-        person_code = inv.provider.code if self.service_type else inv.taker.code
+        client = inv.client
+        person = inv.person
+        # client_code = inv.taker.code if self.service_type else inv.provider.code
+        # person_code = inv.provider.code if self.service_type else inv.taker.code
 
         if self.service_type:  # se tomado
             command = f'INSERT INTO ' \
@@ -238,10 +236,10 @@ class SQLCommands:
                       f'                 APURADOPISCOFINSCSLL,  DATAPREVPISCOFINSCSLL, '\
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
-                      f'VALUES          (({client_code}),       ({key}),                        ({person_code}), ' \
+                      f'VALUES          (({client.code}),       ({key}),                        ({person.code}), ' \
                       f'                {inv.serial_number},    \'NFSE\',                       {inv.serie}, ' \
                       f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-                      f'                {client_comp_num},      ({key}),                        {inv.nature}, '\
+                      f'                {client.estab_num},     ({key}),                        {inv.nature}, '\
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
                       f'                \'{issuance_date}\'' \
@@ -293,9 +291,9 @@ class SQLCommands:
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 SITUACAOISSQN,         SITUACAOIRRF,                   SITUACAOIRPJ, ' \
                       f'                 SITUACAOPIS,           SITUACAOCOFINS,                 SITUACAOCSLL) \n' \
-                      f'VALUES          (({client_code}),       ({key}), ' \
+                      f'VALUES          (({client.code}),       ({key}), ' \
                       f'                \'{issuance_date}\',    ({withheld_type}), ' \
-                      f'                {client_comp_num}, ' \
+                      f'                {client.estab_num}, ' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
                       f'                \'{issuance_date}\', ' \
@@ -359,36 +357,36 @@ class SQLCommands:
         return fed_id
 
 
-class SQLRun:
-    def __init__(self, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB', user='SYSDBA',
-                 password='masterkey'):
-        self.host = host
-        self.database = database
-        self.user = user
-        self.password = password
-
-    def run(self, commands):
-        if not commands:
-            return
-
-        # transforma uma possível matriz em uma lista
-        temp_commands = commands
-        commands = list()
-        for element in temp_commands:
-            if type(element) == list:
-                for cmd in element:
-                    commands.append(cmd)
-            else:
-                commands.append(element)
-
-        commands = ';'.join(commands)
-        with open(SYS_PATH + r'\commands.bin', 'w') as fout:
-            print(commands, file=fout)
-        os.system(fr'py -2 Model\sql_run.py {self.host} {self.database} {self.user} '
-                  fr'{self.password}')
-
-    @staticmethod
-    def result() -> list:
-        with open(fr'{SYS_PATH}\bd_results.bin', 'rb') as fin:
-            arr = fin.read().decode('utf8')
-        return arr.split()
+# class SQLRun:
+#     def __init__(self, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB', user='SYSDBA',
+#                  password='masterkey'):
+#         self.host = host
+#         self.database = database
+#         self.user = user
+#         self.password = password
+#
+#     def run(self, commands):
+#         if not commands:
+#             return
+#
+#         # transforma uma possível matriz em uma lista
+#         temp_commands = commands
+#         commands = list()
+#         for element in temp_commands:
+#             if type(element) == list:
+#                 for cmd in element:
+#                     commands.append(cmd)
+#             else:
+#                 commands.append(element)
+#
+#         commands = ';'.join(commands)
+#         with open(SYS_PATH + r'\commands.bin', 'w') as fout:
+#             print(commands, file=fout)
+#         os.system(fr'py -2 Model\sql_run.py {self.host} {self.database} {self.user} '
+#                   fr'{self.password}')
+#
+#     @staticmethod
+#     def result() -> list:
+#         with open(fr'{SYS_PATH}\bd_results.bin', 'rb') as fin:
+#             arr = fin.read().decode('utf8')
+#         return arr.split()

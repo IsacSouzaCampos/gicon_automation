@@ -4,6 +4,7 @@ from Model.ipi import IPI
 from Model.funrural import FunRural
 from Model.invoices_list import InvoicesList
 from Model.company import Company
+from Model.invoice import Invoice
 
 from View.loading import Loading
 
@@ -13,20 +14,11 @@ class SQLControl:
         self.invoices = invoices
         self.service_type = service_type
         self.sql_commands = SQLCommands(self.service_type)
-        self.sql_run = SQLRun()
-        # self.to_launch = InvoicesList([])
+        # self.sql_run = SQLRun()
         self.commands = list()
-        # self.failed_invoices = InvoicesList([])
 
     def run(self):
-        # for invoice in self.to_launch:
-        #     self.set_companies_codes(invoice)
-
         self.gen_insertion_commands()
-
-    # def get_launch_key_cmd(self):
-    #     print('client code lk:', self.invoices.index(0).client.code)
-    #     return self.sql_commands.lctofis_key(self.invoices.index(0).client.code)
 
     def set_companies_codes(self, invoice):
         if self.service_type:
@@ -39,21 +31,13 @@ class SQLControl:
         invoice.taker.code = invoice.client.code if self.service_type else invoice.person.code
         invoice.provider.code = invoice.person.code if self.service_type else invoice.client.code
 
-    # @staticmethod
-    # def companies_codes_ok(invoice: Invoice):
-    #     return invoice.taker.code != 'NULL' and invoice.provider.code != 'NULL'
-
     def gen_insertion_commands(self):
         load_insertion_commands = Loading('Gerando código de inserção... ', total_size=len(self.invoices))
         load_insertion_commands.start()
 
         for index, invoice in zip(range(len(self.invoices)), self.invoices):
             load_insertion_commands.update(invoice.serial_number, index)
-            # comp_codes_ok = self.companies_codes_ok(invoice)
-            # if comp_codes_ok:
             self.commands.append(self.insert(invoice))
-            # else:
-            #     self.failed_invoices.add(invoice)
 
         load_insertion_commands.close()
 
