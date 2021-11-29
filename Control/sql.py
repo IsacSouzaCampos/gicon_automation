@@ -19,6 +19,7 @@ class SQLControl:
 
     def run(self):
         self.gen_insertion_commands()
+        # self.gen_update_commands()
 
     def set_companies_codes(self, invoice):
         if self.service_type:
@@ -37,24 +38,38 @@ class SQLControl:
 
         for index, invoice in zip(range(len(self.invoices)), self.invoices):
             load_insertion_commands.update(invoice.serial_number, index)
-            self.commands.append(self.insert(invoice))
+            self.commands.append(self.insert_commands(invoice))
 
         load_insertion_commands.close()
 
-    def insert(self, invoice: Invoice) -> list:
+    def gen_update_commands(self):
+        load_insertion_commands = Loading('Gerando códigos de atualização... ', total_size=len(self.invoices))
+        load_insertion_commands.start()
+
+        for index, invoice in zip(range(len(self.invoices)), self.invoices):
+            load_insertion_commands.update(invoice.serial_number, index)
+            self.commands.append(self.update_command(invoice))
+
+        load_insertion_commands.close()
+
+    def insert_commands(self, invoice: Invoice) -> list:
         commands = SQLCommands(self.service_type)
 
         commands_list = list()
         launch = LCTOFISData(invoice, invoice.service_type, IPI(), FunRural())
 
-        key = self.sql_commands.lctofis_key(invoice.client.code)
-        commands_list.append(self.clear_command(commands.lctofis(launch, key)))
+        # key = self.sql_commands.lctofis_key(invoice.client.code)
+        # commands_list.append(self.clear_command(commands.lctofis(launch, key)))
 
-        key = self.sql_commands.lctofis_key(invoice.client.code, 0)
-        commands_list.append(self.clear_command(commands.lctofiscfop(launch, key)))
-        commands_list.append(self.clear_command(commands.lctofisvaloriss(launch, key)))
-        commands_list.append(self.clear_command(commands.lctofisretido(launch, key)))
+        # key = self.sql_commands.lctofis_key(invoice.client.code, 0)
+        # commands_list.append(self.clear_command(commands.lctofiscfop(launch, key)))
+        # commands_list.append(self.clear_command(commands.lctofisvaloriss(launch, key)))
+        # commands_list.append(self.clear_command(commands.lctofisretido(launch, key)))
+        commands_list.append(self.clear_command(commands.lctofisretido2(launch)))
         return commands_list
+
+    def update_command(self, invoice: Invoice) -> list:
+        return [self.sql_commands.lctofisretido_update(invoice)]
 
     def get_company_code_cmd(self, company: Company, comp_type: int):
         return self.sql_commands.get_company_code(company.fed_id, comp_type)

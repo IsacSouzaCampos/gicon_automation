@@ -1,6 +1,7 @@
-import os
-from Model.constants import SYS_PATH
+# import os
+# from Model.constants import SYS_PATH
 from Model.launch import LCTOFISData
+from Model.invoice import Invoice
 
 
 class SQLCommands:
@@ -160,33 +161,33 @@ class SQLCommands:
     def lctofisretido(self, launch: LCTOFISData, key):
         now = self.current_datetime()
 
-        inv = launch.invoice
+        invoice = launch.invoice
 
-        issuance_date = inv.issuance_date.split('/')
+        issuance_date = invoice.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
 
         # client_comp_num = int(inv.taker.fed_id[-6:-2]) if self.service_type else int(inv.provider.fed_id[-6:-2])
 
-        iss = inv.taxes.iss
-        irrf = inv.taxes.irrf
-        csrf = inv.taxes.csrf
+        iss = invoice.taxes.iss
+        irrf = invoice.taxes.irrf
+        csrf = invoice.taxes.csrf
         pis = csrf.pis
         cofins = csrf.cofins
         csll = csrf.csll
 
-        iss_value = float(0 if (not iss.value or inv.is_canceled) else iss.value)
-        irrf_value = 0 if (not irrf.value or inv.is_canceled) else irrf.value
-        csrf_value = 0 if (not csrf.value or inv.is_canceled) else csrf.value
-        pis_value = 0 if (not pis.value or inv.is_canceled) else pis.value
-        cofins_value = 0 if (not cofins.value or inv.is_canceled) else cofins.value
-        csll_value = 0 if (not csll.value or inv.is_canceled) else csll.value
+        iss.value = float(0 if (not iss.value or invoice.is_canceled) else iss.value)
+        irrf.value = 0 if (not irrf.value or invoice.is_canceled) else irrf.value
+        csrf.value = 0 if (not csrf.value or invoice.is_canceled) else csrf.value
+        pis.value = 0 if (not pis.value or invoice.is_canceled) else pis.value
+        cofins.value = 0 if (not cofins.value or invoice.is_canceled) else cofins.value
+        csll.value = 0 if (not csll.value or invoice.is_canceled) else csll.value
 
-        iss.aliquot = round((iss_value / inv.gross_value) * 100, 2)
-        irrf.aliquot = round((irrf_value / inv.gross_value) * 100, 2)
-        csrf.aliquot = round((csrf_value / inv.gross_value) * 100, 2)
-        pis.aliquot = round((pis_value / inv.gross_value) * 100, 2)
-        cofins.aliquot = round((cofins_value / inv.gross_value) * 100, 2)
-        csll.aliquot = round((csll_value / inv.gross_value) * 100, 2)
+        iss.aliquot = round((iss.value / invoice.gross_value) * 100, 2)
+        irrf.aliquot = round((irrf.value / invoice.gross_value) * 100, 2)
+        csrf.aliquot = round((csrf.value / invoice.gross_value) * 100, 2)
+        pis.aliquot = round((pis.value / invoice.gross_value) * 100, 2)
+        cofins.aliquot = round((cofins.value / invoice.gross_value) * 100, 2)
+        csll.aliquot = round((csll.value / invoice.gross_value) * 100, 2)
 
         # iss_situation = 3 if iss_value else 1
         # irrf_situation = 3 if irrf_value else 1
@@ -203,8 +204,8 @@ class SQLCommands:
         csll_situation = 1
 
         ts = self.type_str
-        client = inv.client
-        person = inv.person
+        client = invoice.client
+        person = invoice.person
         # client_code = inv.taker.code if self.service_type else inv.provider.code
         # person_code = inv.provider.code if self.service_type else inv.taker.code
 
@@ -237,34 +238,34 @@ class SQLCommands:
                       f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
                       f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
                       f'VALUES          (({client.code}),       ({key}),                        ({person.code}), ' \
-                      f'                {inv.serial_number},    \'NFSE\',                       {inv.serie}, ' \
-                      f'                \'{issuance_date}\',    \'{issuance_date}\',            {inv.gross_value}, ' \
-                      f'                {client.estab_num},     ({key}),                        {inv.nature}, '\
+                      f'                {invoice.serial_number},\'NFSE\',                       {invoice.serie}, ' \
+                      f'                \'{issuance_date}\',    \'{issuance_date}\',           {invoice.gross_value}, '\
+                      f'                {client.estab_num},     ({key}),                        {invoice.nature}, '\
                       f'                {0},                    {0},                            {0}, ' \
-                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
+                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss.value}, ' \
                       f'                \'{issuance_date}\'' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {0}, ' \
                       f'                {irrf.calc_basis}, ' \
-                      f'                {irrf.aliquot},         {irrf_value},                   \'{issuance_date}\', ' \
+                      f'                {irrf.aliquot},         {irrf.value},                   \'{issuance_date}\', ' \
                       f'                {irrf.code}, ' \
                       f'                {irrf.variation}, ' \
-                      f'                {0},                    {csrf_value},                   {1}, ' \
+                      f'                {0},                    {csrf.value},                   {1}, ' \
                       f'                {pis.calc_basis}, ' \
-                      f'                {pis.aliquot},          {pis_value},                    {csrf.code}, ' \
+                      f'                {pis.aliquot},          {pis.value},                    {csrf.code}, ' \
                       f'                {csrf.variation}, ' \
                       f'                {cofins.calc_basis}, ' \
-                      f'                {cofins.aliquot},       {cofins_value},                 {csrf.code}, ' \
+                      f'                {cofins.aliquot},       {cofins.value},                 {csrf.code}, ' \
                       f'                {csrf.variation}, ' \
                       f'                {csll.calc_basis}, ' \
-                      f'                {csll.aliquot},         {csll_value},                   {csrf.code}, ' \
+                      f'                {csll.aliquot},         {csll.value},                   {csrf.code}, ' \
                       f'                {csrf.variation}, ' \
                       f'                {0},                    \'{issuance_date}\', ' \
                       f'                {0},                    {238},                          ({now}), ' \
                       f'                {3},                    {838})'
 
         else:
-            withheld_type = inv.withheld_type
+            withheld_type = invoice.withheld_type
             command = f'INSERT INTO ' \
                       f'LCTOFIS{ts}RETIDO(CODIGOEMPRESA,        CHAVELCTOFIS{ts}, ' \
                       f'                 DATALCTOFIS,           TIPORETENCAO, ' \
@@ -295,27 +296,239 @@ class SQLCommands:
                       f'                \'{issuance_date}\',    ({withheld_type}), ' \
                       f'                {client.estab_num}, ' \
                       f'                {0},                    {0},                            {0}, ' \
-                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss_value}, ' \
+                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss.value}, ' \
                       f'                \'{issuance_date}\', ' \
                       f'                {0},                    {0},                            {0}, ' \
                       f'                {irrf.calc_basis}, ' \
-                      f'                {irrf.aliquot},         {irrf_value},                   \'{issuance_date}\', ' \
+                      f'                {irrf.aliquot},         {irrf.value},                   \'{issuance_date}\', ' \
                       f'                {irrf.code}, ' \
                       f'                {irrf.variation}, ' \
-                      f'                {csrf_value}, ' \
+                      f'                {csrf.value}, ' \
                       f'                {pis.calc_basis}, ' \
-                      f'                {pis.aliquot},          {pis_value},                    {csrf.code}, ' \
+                      f'                {pis.aliquot},          {pis.value},                    {csrf.code}, ' \
                       f'                {csrf.variation}, ' \
                       f'                {cofins.calc_basis}, ' \
-                      f'                {cofins.aliquot},       {cofins_value},                 {csrf.code}, ' \
+                      f'                {cofins.aliquot},       {cofins.value},                 {csrf.code}, ' \
                       f'                {csrf.variation}, ' \
                       f'                {csll.calc_basis}, ' \
-                      f'                {csll.aliquot},         {csll_value},                   {csrf.code}, ' \
+                      f'                {csll.aliquot},         {csll.value},                   {csrf.code}, ' \
                       f'                {csrf.variation}, ' \
                       f'                \'{issuance_date}\', ' \
                       f'                {0},                    {238},                          ({now}), ' \
                       f'                {iss_situation},        {irrf_situation},               {irpj_situation}, ' \
                       f'                {pis_situation},        {cofins_situation},             {csll_situation})'
+
+        return command
+
+    def lctofisretido2(self, launch: LCTOFISData):
+        invoice = launch.invoice
+        now = self.current_datetime()
+
+        issuance_date = invoice.issuance_date.split('/')
+        issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
+
+        # client_comp_num = int(inv.taker.fed_id[-6:-2]) if self.service_type else int(inv.provider.fed_id[-6:-2])
+
+        iss = invoice.taxes.iss
+        irrf = invoice.taxes.irrf
+        csrf = invoice.taxes.csrf
+        pis = csrf.pis
+        cofins = csrf.cofins
+        csll = csrf.csll
+
+        iss.value = float(0 if (not iss.value or invoice.is_canceled) else iss.value)
+        irrf.value = 0 if (not irrf.value or invoice.is_canceled) else irrf.value
+        csrf.value = 0 if (not csrf.value or invoice.is_canceled) else csrf.value
+        pis.value = 0 if (not pis.value or invoice.is_canceled) else pis.value
+        cofins.value = 0 if (not cofins.value or invoice.is_canceled) else cofins.value
+        csll.value = 0 if (not csll.value or invoice.is_canceled) else csll.value
+
+        iss.aliquot = round((iss.value / invoice.gross_value) * 100, 2)
+        irrf.aliquot = round((irrf.value / invoice.gross_value) * 100, 2)
+        csrf.aliquot = round((csrf.value / invoice.gross_value) * 100, 2)
+        pis.aliquot = round((pis.value / invoice.gross_value) * 100, 2)
+        cofins.aliquot = round((cofins.value / invoice.gross_value) * 100, 2)
+        csll.aliquot = round((csll.value / invoice.gross_value) * 100, 2)
+
+        # iss_situation = 3 if iss_value else 1
+        # irrf_situation = 3 if irrf_value else 1
+        # irpj_situation = 1
+        # pis_situation = 3 if pis_value else 1
+        # cofins_situation = 3 if cofins_value else 1
+        # csll_situation = 3 if csll_value else 1
+
+        iss_situation = 1
+        irrf_situation = 1
+        irpj_situation = 1
+        pis_situation = 1
+        cofins_situation = 1
+        csll_situation = 1
+
+        ts = self.type_str
+        client = invoice.client
+        person = invoice.person
+
+        if self.service_type:  # se tomado
+            key = f'SELECT CHAVELCTOFISSAI FROM LCTOFISSAI WHERE CODIGOEMPRESA = {client.code} AND ' \
+                  f'CODIGOPESSOA = ({person.code}) AND NUMERONF = {invoice.serial_number}'
+            command = f'INSERT INTO ' \
+                      f'LCTOFIS{ts}RETIDO(CODIGOEMPRESA,        CHAVELCTOFIS{ts}RETIDO,         CODIGOPESSOA, ' \
+                      f'                 NUMERONF,              ESPECIENF,                      SERIENF, ' \
+                      f'                 DATALCTOFIS,           DATAEMISSAO,                    VALORCONTABIL, ' \
+                      f'                 CODIGOESTAB,           CHAVELCTOFIS{ts},               CODIGOCFOP, ' \
+                      f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
+                      f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                      f'                 DATAPREVISSQN, ' \
+                      f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
+                      f'                 APURADOIRPJ,' \
+                      f'                 BASECALCULOIRRF, ' \
+                      f'                 ALIQIRRF,              VALORIRRF,                      DATAPREVIRRFIRPJ, ' \
+                      f'                 CODIGOIMPOSTOIRRF, ' \
+                      f'                 VARIACAOIMPOSTOIRRF, ' \
+                      f'                 APURADOIRRF,           TOTALPISCOFINSCSLL,             TIPORETPISCOFINSCSLL,' \
+                      f'                 BASECALCULOPIS, ' \
+                      f'                 ALIQPIS,               VALORPIS,                       CODIGOIMPOSTOPIS, ' \
+                      f'                 VARIACAOIMPOSTOPIS, ' \
+                      f'                 BASECALCULOCOFINS, ' \
+                      f'                 ALIQCOFINS,            VALORCOFINS,                    CODIGOIMPOSTOCOFINS, ' \
+                      f'                 VARIACAOIMPOSTOCOFINS, ' \
+                      f'                 BASECALCULOCSLL, ' \
+                      f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
+                      f'                 VARIACAOIMPOSTOCSLL, ' \
+                      f'                 APURADOPISCOFINSCSLL,  DATAPREVPISCOFINSCSLL, '\
+                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
+                      f'                 ORIGEMDADO,            CODIGOTABCTBFIS) \n' \
+                      f'VALUES          (({client.code}),       ({key}),                        ({person.code}), ' \
+                      f'                {invoice.serial_number},\'NFSE\',                       {invoice.serie}, ' \
+                      f'                \'{issuance_date}\',    \'{issuance_date}\',           {invoice.gross_value}, '\
+                      f'                {client.estab_num},     ({key}),                        {invoice.nature}, '\
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss.value}, ' \
+                      f'                \'{issuance_date}\'' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {0}, ' \
+                      f'                {irrf.calc_basis}, ' \
+                      f'                {irrf.aliquot},         {irrf.value},                   \'{issuance_date}\', ' \
+                      f'                {irrf.code}, ' \
+                      f'                {irrf.variation}, ' \
+                      f'                {0},                    {csrf.value},                   {1}, ' \
+                      f'                {pis.calc_basis}, ' \
+                      f'                {pis.aliquot},          {pis.value},                    {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {cofins.calc_basis}, ' \
+                      f'                {cofins.aliquot},       {cofins.value},                 {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {csll.calc_basis}, ' \
+                      f'                {csll.aliquot},         {csll.value},                   {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {0},                    \'{issuance_date}\', ' \
+                      f'                {0},                    {238},                          ({now}), ' \
+                      f'                {3},                    {838})'
+
+        else:
+            key = f'SELECT CHAVELCTOFISSAI FROM LCTOFISSAI WHERE CODIGOEMPRESA = {client.code} AND ' \
+                  f'CODIGOPESSOA = ({person.code}) AND NUMERONF = {invoice.serial_number}'
+            withheld_type = invoice.withheld_type
+            command = f'INSERT INTO ' \
+                      f'LCTOFIS{ts}RETIDO(CODIGOEMPRESA,        CHAVELCTOFIS{ts}, ' \
+                      f'                 DATALCTOFIS,           TIPORETENCAO, ' \
+                      f'                 CODIGOESTAB, ' \
+                      f'                 BASECALCULOINSS,       ALIQINSS,                       VALORINSS, ' \
+                      f'                 BASECALCULOISSQN,      ALIQISSQN,                      VALORISSQN, ' \
+                      f'                 DATAPREVISSQN, ' \
+                      f'                 BASECALCULOIRPJ,       ALIQIRPJ,                       VALORIRPJ,' \
+                      f'                 BASECALCULOIRRF, ' \
+                      f'                 ALIQIRRF,              VALORIRRF,                      DATAPREVIRRFIRPJ, ' \
+                      f'                 CODIGOIMPOSTOIRRF, ' \
+                      f'                 VARIACAOIMPOSTOIRRF, ' \
+                      f'                 TOTALPISCOFINSCSLL, ' \
+                      f'                 BASECALCULOPIS, ' \
+                      f'                 ALIQPIS,               VALORPIS,                       CODIGOIMPOSTOPIS, ' \
+                      f'                 VARIACAOIMPOSTOPIS, ' \
+                      f'                 BASECALCULOCOFINS, ' \
+                      f'                 ALIQCOFINS,            VALORCOFINS,                    CODIGOIMPOSTOCOFINS, ' \
+                      f'                 VARIACAOIMPOSTOCOFINS, ' \
+                      f'                 BASECALCULOCSLL, ' \
+                      f'                 ALIQCSLL,              VALORCSLL,                      CODIGOIMPOSTOCSLL, ' \
+                      f'                 VARIACAOIMPOSTOCSLL, ' \
+                      f'                 DATAPREVPISCOFINSCSLL, ' \
+                      f'                 CONCILIADA,            CODIGOUSUARIO,                  DATAHORALCTOFIS, ' \
+                      f'                 SITUACAOISSQN,         SITUACAOIRRF,                   SITUACAOIRPJ, ' \
+                      f'                 SITUACAOPIS,           SITUACAOCOFINS,                 SITUACAOCSLL) \n' \
+                      f'VALUES          (({client.code}),       ({key}), ' \
+                      f'                \'{issuance_date}\',    ({withheld_type}), ' \
+                      f'                {client.estab_num}, ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {iss.calc_basis},       {float(iss.aliquot) * 100},     {iss.value}, ' \
+                      f'                \'{issuance_date}\', ' \
+                      f'                {0},                    {0},                            {0}, ' \
+                      f'                {irrf.calc_basis}, ' \
+                      f'                {irrf.aliquot},         {irrf.value},                   \'{issuance_date}\', ' \
+                      f'                {irrf.code}, ' \
+                      f'                {irrf.variation}, ' \
+                      f'                {csrf.value}, ' \
+                      f'                {pis.calc_basis}, ' \
+                      f'                {pis.aliquot},          {pis.value},                    {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {cofins.calc_basis}, ' \
+                      f'                {cofins.aliquot},       {cofins.value},                 {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                {csll.calc_basis}, ' \
+                      f'                {csll.aliquot},         {csll.value},                   {csrf.code}, ' \
+                      f'                {csrf.variation}, ' \
+                      f'                \'{issuance_date}\', ' \
+                      f'                {0},                    {238},                          ({now}), ' \
+                      f'                {iss_situation},        {irrf_situation},               {irpj_situation}, ' \
+                      f'                {pis_situation},        {cofins_situation},             {csll_situation})'
+
+        return command
+
+    def lctofisretido_update(self, invoice: Invoice):
+        issuance_date = invoice.issuance_date.split('/')
+        issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
+
+        iss = invoice.taxes.iss
+        irrf = invoice.taxes.irrf
+        csrf = invoice.taxes.csrf
+        pis = csrf.pis
+        cofins = csrf.cofins
+        csll = csrf.csll
+
+        iss.value = float(0 if (not iss.value or invoice.is_canceled) else iss.value)
+        irrf.value = 0 if (not irrf.value or invoice.is_canceled) else irrf.value
+        csrf.value = 0 if (not csrf.value or invoice.is_canceled) else csrf.value
+        pis.value = 0 if (not pis.value or invoice.is_canceled) else pis.value
+        cofins.value = 0 if (not cofins.value or invoice.is_canceled) else cofins.value
+        csll.value = 0 if (not csll.value or invoice.is_canceled) else csll.value
+
+        iss.aliquot = round((iss.value / invoice.gross_value) * 100, 2)
+        irrf.aliquot = round((irrf.value / invoice.gross_value) * 100, 2)
+        csrf.aliquot = round((csrf.value / invoice.gross_value) * 100, 2)
+        pis.aliquot = round((pis.value / invoice.gross_value) * 100, 2)
+        cofins.aliquot = round((cofins.value / invoice.gross_value) * 100, 2)
+        csll.aliquot = round((csll.value / invoice.gross_value) * 100, 2)
+
+        ts = self.type_str
+
+        if self.service_type:  # se tomado
+            command = ''
+        else:
+            command = f'UPDATE LCTOFIS{ts}RETIDO SET ' \
+                      f'BASECALCULOISSQN = {iss.calc_basis}, ALIQISSQN = {iss.aliquot}, VALORISSQN = {iss.value}, ' \
+                      f'DATAPREVISSQN = \'{issuance_date}\', ' \
+                      f'BASECALCULOIRRF = {irrf.calc_basis}, ALIQIRRF = {irrf.aliquot}, VALORIRRF = {irrf.value}, ' \
+                      f'DATAPREVIRRFIRPJ = \'{issuance_date}\', CODIGOIMPOSTOIRRF = {irrf.code}, ' \
+                      f'VARIACAOIMPOSTOIRRF = {irrf.variation}, ' \
+                      f'TOTALPISCOFINSCSLL = {csrf.value}, ' \
+                      f'BASECALCULOPIS = {pis.calc_basis}, ALIQPIS = {pis.aliquot}, VALORPIS = {pis.value}, ' \
+                      f'CODIGOIMPOSTOPIS = {csrf.code}, VARIACAOIMPOSTOPIS = {csrf.variation}, ' \
+                      f'BASECALCULOCOFINS = {cofins.calc_basis}, ALIQCOFINS = {cofins.aliquot}, ' \
+                      f'VALORCOFINS = {cofins.value}, CODIGOIMPOSTOCOFINS = {csrf.code}, ' \
+                      f'VARIACAOIMPOSTOCOFINS = {csrf.variation}, ' \
+                      f'BASECALCULOCSLL = {csll.calc_basis}, ALIQCSLL = {csll.aliquot}, VALORCSLL = {csll.value}, ' \
+                      f'CODIGOIMPOSTOCSLL = {csrf.code}, VARIACAOIMPOSTOCSLL = {csrf.variation}, ' \
+                      f'DATAPREVPISCOFINSCSLL = \'{issuance_date}\' ' \
+                      f'WHERE CODIGOEMPRESA = {invoice.client.code} AND '
 
         return command
 
