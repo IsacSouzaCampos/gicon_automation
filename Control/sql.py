@@ -66,6 +66,8 @@ class SQLControl:
         # commands_list.append(self.clear_command(commands.lctofisvaloriss(launch, key)))
         # commands_list.append(self.clear_command(commands.lctofisretido(launch, key)))
         commands_list.append(self.clear_command(commands.lctofisretido2(launch)))
+        if invoice.is_canceled:
+            commands_list.append(self.clear_command(commands.update_lctofiscfop(invoice)))
         return commands_list
 
     def update_command(self, invoice: Invoice) -> list:

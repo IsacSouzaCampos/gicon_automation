@@ -5,7 +5,7 @@ from Model.invoices_list import InvoicesList
 from Model.invoice import Invoice
 # from Model.constants import SYS_PATH
 
-from View.popup import PopUp
+from View.warnings import Warnings
 
 
 class InspectControl:
@@ -46,7 +46,7 @@ class InspectControl:
         load_insp.close()
 
         if invoices.empty():
-            PopUp().msg('A pasta selecionada não contém XML\'s.')
+            Warnings().msg('A pasta selecionada não contém XML\'s.')
             return InvoicesList([])
 
         return invoices

@@ -2,19 +2,27 @@ from Model.invoice import Invoice
 
 
 class InvoicesList:
-    def __init__(self, invoices: list = list()):
+    def __init__(self, invoices: list = None):
+        if invoices is None:
+            invoices = []
+
         self.invoices = invoices
 
     def index(self, index):
         return self.invoices[index]
 
+    def get_index(self, invoice: Invoice) -> int:
+        return self.invoices.index(invoice)
+
     def add(self, invoice: Invoice):
         self.invoices.append(invoice)
 
     def remove(self, param) -> None:
-        if type(param) == Invoice:
+        # if type(param) == Invoice:
+        if isinstance(param, Invoice):
             self.invoices.remove(param)
-        elif type(param) == int:
+        # elif type(param) == int:
+        elif isinstance(param, int):
             self.invoices.remove(self.invoices[param])
 
     def empty(self):

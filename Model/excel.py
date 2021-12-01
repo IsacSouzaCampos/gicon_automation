@@ -41,7 +41,7 @@ def create_xlsx(header: list, invoices: InvoicesList, file_name: str, xml_files:
 
     # salva o arquivo Excel
     # excel_file.save(f'{folder.split("/")[-1]}.xlsx')
-    excel_file.save(file_name)
+    excel_file.save(fr'Planilhas\{file_name}')
 
     # abre o arquivo Excel gerado
     # os.system(f'start excel.exe {folder.split("/")[-1]}.xlsx')

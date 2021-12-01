@@ -3,7 +3,7 @@ import PySimpleGUI as sg
 import Model.constants as const
 
 
-class PopUp:
+class Warnings:
     @staticmethod
     def max_invoices() -> int:
         """
@@ -36,3 +36,18 @@ class PopUp:
     @staticmethod
     def msg(msg):
         sg.popup(msg)
+
+    @staticmethod
+    def repeated_invoices(invoices_identifiers: list):
+        layout = [
+            [sg.Text('Remova as notas duplicadas antes da conferência.')],
+            [sg.Table(values=invoices_identifiers, headings=['Nº nota', 'CNPJ cliente', 'Caminho do arquivo'],
+                      selected_row_colors=('black', 'gray'))],
+            [sg.Text()],
+            # [sg.OK()]
+        ]
+
+        window = sg.Window('Notas repetidas', layout, finalize=True)
+        window.read()
+        window.close()
+

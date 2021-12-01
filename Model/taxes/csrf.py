@@ -51,7 +51,8 @@ class CSRF:
             # foi detectada retenção desse imposto anteriormente
             return -1 if value < 0 else value
 
-        if self.pis.value < 0 or self.cofins.value < 0 or self.csll.value < 0:
+        if (self.pis.value < 0 or self.cofins.value < 0 or self.csll.value < 0) or \
+                (not self.pis.value and not self.cofins.value and not self.csll.value):
             value = self.outer.extract_tax_value(service_description, aditional_data, 4)
             if value < 0:
                 value = self.outer.extract_tax_from_percentage(service_description, aditional_data,

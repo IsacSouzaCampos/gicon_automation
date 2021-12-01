@@ -5,7 +5,7 @@ import Model.constants as const
 from Model.invoices_list import InvoicesList
 from Model.filter import Filter
 
-from View.popup import PopUp
+from View.warnings import Warnings
 
 
 class MainGUI:
@@ -432,33 +432,34 @@ class ResultTable:
                           'Fabricantes de Veículos e Máquinas': 6
                           }
 
-        filter_layout = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-')],
-                         [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
-                          sg.Radio('Ambos', 'radio1')],
-                         [sg.Checkbox('ISS', key='-ISS_FILTER-'),
-                          sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
-                          sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
-                         [sg.Text('CNAE'),
-                          sg.Combo(self.cnae_descriptions, size=(87, 1), pad=((67, 0), (0, 0)), key='-CNAE_CODE-')],
-                         [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))),
-                          sg.Combo([''] + list(withheld_types.keys()), size=(87, 1), key='-WITHHELD_TYPE_FILTER-')],
-                         [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
-        filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
+        # filter_layout = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-')],
+        #                  [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
+        #                   sg.Radio('Ambos', 'radio1')],
+        #                  [sg.Checkbox('ISS', key='-ISS_FILTER-'),
+        #                   sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
+        #                   sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
+        #                  [sg.Text('CNAE'),
+        #                   sg.Combo(self.cnae_descriptions, size=(87, 1), pad=((67, 0), (0, 0)), key='-CNAE_CODE-')],
+        #                  [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))),
+        #                   sg.Combo([''] + list(withheld_types.keys()), size=(87, 1), key='-WITHHELD_TYPE_FILTER-')],
+        #                  [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
+        # filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
 
-        update_layout = [
-                         [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 20), (0, 0))),
-                          sg.Text('Tipo Retenção'), sg.Combo(list(withheld_types.keys()), size=(62, 1),
-                                                             default_value='Pessoas Jurídicas de Direito Privado',
-                                                             key='-WITHHELD_TYPE_UPDATE-')],
-                         [sg.Button('Atualizar', key='-UPDATE_FILTER-'), sg.Button('Resetar', key='-RESET-')]
-                         ]
-        update_frame = sg.Frame('Dados de Atualização', update_layout)
+        # update_layout = [
+        #                  [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 20), (0, 0))),
+        #                   sg.Text('Tipo Retenção'), sg.Combo(list(withheld_types.keys()), size=(62, 1),
+        #                                                      default_value='Pessoas Jurídicas de Direito Privado',
+        #                                                      key='-WITHHELD_TYPE_UPDATE-')],
+        #                  [sg.Button('Atualizar', key='-UPDATE_FILTER-'), sg.Button('Resetar', key='-RESET-')]
+        #                  ]
+        # update_frame = sg.Frame('Dados de Atualização', update_layout)
 
         aditional_data_layout = [
             [sg.Text('Num. Empresa ', pad=((0, 0), (10, 10))),
-             sg.Input(size=(14, 1), key='-COMPANY_NUMBER-', pad=((0, 0), (10, 10))),
-             sg.Text('Série ', pad=((20, 0), (10, 10))),
-             sg.Input(size=(5, 1), key='-SERIE-', pad=((0, 425), (10, 10)))]
+             sg.Input(size=(14, 1), key='-COMPANY_NUMBER-', pad=((0, 550), (10, 10))),
+             # sg.Text('Série ', pad=((20, 0), (10, 10))),
+             # sg.Input(size=(5, 1), key='-SERIE-', pad=((0, 425), (10, 10)))
+             ]
         ]
         aditiona_data_frame = sg.Frame('Dados Adicionais', aditional_data_layout)
 
@@ -546,13 +547,13 @@ class ResultTable:
                 withheld_type = withheld_types[wh_type_value] if wh_type_value != '' else None
 
                 if nature != '' and len(nature) != 7:
-                    PopUp.msg('Natureza deve possuir 7 caracteres.')
+                    Warnings.msg('Natureza deve possuir 7 caracteres.')
                     continue
                 try:
                     nature = int(nature) if nature else ''
                 except Exception as e:
                     print(e)
-                    PopUp.msg('Formato de natureza errado.')
+                    Warnings.msg('Formato de natureza errado.')
                     continue
 
                 for invoice in invs_lst:
@@ -639,18 +640,18 @@ class ResultTable:
                     sg.popup('Há notas com erros na conferência. Corrija-as antes de lançar.')
                     continue
 
-                serie = values['-SERIE-'].upper()
-                if serie not in ['U', '1']:
-                    sg.popup('Série não reconhecida. Tente novamente.')
-                    continue
+                # serie = values['-SERIE-'].upper()
+                # if serie not in ['U', '1']:
+                #     sg.popup('Série não reconhecida. Tente novamente.')
+                #     continue
                 if values['-COMPANY_NUMBER-']:
                     num = values['-COMPANY_NUMBER-']
                     for invoice in self.invoices:
                         invoice.client.set_code(num)
-                        invoice.set_serie(serie)
-                else:
-                    for invoice in self.invoices:
-                        invoice.set_serie(serie)
+                        # invoice.set_serie(serie)
+                # else:
+                #     for invoice in self.invoices:
+                #         invoice.set_serie(serie)
                 break
 
         self.window.close()

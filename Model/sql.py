@@ -1,5 +1,3 @@
-# import os
-# from Model.constants import SYS_PATH
 from Model.launch import LCTOFISData
 from Model.invoice import Invoice
 
@@ -350,6 +348,13 @@ class SQLCommands:
         cofins.aliquot = round((cofins.value / invoice.gross_value) * 100, 2)
         csll.aliquot = round((csll.value / invoice.gross_value) * 100, 2)
 
+        iss.calc_basis = invoice.gross_value if iss.value else 0
+        irrf.calc_basis = invoice.gross_value if irrf.value else 0
+        csrf.calc_basis = invoice.gross_value if csrf.value else 0
+        pis.calc_basis = invoice.gross_value if pis.value else 0
+        cofins.calc_basis = invoice.gross_value if cofins.value else 0
+        csll.calc_basis = invoice.gross_value if csll.value else 0
+
         # iss_situation = 3 if iss_value else 1
         # irrf_situation = 3 if irrf_value else 1
         # irpj_situation = 1
@@ -483,6 +488,18 @@ class SQLCommands:
 
         return command
 
+    @staticmethod
+    def update_lctofiscfop(invoice: Invoice):
+        command = f'UPDATE LCTOFISSAICFOP ' \
+                  f'SET VALORCONTABILIMPOSTO = 0, BASECALCULOIMPOSTO = 0, ALIQIMPOSTO = 0, VALORIMPOSTO = 0, ' \
+                  f'ISENTASIMPOSTO = 0, OUTRASIMPOSTO = 0, VALOREXVALORADICIONAL = 0 ' \
+                  f'WHERE CODIGOEMPRESA = ({invoice.client.code}) AND CHAVELCTOFISSAI = ' \
+                  f'(SELECT CHAVELCTOFISSAI FROM LCTOFISSAI ' \
+                  f'WHERE CODIGOEMPRESA = ({invoice.client.code}) AND ' \
+                  f'CODIGOPESSOA = ({invoice.person.code}) AND NUMERONF = {invoice.serial_number})'
+
+        return command
+
     def lctofisretido_update(self, invoice: Invoice):
         issuance_date = invoice.issuance_date.split('/')
         issuance_date = f'{issuance_date[2]}-{issuance_date[1]}-{issuance_date[0]}'
@@ -568,38 +585,3 @@ class SQLCommands:
         elif len(fed_id) == 11:
             fed_id = f'{fed_id[:3]}.{fed_id[3:6]}.{fed_id[6:9]}-{fed_id[9:]}'
         return fed_id
-
-
-# class SQLRun:
-#     def __init__(self, host='10.0.4.92', database=r'C:\Questor\db_questor\Saraiva_teste.FDB', user='SYSDBA',
-#                  password='masterkey'):
-#         self.host = host
-#         self.database = database
-#         self.user = user
-#         self.password = password
-#
-#     def run(self, commands):
-#         if not commands:
-#             return
-#
-#         # transforma uma possível matriz em uma lista
-#         temp_commands = commands
-#         commands = list()
-#         for element in temp_commands:
-#             if type(element) == list:
-#                 for cmd in element:
-#                     commands.append(cmd)
-#             else:
-#                 commands.append(element)
-#
-#         commands = ';'.join(commands)
-#         with open(SYS_PATH + r'\commands.bin', 'w') as fout:
-#             print(commands, file=fout)
-#         os.system(fr'py -2 Model\sql_run.py {self.host} {self.database} {self.user} '
-#                   fr'{self.password}')
-#
-#     @staticmethod
-#     def result() -> list:
-#         with open(fr'{SYS_PATH}\bd_results.bin', 'rb') as fin:
-#             arr = fin.read().decode('utf8')
-#         return arr.split()

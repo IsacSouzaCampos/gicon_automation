@@ -45,8 +45,7 @@ class Invoice:
 
         self.taxes = Taxes(self.taker, self.provider, self.service_description, self.aditional_data, self.cfps,
                            self.cst, self.gross_value, self.xml_data)
-
-        # print('IR(%):', self.ir_percentage, '- CSRF(%):', self.csrf_percentage)
+        # print(f'{self.taxes.csrf.pis.value = }, {self.taxes.csrf.cofins.value = }, {self.taxes.csrf.csll.value = }')
 
         self.net_value = 0
         self.set_net_value()
