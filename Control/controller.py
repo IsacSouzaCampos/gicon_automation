@@ -30,15 +30,11 @@ class Controller:
             if repeated_invoices:
                 to_remove_indexes, unfixable_invoices = self.fix_repeated_invoices(invoices, repeated_invoices)
                 if unfixable_invoices:
-                    # print(f'{unfixable_invoices = }')
                     Warnings().repeated_invoices(unfixable_invoices)
                     sys.exit()
                 else:
                     for index in reversed(sorted(to_remove_indexes)):
                         invoices.remove(index)
-
-            # for invoice in invoices:
-            #     print(f'is_canceled: {invoice.is_canceled = }')
 
             if invoices.repeated_fed_ids():
                 s = 'tomadora' if service_type else 'prestadora'
@@ -46,7 +42,7 @@ class Controller:
                                f'empresa na pasta.')
                 continue
 
-            res_tb = ResultTable(invoices, inspection_control.cnae_code, invoices.number_of_errors())
+            res_tb = ResultTable(invoices, invoices.number_of_errors())
             is_finished, invoices = res_tb.show()
 
             if is_finished:
@@ -68,7 +64,7 @@ class Controller:
         insertion_commands = InsertionCommands(sql_control.commands, self.get_client_fed_id(invoices),
                                                invoices.index(0).client.code, service_type)
         text = insertion_commands.to_string()
-        text += '\n\n' + insertion_commands.updates_commands()
+        text += '\n\n' + insertion_commands.updates_commands(inspection_control.min_date, inspection_control.max_date)
 
         InsertionCommandsView(text).show()
 
@@ -123,7 +119,6 @@ class Controller:
                 if element.is_canceled:
                     for i, e in enumerate(elements):  # se nota não for a cancelada, adiciona em to_remove
                         if i != index:
-                            # print(f'to_remove: {invoices.get_index(elements[i]) = }')
                             to_remove_indexes.append(invoices.get_index(elements[i]))
                     break
             else:

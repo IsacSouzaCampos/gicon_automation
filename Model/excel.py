@@ -34,17 +34,12 @@ def create_xlsx(header: list, invoices: InvoicesList, file_name: str, xml_files:
             row.append('CANCELADA')
         else:
             row = row[:header.index('Natureza') + 1]
-        # print('row:', row)
         sheet1.append(row)
 
     upload_sheet_content(sheet1, xml_files)
 
     # salva o arquivo Excel
-    # excel_file.save(f'{folder.split("/")[-1]}.xlsx')
     excel_file.save(fr'Planilhas\{file_name}')
-
-    # abre o arquivo Excel gerado
-    # os.system(f'start excel.exe {folder.split("/")[-1]}.xlsx')
 
 
 def upload_sheet_content(sheet1, xml_files):

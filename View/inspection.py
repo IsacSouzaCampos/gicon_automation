@@ -394,18 +394,13 @@ class EditableResultTable:
 
 
 class ResultTable:
-    def __init__(self, invoices: InvoicesList, cnae_descriptions: list = None, n_errors: int = None):
+    def __init__(self, invoices: InvoicesList, n_errors: int = None):
         self.invoices = invoices
-        # self.companies = companies
-        self.cnae_descriptions = cnae_descriptions
         self.n_errors = n_errors
         self.window = None
 
     def show(self):
         """Mostra tabela de resultados simplificada por conta do número grande de notas conferidas."""
-
-        # inputs_header = [sg.Text(h, size=(10, 1), justification='center') for h in const.HEADER2]
-        # inputs = [sg.Input(key=k, size=(12, 1), justification='center') for k in const.HEADER2]
 
         table = list()
         for invoice in self.invoices:
@@ -413,10 +408,6 @@ class ResultTable:
             csrf_value = '' if not invoice.taxes.csrf.value else invoice.taxes.csrf.value
             table.append([invoice.serial_number, invoice.issuance_date, invoice.gross_value, invoice.taxes.iss.value,
                           irrf_value, csrf_value, invoice.net_value, invoice.nature, invoice.withheld_type])
-
-        # inv_to_update_layouts = [[[inputs_header[i]], [inputs[i]]] for i in range(len(inputs))]
-        # inv_to_update_cols = [[sg.Column(inv_to_update_layouts[i], pad=(0, 0)) for i in range(len(inputs))]]
-        # inv_to_update_frame = sg.Frame('Dados Nota', inv_to_update_cols)
 
         if self.n_errors > 0:
             errors_link = sg.Text(f'{self.n_errors} {const.ERROR_LINK_TEXT}',
@@ -432,61 +423,17 @@ class ResultTable:
                           'Fabricantes de Veículos e Máquinas': 6
                           }
 
-        # filter_layout = [[sg.Text('CNPJ/CPF'), sg.Input(size=(17, 1), key='-FED_ID_FILTER-')],
-        #                  [sg.Radio('CNPJ', 'radio1', key='-RAD11-'), sg.Radio('CPF', 'radio1', key='-RAD12-'),
-        #                   sg.Radio('Ambos', 'radio1')],
-        #                  [sg.Checkbox('ISS', key='-ISS_FILTER-'),
-        #                   sg.Checkbox('IRRF', key='-IRRF_FILTER-', pad=((17, 0), (0, 0))),
-        #                   sg.Checkbox('CSRF', key='-CSRF_FILTER-', pad=((7, 0), (0, 0)))],
-        #                  [sg.Text('CNAE'),
-        #                   sg.Combo(self.cnae_descriptions, size=(87, 1), pad=((67, 0), (0, 0)), key='-CNAE_CODE-')],
-        #                  [sg.Text('Tipo Retenção', pad=((0, 25), (0, 0))),
-        #                   sg.Combo([''] + list(withheld_types.keys()), size=(87, 1), key='-WITHHELD_TYPE_FILTER-')],
-        #                  [sg.Button('Filtrar'), sg.Button('Limpar Filtro', disabled=True)]]
-        # filter_frame = sg.Frame('Filtro', filter_layout, key='-FILTER_FRAME-')
-
-        # update_layout = [
-        #                  [sg.Text('Natureza'), sg.Input(size=(14, 1), key='-NATURE-', pad=((0, 20), (0, 0))),
-        #                   sg.Text('Tipo Retenção'), sg.Combo(list(withheld_types.keys()), size=(62, 1),
-        #                                                      default_value='Pessoas Jurídicas de Direito Privado',
-        #                                                      key='-WITHHELD_TYPE_UPDATE-')],
-        #                  [sg.Button('Atualizar', key='-UPDATE_FILTER-'), sg.Button('Resetar', key='-RESET-')]
-        #                  ]
-        # update_frame = sg.Frame('Dados de Atualização', update_layout)
-
         aditional_data_layout = [
             [sg.Text('Num. Empresa ', pad=((0, 0), (10, 10))),
-             sg.Input(size=(14, 1), key='-COMPANY_NUMBER-', pad=((0, 550), (10, 10))),
-             # sg.Text('Série ', pad=((20, 0), (10, 10))),
-             # sg.Input(size=(5, 1), key='-SERIE-', pad=((0, 425), (10, 10)))
+             sg.Input(size=(14, 1), key='-COMPANY_NUMBER-', pad=((0, 550), (10, 10)))
              ]
         ]
         aditiona_data_frame = sg.Frame('Dados Adicionais', aditional_data_layout)
 
         layout = [
-            # [sg.Combo(self.companies, size=(30, 1), key='-COMBO-'), sg.Button('Filtrar'),
-            #  sg.Button('Limpar Filtro', disabled=True)],
-            # [sg.Text('CNPJ/CPF'),
-            # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL1-'),
-            # sg.Text('.', pad=(0, 0)),
-            # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL2-'),
-            # sg.Text('.', pad=(0, 0)),
-            # sg.Input(size=(3, 1), change_submits=True, do_not_clear=True, key='-IN_FIL3-'),
-            # sg.Text('/', pad=(0, 0)),
-            # sg.Input(size=(4, 1), change_submits=True, do_not_clear=True, key='-IN_FIL4-'),
-            # sg.Text('-', pad=(0, 0)),
-            # sg.Input(size=(2, 1), change_submits=True, do_not_clear=True, key='-IN_FIL5-')],
-
-            # [filter_frame],
-            # [update_frame],
-
             [sg.Table(values=table, headings=const.HEADER1, selected_row_colors=('black', 'gray'), key='-TABLE-')],
-            [  # sg.Button('Editar'), sg.Button('Atualizar', disabled=True),
-             sg.Text(f'{len(self.invoices)} registros', key='-N_REGISTERS-'), errors_link],
-            # [inv_to_update_frame],
-            # [sg.Text()],
+            [sg.Text(f'{len(self.invoices)} registros', key='-N_REGISTERS-'), errors_link],
             [aditiona_data_frame],
-            # [sg.Text()],
             [sg.Button('Gerar SQL')],
         ]
 
@@ -502,24 +449,7 @@ class ResultTable:
                 self.window.close()
                 return False, InvoicesList([])
 
-            # if event in ['-IN_FIL1-', '-IN_FIL2-', '-IN_FIL3-', '-IN_FIL4-', '-IN_FIL5-']:
-            #     self.window[event].Update(re.sub("[^0-9]", "", values[event]))
-            # if event == '-IN_FIL1-' and len(self.window[event].Get()) == 2:
-            #     self.window['-IN_FIL2-'].SetFocus()
-            # if event == '-IN_FIL2-' and len(self.window[event].Get()) == 3:
-            #     self.window['-IN_FIL3-'].SetFocus()
-            # if event == '-IN_FIL3-' and len(self.window[event].Get()) == 3:
-            #     self.window['-IN_FIL4-'].SetFocus()
-            # if event == '-IN_FIL4-' and len(self.window[event].Get()) == 4:
-            #     self.window['-IN_FIL5-'].SetFocus()
-            # if event == '-IN_FIL5-' and len(self.window[event].Get()) == 2:
-            #     self.window['Filtrar'].SetFocus()
-
             if event == 'Filtrar':
-                # _filter = values['-IN_FIL1-'] + values['-IN_FIL2-'] + values['-IN_FIL3-'] + \
-                #          values['-IN_FIL4-'] + values['-IN_FIL5-']
-                # _filter = values['-INPUT_FILTER-']
-                # temp_table_idxs, temp_invs_lst = self.invoices.filter(_filter, self.invoices.index(0).service_type)
                 selected_fed_id = None
                 if values['-RAD11-']:
                     selected_fed_id = 0
@@ -533,8 +463,6 @@ class ResultTable:
                                                         values['-ISS_FILTER-'], values['-IRRF_FILTER-'],
                                                         values['-CSRF_FILTER-'], values['-CNAE_CODE-'],
                                                         withheld_type).run()
-                # if temp_invs_lst is None:
-                #     continue
                 temp_table = temp_invs_lst.get_gui_table()
                 self.window['-TABLE-'].Update(temp_table)
                 self.window['-N_REGISTERS-'].Update(f'{len(temp_table)} registros')
@@ -558,9 +486,7 @@ class ResultTable:
 
                 for invoice in invs_lst:
                     invoice.nature = nature if nature else invoice.nature
-                    # print('withheld type:', withheld_type)
                     invoice.withheld_type = withheld_type if withheld_type else None
-                    # print('invoice withheld type:', invoice.withheld_type)
 
                 if temp_table:
                     temp_table = invs_lst.get_gui_table()
@@ -639,19 +565,10 @@ class ResultTable:
                 if self.n_errors > 0:
                     sg.popup('Há notas com erros na conferência. Corrija-as antes de lançar.')
                     continue
-
-                # serie = values['-SERIE-'].upper()
-                # if serie not in ['U', '1']:
-                #     sg.popup('Série não reconhecida. Tente novamente.')
-                #     continue
                 if values['-COMPANY_NUMBER-']:
                     num = values['-COMPANY_NUMBER-']
                     for invoice in self.invoices:
                         invoice.client.set_code(num)
-                        # invoice.set_serie(serie)
-                # else:
-                #     for invoice in self.invoices:
-                #         invoice.set_serie(serie)
                 break
 
         self.window.close()
