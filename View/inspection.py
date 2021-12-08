@@ -25,7 +25,7 @@ class MainGUI:
 
         sg.theme('default1')
 
-        radio = [False, False]
+        radio = [True, False]
         if self.service_type is not None:
             radio[self.service_type] = True
         service_type_layout = [[sg.Radio('Prestado', 'radio1', default=radio[0])],

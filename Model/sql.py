@@ -47,7 +47,7 @@ class SQLCommands:
         cofins.value = 0 if (not cofins.value or invoice.is_canceled) else cofins.value
         csll.value = 0 if (not csll.value or invoice.is_canceled) else csll.value
 
-        iss.aliquot = round((iss.value / invoice.gross_value) * 100, 2)
+        iss.aliquot = round((iss.value / invoice.gross_value), 2)
         irrf.aliquot = round((irrf.value / invoice.gross_value) * 100, 2)
         csrf.aliquot = round((csrf.value / invoice.gross_value) * 100, 2)
         pis.aliquot = round((pis.value / invoice.gross_value) * 100, 2)

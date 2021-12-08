@@ -32,15 +32,23 @@ class Taxes:
         keywords = IR_KEYWORDS if tax_type == 0 else (PIS_KEYWORDS + CSRF_KEYWORDS + COFINS_KEYWORDS + CSLL_KEYWORDS)
 
         for text in [self.service_description, self.aditional_data]:
-            clean_value = clear_string(text)
+            clean_values = list()
+            temp_value = text.lower()
+            while '  ' in temp_value:
+                temp_value = temp_value.replace('  ', ' ')
+            clean_values.append(temp_value)
+            clean_values.append(clear_string(text))
+
+            # clean_value = clear_string(text)
 
             # if 'leidatransparencia' in clean_value or 'lei12.741/2012' in clean_value:
             #     if 'retencao' not in clean_value and 'retencoes' not in clean_value:
             #         return False
 
-            for kw in keywords:
-                if kw in clean_value:
-                    return True
+            for clean_value in clean_values:
+                for kw in keywords:
+                    if kw in clean_value:
+                        return True
 
         return False
 
@@ -51,46 +59,58 @@ class Taxes:
         keywords = ALL_KEYWORDS[tax_type]
 
         for text in [service_description, aditional_data]:
-            clean_value = clear_string(text)
+            clean_values = list()
+            temp_value = text.lower()
+            while '  ' in temp_value:
+                temp_value = temp_value.replace('  ', ' ')
+            clean_values.append(temp_value)
+            clean_values.append(clear_string(text))
 
-            for tax_kw in keywords:
-                if tax_kw in clean_value:
-                    splitted_string = clean_value.split(tax_kw)
+            # if self.data['numeroserie'] == '90705':
+            #     print(f'{clean_values = }')
 
-                    for s in splitted_string[1:]:
-                        # aux serve para que o algoritmo saiba quando o valor realmente começou a ser lido
-                        aux = False
-                        tax_value = str()
+            for clean_value in clean_values:
+                for tax_kw in keywords:
+                    # print(tax_kw) if self.data['numeroserie'] == '90705' else None
+                    if tax_kw in clean_value:
+                        splitted_string = clean_value.split(tax_kw)
+                        # if tax_kw == ' ir ':
+                        #     print(f'{self.data["numeroserie"]}, {splitted_string = }')
 
-                        i = 0
-                        while i < len(s):
-                            c = s[i]
-                            if (i + 1) >= len(s):
-                                # não encontrou valor referente ao imposto em análise
-                                if c.isnumeric():
-                                    tax_value += c
-                                if not tax_value:
-                                    return -1
-                                return self.to_float(tax_value)
+                        for s in splitted_string[1:]:
+                            # aux serve para que o algoritmo saiba quando o valor realmente começou a ser lido
+                            aux = False
+                            tax_value = str()
 
-                            next_c = s[i + 1]
-                            if c.isnumeric() or c in [',', '.']:
-                                tax_value += c
-
-                                # reinicia a variável tax_value caso o valor extraído até aqui tenha
-                                # sido o de porcentagem da cobrança
-                                if next_c == '%':
-                                    tax_value = ''
-                                    aux = False
-                                    i += 1
-                                    continue
-
-                                if not next_c.isnumeric() and next_c not in [',', '.'] and aux:
+                            i = 0
+                            while i < len(s):
+                                c = s[i]
+                                if (i + 1) >= len(s):
+                                    # não encontrou valor referente ao imposto em análise
+                                    if c.isnumeric():
+                                        tax_value += c
+                                    if not tax_value:
+                                        return -1
                                     return self.to_float(tax_value)
 
-                            if next_c.isnumeric() and not aux:
-                                aux = True
-                            i += 1
+                                next_c = s[i + 1]
+                                if c.isnumeric() or c in [',', '.']:
+                                    tax_value += c
+
+                                    # reinicia a variável tax_value caso o valor extraído até aqui tenha
+                                    # sido o de porcentagem da cobrança
+                                    if next_c == '%':
+                                        tax_value = ''
+                                        aux = False
+                                        i += 1
+                                        continue
+
+                                    if not next_c.isnumeric() and next_c not in [',', '.'] and aux:
+                                        return self.to_float(tax_value)
+
+                                if next_c.isnumeric() and not aux:
+                                    aux = True
+                                i += 1
         return -1
 
     def extract_tax_from_percentage(self, service_description, aditional_data, gross_value, tax_type):
