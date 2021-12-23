@@ -27,7 +27,7 @@ class InsertionCommands:
     def updates_commands(self, min_date, max_date) -> str:
         service_str_path = r'\tomado' if self.service_type else r'\prestado'
         try:
-            with open(SYS_PATH + service_str_path + fr'\{self.client_fed_id}.txt', 'r') as fin:
+            with open(SYS_PATH + service_str_path + fr'\{self.client_fed_id}.txt', 'r', encoding='utf-8-sig') as fin:
                 text = fin.read()
                 text = text.replace('CLIENT_CODE', f'{self.client_code}')
                 text = text.replace('MIN_DATE', f'{min_date[0]}.{min_date[1]}.{min_date[2]}')

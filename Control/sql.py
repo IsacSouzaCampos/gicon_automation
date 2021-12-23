@@ -46,14 +46,6 @@ class SQLControl:
 
         commands_list = list()
         launch = LCTOFISData(invoice, invoice.service_type, IPI(), FunRural())
-
-        # key = self.sql_commands.lctofis_key(invoice.client.code)
-        # commands_list.append(self.clear_command(commands.lctofis(launch, key)))
-
-        # key = self.sql_commands.lctofis_key(invoice.client.code, 0)
-        # commands_list.append(self.clear_command(commands.lctofiscfop(launch, key)))
-        # commands_list.append(self.clear_command(commands.lctofisvaloriss(launch, key)))
-        # commands_list.append(self.clear_command(commands.lctofisretido(launch, key)))
         commands_list.append(self.clear_command(commands.lctofisretido(launch)))
         if invoice.is_canceled:
             commands_list.append(self.clear_command(commands.update_lctofiscfop(invoice)))

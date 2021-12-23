@@ -39,12 +39,6 @@ class Taxes:
             clean_values.append(temp_value)
             clean_values.append(clear_string(text))
 
-            # clean_value = clear_string(text)
-
-            # if 'leidatransparencia' in clean_value or 'lei12.741/2012' in clean_value:
-            #     if 'retencao' not in clean_value and 'retencoes' not in clean_value:
-            #         return False
-
             for clean_value in clean_values:
                 for kw in keywords:
                     if kw in clean_value:

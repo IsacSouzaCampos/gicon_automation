@@ -105,11 +105,7 @@ class EditableResultTable:
                         sg.Text(header[4], pad=(52, 0)), sg.Text(header[5], pad=(30, 0)),
                         sg.Text(header[6], pad=(20, 0)), sg.Text(header[7], pad=(20, 0))]
 
-        # print('invoices type:', type(invoices.invoices[0]))
-        # input()
         table = self.invoices.get_gui_table()
-        # print('invoices type:', type(invoices))
-        # input()
 
         input_rows = [[sg.Input(v if v != 0 else '', size=(15, 1), pad=(0, 0), justification='center')
                        for j, v in enumerate(row[:8])] +
@@ -132,14 +128,7 @@ class EditableResultTable:
         button = [sg.Button('Atualizar', size=(10, 1))] if self.n_errors is None else [sg.Button('Lançar',
                                                                                                  size=(10, 1))]
 
-        # combo_text = 'Filtro por empresa: '
-        # combo_layout = [[sg.Text(combo_text), sg.Combo(companies, size=(45, 1), key='-COMBO-'), sg.Button('Filtrar')]]
-        # combo_column = [[sg.Column(combo_layout, size=(910, 40))]]
-
         layout = [
-            # implementar futuramente
-            # [sg.Text(combo_text), sg.Combo(companies, size=(45, 1), key='-COMBO-'), sg.Button('Filtrar')],
-            # [sg.Frame('Filtro', combo_column)],
             [sg.Frame('Tabela de Resultados', frame, key='-FRAME-')],
             errors_link,
             [sg.Text()],
@@ -152,8 +141,6 @@ class EditableResultTable:
             event, values = self.window.read()
 
             if event == sg.WINDOW_CLOSED or event is None:
-                # exit()  # REMOVER APÓS TERMINAR TESTES
-                # return InvoicesList([])
                 self.invoices = InvoicesList([])
                 break
 
@@ -174,12 +161,10 @@ class EditableResultTable:
                 for i, row in enumerate(new_table):
                     new_table[i] = self.set_row_types(header, row)
                     self.invoices.update_invoice(i, row)
-                # new_table = [set_row_types(header, row) for row in new_table]
 
                 invoices, changed = self.service_details(self.invoices, header, selected_row, index)
                 if changed:
                     table = invoices.get_gui_table()
-                    # print('row:', table[index])
                     self.update(table[index], range(start, end))
                 self.n_errors = self.update_errors() if self.n_errors is not None else None
 
@@ -320,8 +305,6 @@ class EditableResultTable:
             new_row = self.set_row_types(header, new_row)
 
             invoices.update_invoice(row_index, new_row)
-            # inv = invoices.index(row_index)
-            # print('invoice:', inv.serial_number, 'ir:', inv.taxes.irrf.value, 'csrf:', inv.taxes.csrf.value)
             window.close()
 
         return invoices, True
